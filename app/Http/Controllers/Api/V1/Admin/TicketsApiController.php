@@ -226,19 +226,19 @@ class TicketsApiController extends Controller
      */
     public function destroy(TicketApi $ticket)
     {
-      try{
-        $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
-        $ticket->delete();
-        return response()->json([
-          'message' => 'Data Berhasil Di Hapus',
-          'data' => $ticket_image
-        ]);
-      }
-      catch(QueryException $e) {
+      // try{
+      //   $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
+      //   $ticket->delete();
+      //   return response()->json([
+      //     'message' => 'Data Berhasil Di Hapus',
+      //     'data' => $ticket_image
+      //   ]);
+      // }
+      // catch(QueryException $e) {
           return response()->json([
-            'message' => 'Data Masih Terkait dengan data yang lain',
+            'message' => 'Data Masih Perbaikan',
             'data' => $e
           ]);
-      }
+      // }
     }
 }
