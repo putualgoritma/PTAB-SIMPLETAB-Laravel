@@ -18,7 +18,7 @@ class TestWaController extends Controller
         // data dummy / sementara sebelum ada request
         // data yang diperlukan
         $name = 'adi';
-        $phone = '6281236815960';
+        $phone = '082147860693';
         $customer_id = '101';
         $adress = 'tabanan';
         $requestMessage = 'Selamat @waktu, Nama anda @name, id anda @customer_id, alamat anda @adress';
