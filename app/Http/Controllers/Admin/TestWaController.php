@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Traits\TraitModel;
 use App\Traits\WablasTrait;
+use App\wa_history;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +22,7 @@ class TestWaController extends Controller
         $phone = '6281236815960';
         $customer_id = '101';
         $adress = 'tabanan';
-        $requestMessage = 'Selamat @waktu, Nama anda @name, id anda @customer_id, alamat anda @adress';
+        $requestMessage = 'Selamat @waktu, Nama anda @nama, id anda @sbg, alamat anda @alamat';
 
         $jam = date('H');
         if ($jam > 0 && $jam < 11) {
@@ -36,6 +37,7 @@ class TestWaController extends Controller
             $waktu = "";
         }
         $cek = [];
+        $kumpulan_data = [];
         $data = [];
         $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
 
@@ -61,25 +63,25 @@ class TestWaController extends Controller
             'ref_id' => $code . $customer_id
         ];
 
+        $kumpulan_data[] = $data;
 
         $i = 0;
         $array_merg = [];
         $temp = [];
-    
-                $temp = array_merge($data, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
-            //    dd($temp);
-                DB::table('wa_histories')->insert($temp);
-           
-            $test1 = WablasTrait::sendText($data);
-         
-            if (!empty(json_decode($test1)->data->messages)) {
-                $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
-            }
+
+        $temp = array_merge($data, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
+        //    dd($temp);
+        DB::table('wa_histories')->insert($temp);
+        // dd($data);
+        $test1 = WablasTrait::sendText($kumpulan_data);
+        // dd($test1);
+        if (!empty(json_decode($test1)->data->messages)) {
+            $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+        }
 
         foreach ($array_merg as $key => $value) {
             if (!empty($value->ref_id)) {
                 wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-             
             }
         }
         dd($test1);
