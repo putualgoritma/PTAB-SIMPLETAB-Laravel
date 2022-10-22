@@ -198,6 +198,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('customwa', 'CustomWaController@index')->name('customwa.index');
     Route::post('customwa', 'CustomWaController@import')->name('customwa.import');
     // history Wa
+    Route::get('test', 'TestWaController@index')->name('test.index');
     Route::get('historywa', 'HistoryWaController@index')->name('historywa.index');
     Route::delete('historywa/destroy/{id}', 'HistoryWaController@destroy')->name('historywa.destroy');
     Route::delete('wablast/destroy', 'WhatsappBlastController@massDestroy')->name('wablast.massDestroy');
