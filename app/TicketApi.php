@@ -28,6 +28,10 @@ class TicketApi extends Model
     public function department() { 
         return $this->belongsTo(DapertementApi::class, 'dapertement_id', 'id'); 
     }
+
+    public function department_receive() { 
+        return $this->belongsTo(DapertementApi::class, 'dapertement_receive_id', 'id'); 
+    }
     
     public function customer() { 
         return $this->belongsTo(CustomerApi::class, 'customer_id', 'nomorrekening'); 

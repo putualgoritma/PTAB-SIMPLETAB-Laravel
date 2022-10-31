@@ -15,10 +15,15 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use OneSignal;
+use App\Traits\WablasTrait;
+use App\wa_history;
+use Illuminate\Support\Facades\DB;
+use App\StaffApi;
 
 class TicketsApiController extends Controller
 {
     use TraitModel;
+    use WablasTrait;
 
     public function tickets(Request $request)
     {
@@ -244,6 +249,39 @@ class TicketsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+                //wa notif                
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if($admin->staff_id > 0){
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                }else{
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa')
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }        
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif                                
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -263,6 +301,39 @@ class TicketsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Humas: Keluhan Baru Diterima : ' . $dataForm->description;
+                //wa notif                
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if($admin->staff_id > 0){
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                }else{
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa')
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }        
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif                                
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -282,6 +353,39 @@ class TicketsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Bagian: Keluhan Baru Diterima : ' . $dataForm->description;
+                //wa notif                
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if($admin->staff_id > 0){
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                }else{
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa')
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }        
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif 
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -376,6 +480,39 @@ class TicketsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Bagian: Keluhan Baru Dideligasikan : ' . $request->description;
+            //wa notif                
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if($admin->staff_id > 0){
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            }else{
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa')
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }        
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif 
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -404,6 +541,34 @@ class TicketsApiController extends Controller
         $customer = CustomerApi::find($ticket->customer_id);
         $id_onesignal = $customer->_id_onesignal;
         $message = 'Customer: Keluahan Ditutup Karena Sudah Ada Keluhan yang Sama/Terkait Sebelumnya  : ' . $ticket->code;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        $phone_no = $customer->phone;
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }        
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+        //onesignal notif 
         if (!empty($id_onesignal)) {
             OneSignal::sendNotificationToUser(
                 $message,

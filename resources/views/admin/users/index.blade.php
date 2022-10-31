@@ -35,6 +35,9 @@
                             {{ trans('global.user.fields.email') }}
                         </th>
                         <th>
+                            {{ trans('global.user.fields.phone') }}
+                        </th>
+                        <th>
                             {{ trans('global.user.fields.email_verified_at') }}
                         </th>
                         <th>
@@ -62,6 +65,9 @@
                             </td>
                             <td>
                                 {{ $user->email ?? '' }}
+                            </td>
+                            <td>
+                                {{ $user->phone ?? '' }}
                             </td>
                             <td>
                                 {{ $user->email_verified_at ?? '' }}

@@ -23,7 +23,9 @@ use App\Subdapertement;
 use App\Ticket;
 use App\TicketApi;
 use App\Traits\TraitModel;
+use App\Traits\WablasTrait;
 use App\User;
+use App\wa_history;
 use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -32,6 +34,8 @@ use OneSignal;
 class ActionsApiController extends Controller
 {
     use TraitModel;
+    use WablasTrait;
+
     /**
      * Display a listing of the resource.
      *
@@ -505,10 +509,48 @@ class ActionsApiController extends Controller
                 $subdapertement_def_id = $subdapertement_def->id;
 
                 //if close send notif to user
+                //wa notif
+                $wa_data = [
+                    'phone' => $this->gantiformat($phone),
+                    'customer_id' => $customer_id,
+                    'message' => $message,
+                    'template_id' => 'test1',
+                    'status' => 'gagal',
+                    'ref_id' => $code . $customer_id,
+                ];
+                //onesignal notif
                 if ($statusAction == 'close') {
                     $customer = CustomerApi::find($ticket->customer_id);
                     $id_onesignal = $customer->_id_onesignal;
                     $message = 'Customer: Keluahan Sudah Diselesaikan  : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    $phone_no = $customer->phone;
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -526,6 +568,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Admin: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -543,6 +618,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -562,6 +670,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -580,6 +721,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Sub Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -613,8 +787,7 @@ class ActionsApiController extends Controller
         }
     }
 
-    function list(Request $request)
-    {
+    function list(Request $request) {
         $department = '';
         $subdepartment = 0;
         $staff = 0;
@@ -725,6 +898,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Admin: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -744,6 +950,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Humas: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -763,6 +1002,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Bagian: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -781,6 +1053,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Sub Bagian: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -859,6 +1164,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Admin: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -878,6 +1216,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Humas: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -897,6 +1268,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Bagian: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -915,6 +1319,39 @@ class ActionsApiController extends Controller
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
             $message = 'Sub Bagian: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif
             if (!empty($id_onesignal)) {
                 OneSignal::sendNotificationToUser(
                     $message,
@@ -1008,7 +1445,7 @@ class ActionsApiController extends Controller
 
             $staffs = StaffApi::where('subdapertement_id', $action->subdapertement_id)->get();
 
-            // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+            // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
             $action_staff_lists = DB::table('staffs')
                 ->join('action_staff', function ($join) {
@@ -1097,6 +1534,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Admin: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1116,6 +1586,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1135,6 +1638,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Bagian: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1153,6 +1689,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Sub Bagian: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1267,6 +1836,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Admin: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1286,6 +1888,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1305,6 +1940,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Bagian: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1323,6 +1991,39 @@ class ActionsApiController extends Controller
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Sub Bagian: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
+                    //onesignal notif
                     if (!empty($id_onesignal)) {
                         OneSignal::sendNotificationToUser(
                             $message,
@@ -1547,7 +2248,7 @@ class ActionsApiController extends Controller
 
             $staffs = StaffApi::where('subdapertement_id', $action->subdapertement_id)->get();
 
-            // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+            // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
             $action_staff_lists = DB::table('staffs')
                 ->join('lock_staff', function ($join) {
@@ -1604,6 +2305,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Admin: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -1624,6 +2358,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Bagian: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -1642,6 +2409,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Sub Bagian: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -1734,6 +2534,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Admin: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -1755,6 +2588,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Bagian: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
@@ -1773,6 +2639,39 @@ class ActionsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Sub Bagian: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                if ($admin->staff_id > 0) {
+                    $staff = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff->phone;
+                } else {
+                    $phone_no = $admin->phone;
+                }
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+                //onesignal notif
                 if (!empty($id_onesignal)) {
                     OneSignal::sendNotificationToUser(
                         $message,
