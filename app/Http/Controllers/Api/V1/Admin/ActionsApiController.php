@@ -573,8 +573,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -614,7 +614,7 @@ class ActionsApiController extends Controller
                 }
 
                 //send notif to humas
-                $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->get();
+                $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->where('staff_id', 0)->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
                     $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
@@ -623,8 +623,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -675,8 +675,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -716,7 +716,7 @@ class ActionsApiController extends Controller
                 }
 
                 //send notif to sub departement terkait
-                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
@@ -726,8 +726,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -763,6 +763,41 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );
+                    }
+                }
+
+                //send notif to staff terkait
+                $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
+                foreach ($actionstaffs as $key => $actionstaff) {
+                    $message = 'Staff: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+                    //wa notif
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
+
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa'),
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
                     }
                 }
 
@@ -903,8 +938,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -955,8 +990,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1007,8 +1042,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1048,7 +1083,7 @@ class ActionsApiController extends Controller
         }
 
         //send notif to sub departement terkait
-        $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+        $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
@@ -1058,8 +1093,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1095,6 +1130,40 @@ class ActionsApiController extends Controller
                     $buttons = null,
                     $schedule = null
                 );
+            }
+        }
+
+        //send notif to staff
+        $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
+        foreach ($actionstaffs as $key => $actionstaff) {
+            $message = 'Staff: Tindakan Baru Dibuat : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
+            $phone_no = $staff_phone->phone;
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
             }
         }
 
@@ -1169,8 +1238,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1221,8 +1290,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1273,8 +1342,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1314,7 +1383,7 @@ class ActionsApiController extends Controller
         }
 
         //send notif to sub departement terkait
-        $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+        $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
             ->get();
         foreach ($admin_arr as $key => $admin) {
             $id_onesignal = $admin->_id_onesignal;
@@ -1324,8 +1393,8 @@ class ActionsApiController extends Controller
             $wa_data_group = [];
             //get phone user
             if ($admin->staff_id > 0) {
-                $staff = StaffApi::where('id', $admin->staff_id)->first();
-                $phone_no = $staff->phone;
+                $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff_phone->phone;
             } else {
                 $phone_no = $admin->phone;
             }
@@ -1361,6 +1430,39 @@ class ActionsApiController extends Controller
                     $buttons = null,
                     $schedule = null
                 );
+            }
+        }
+
+        //send notif to staff
+        $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
+        foreach ($actionstaffs as $key => $actionstaff) {
+            $message = 'Staff: Tindakan Baru Diupdate : ' . $ticket->code . $request->description;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
+            $phone_no = $staff_phone->phone;
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
             }
         }
 
@@ -1539,8 +1641,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1591,8 +1693,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1643,8 +1745,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1684,7 +1786,7 @@ class ActionsApiController extends Controller
                 }
 
                 //send notif to sub departement terkait
-                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
@@ -1694,8 +1796,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1731,6 +1833,35 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );
+                    }
+                }
+
+                //send notif to staff terkait
+                $message = 'Staff: Petugas Baru Ditugaskan : ' . $action->ticket->code . $staff->name;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                $phone_no = $staff->phone;
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
                     }
                 }
 
@@ -1841,8 +1972,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1893,8 +2024,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1945,8 +2076,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -1986,7 +2117,7 @@ class ActionsApiController extends Controller
                 }
 
                 //send notif to sub departement terkait
-                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+                $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
                     ->get();
                 foreach ($admin_arr as $key => $admin) {
                     $id_onesignal = $admin->_id_onesignal;
@@ -1996,8 +2127,8 @@ class ActionsApiController extends Controller
                     $wa_data_group = [];
                     //get phone user
                     if ($admin->staff_id > 0) {
-                        $staff = StaffApi::where('id', $admin->staff_id)->first();
-                        $phone_no = $staff->phone;
+                        $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff_phone->phone;
                     } else {
                         $phone_no = $admin->phone;
                     }
@@ -2033,6 +2164,35 @@ class ActionsApiController extends Controller
                             $buttons = null,
                             $schedule = null
                         );
+                    }
+                }
+
+                //send notif to staff terkait
+                $message = 'Staff: Petugas Baru Diupdate : ' . $action->ticket->code . $staff->name;
+                //wa notif
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                $phone_no = $staff->phone;
+                $wa_data = [
+                    'phone' => $this->gantiFormat($phone_no),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa'),
+                ];
+                $wa_data_group[] = $wa_data;
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
                     }
                 }
 
@@ -2310,8 +2470,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2363,8 +2523,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2404,7 +2564,7 @@ class ActionsApiController extends Controller
             }
 
             //send notif to sub departement terkait
-            $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
+            $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
@@ -2414,8 +2574,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2451,6 +2611,36 @@ class ActionsApiController extends Controller
                         $buttons = null,
                         $schedule = null
                     );
+                }
+            }
+
+            //send notif to staff terkait
+            $message = 'Staff: Petugas Segel Meter Baru Ditugaskan : ' . $action->code . $staff->name;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            $phone_no = $staff->phone;
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
                 }
             }
 
@@ -2539,8 +2729,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2579,7 +2769,7 @@ class ActionsApiController extends Controller
                 }
             }
 
-            //send notif to sub departement terkait
+            //send notif to departement terkait
             $lock_obj = Lock::where('id', $dataForm->lock_id)->first();
             $subdapertement_obj = Subdapertement::where('id', $lock_obj->subdapertement_id)->first();
             $admin_arr = User::where('dapertement_id', $subdapertement_obj->dapertement_id)
@@ -2593,8 +2783,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2634,7 +2824,7 @@ class ActionsApiController extends Controller
             }
 
             //send notif to sub departement terkait
-            $admin_arr = User::where('subdapertement_id', $lock_obj->subdapertement_id)
+            $admin_arr = User::where('subdapertement_id', $lock_obj->subdapertement_id)->where('staff_id', 0)
                 ->get();
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
@@ -2644,8 +2834,8 @@ class ActionsApiController extends Controller
                 $wa_data_group = [];
                 //get phone user
                 if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+                    $phone_no = $staff_phone->phone;
                 } else {
                     $phone_no = $admin->phone;
                 }
@@ -2683,6 +2873,38 @@ class ActionsApiController extends Controller
                     );
                 }
             }
+
+            //send notif to staff terkait
+            $message = 'Staff: Tindakan Penyegelan/Pencabutan Baru Dibuat : ' . $dataForm->memo;
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            $staff_phone = StaffApi::where('id', $ticket->staff_id)->first();
+            $phone_no = $staff_phone->phone;
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+
             return response()->json([
                 'message' => 'Success',
             ]);
