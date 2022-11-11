@@ -10,6 +10,9 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Imports\CustomerImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class CustomersController extends Controller
 {
@@ -77,7 +80,6 @@ class CustomersController extends Controller
         }
         //default view
         return view('admin.customers.index');
-
     }
 
     public function create()
@@ -125,27 +127,27 @@ class CustomersController extends Controller
         abort_unless(\Gate::allows('customer_edit'), 403);
 
         $password_val = '';
-        if(trim($request->password) != ''){
-            if(trim($request->password) != trim($request->repassword)){
+        if (trim($request->password) != '') {
+            if (trim($request->password) != trim($request->repassword)) {
                 return back()->withError('Password dan Re-Password harus sama!');
-            }else{
-                $password_val = bcrypt($request->password); 
+            } else {
+                $password_val = bcrypt($request->password);
             }
         }
 
         //synced
-        $synced=99;
-        if($request->type=='customer'){
-            $synced=0;
+        $synced = 99;
+        if ($request->type == 'customer') {
+            $synced = 0;
         }
 
         $customer = Customer::find($request->code);
         $customer->email = $request->email;
         $customer->phone = $request->phone;
         $customer->_synced = $synced;
-        if($password_val != ''){
+        if ($password_val != '') {
             $customer->password = $password_val;
-            }
+        }
         $customer->save();
 
         return redirect()->route('admin.customers.index');
@@ -163,5 +165,37 @@ class CustomersController extends Controller
     public function massDestroy(MassDestroyCustomerRequest $request)
     {
         # code...
+    }
+
+    public function editImport()
+    {
+        abort_unless(\Gate::allows('customer_edit'), 403);
+        return view('admin.customers.editImport');
+    }
+
+    public function updateImport(Request $request)
+    {
+        abort_unless(\Gate::allows('customer_edit'), 403);
+        $import = new CustomerImport;
+        $test =  Excel::import($import, $request->file('file'));
+
+        $array = $import->getArray();
+
+        abort_unless(\Gate::allows('wablast_access'), 403);
+
+        $customers = $import->getArray();
+
+        ini_set("memory_limit", -1);
+        set_time_limit(0);
+        //ini test
+
+        // dd($customers[2]['name']);
+        for ($i = 0; $i < count($customers); $i++) {
+            $customer = Customer::find($customers[$i]['nomorrekening']);
+            $customer->phone = $customers[$i]['phone'];
+            $customer->save();
+        }
+
+        return redirect()->route('admin.customers.index');
     }
 }

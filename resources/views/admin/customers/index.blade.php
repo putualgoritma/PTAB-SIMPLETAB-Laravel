@@ -2,11 +2,20 @@
 @section('content')
 @can('customer_create')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-2">
             <a class="btn btn-success" href="{{ route('admin.customers.create') }}">
                 {{ trans('global.add') }} {{ trans('global.customer.title_singular') }}
             </a>
         </div>
+        @can('customer_edit')
+
+        <div class="col-lg-2">
+            <a class="btn btn-info" href="{{ route('admin.customers.editImport') }}">
+                {{ trans('global.edit') }} {{ trans('global.customer.title_singular') }} (Excel)
+            </a>
+        </div>
+        
+@endcan
     </div>
     
 @endcan

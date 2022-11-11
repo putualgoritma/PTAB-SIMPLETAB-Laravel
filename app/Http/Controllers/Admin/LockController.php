@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AreaStaff;
 use App\CtmPembayaran;
+use App\CtmWilayah;
 use App\Customer;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
@@ -19,6 +21,7 @@ use OneSignal;
 use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpWord\TemplateProcessor;
 use DateTime;
+use Illuminate\Support\Facades\Auth;
 
 class LockController extends Controller
 {
@@ -32,76 +35,124 @@ class LockController extends Controller
     public function index(Request $request)
     {
         abort_unless(\Gate::allows('lock_access'), 403);
-        // if ($request->status != '' && $request->search != ''  && $request->date != '') {
-        //     $qry =
-        // } else if ($request->status && $request->date != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('type', $request->status)
-        //         ->get();
-        // } else if ($request->status != '' && $request->search != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('type', $request->status)
-        //         ->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-        //         ->where('type', $request->status)
-        //         ->get();
-        // } else if ($request->search != ''  && $request->date != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('created_at', 'like', $request->date . '%')
-        //         ->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-        //         ->where('created_at', 'like', $request->date . '%')
-        //         ->get();
-        // } else if ($request->search != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-        //         ->get();
-        // } else if ($request->date != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('created_at', 'like', $request->date . '%')
-        //         ->get();
-        // } else if ($request->status != '') {
-        //     $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //         ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //         ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //         ->with('customer')
-        //         ->with('subdapertement')->where('type', $request->status)
-        //         ->get();
-        // } else {
-        // $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut,tblpelanggan.idareal as idareal')
-        //     ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-        //     ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-        //     ->with('customer')
-        //     ->with('subdapertement')->get();
-        // }
+        $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
 
-        $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut, users.id as staff_id, users.name as staff_name ,lock_action.created_at as created_at, lock_action.updated_at as updated_at, tblpelanggan.idareal as idareal')
-            ->FilterStatus(request()->input('status'))
-            ->FilterDate(request()->input('from'), request()->input('to'))
-            ->FilterStaff(request()->input('staff'))
-            ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
-            ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-            ->join('users', 'lock_action.staff_id', '=', 'users.id')
-            ->with('customer')
-            ->with('subdapertement')
-            // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
-            // ->where('tblpelanggan.nomorrekening', 'I')->orwhere('tblpelanggan.namapelanggan', 'like', '%' . 'I' . '%')
-            // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
-            ->get();
+        if (Auth::user()->dapertement_id != 0 && Auth::user()->subdapertement_id != 0 && Auth::user()->staff_id != 0) {
+            if (Auth::user()->staff_id === 0) {
+                $group_unit = Dapertement::select('dapertements.group_unit')
+                    ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+                $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();
+                // dd($data[0]->code);
+            } else {
+                $data = AreaStaff::join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'area_id')->selectRaw('area_id as code,NamaWilayah')->where('staff_id', Auth::user()->staff_id)->get();
+            }
+            $areas = $data;
+            // dd($data);
+            $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
+                ->join('dapertements', 'staffs.dapertement_id', '=', 'dapertements.id')
+                ->join('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
+                ->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')
+                ->groupBy('staffs.id');
+            for ($i = 0; $i < count($data); $i++) {
+                if ($i < 1) {
 
+                    $qrystf->where('area_id', $data[$i]->code)
+                        ->where('subdapertement_id', 10)
+                        ->orWhere('dapertements.group_unit', '>', 1)
+                        ->where('area_id', $data[$i]->code);
+                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
+                } else {
+                    $qrystf->orWhere('area_id', $data[$i]->code)
+                        ->where('subdapertement_id', 10)
+                        ->orWhere('dapertements.group_unit', '>', 1)
+                        ->Where('area_id', $data[$i]->code);
+                }
+            }
+
+            $qrydt = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut, users.id as staff_id, users.name as staff_name ,lock_action.created_at as created_at, lock_action.updated_at as updated_at, tblpelanggan.idareal as idareal')
+                ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
+                ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+                ->join('users', 'lock_action.staff_id', '=', 'users.id')
+                ->with('customer')
+                ->with('subdapertement');
+            for ($i = 0; $i < count($data); $i++) {
+                if ($i < 1) {
+
+                    $qrydt->where('tblpelanggan.idareal', $data[$i]->code)
+                        ->FilterArea(request()->input('area'))
+                        ->FilterStatus(request()->input('status'))
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->FilterStaff(request()->input('staff'));
+                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->tblpelanggan.idareal;
+                } else {
+                    $qrydt->orWhere('tblpelanggan.idareal', $data[$i]->code)
+                        ->FilterArea(request()->input('area'))
+                        ->FilterStatus(request()->input('status'))
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->FilterStaff(request()->input('staff'));
+                }
+            }
+            $qry = $qrydt->get();
+        } else if (Auth::user()->name == 'ADMIN') {
+            $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
+            $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut, users.id as staff_id, users.name as staff_name ,lock_action.created_at as created_at, lock_action.updated_at as updated_at, tblpelanggan.idareal as idareal')
+                ->FilterStatus(request()->input('status'))
+                ->FilterDate(request()->input('from'), request()->input('to'))
+                ->FilterStaff(request()->input('staff'))
+                ->FilterArea(request()->input('area'))
+                ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
+                ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+                ->join('users', 'lock_action.staff_id', '=', 'users.id')
+                ->with('customer')
+                ->with('subdapertement')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                // ->where('tblpelanggan.nomorrekening', 'I')->orwhere('tblpelanggan.namapelanggan', 'like', '%' . 'I' . '%')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                ->get();
+            // $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
+            //     ->leftJoin('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
+            //     ->leftJoin('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+            //     ->oin('area_staff', 'staffs.id', '=', 'area_staff.staff_id')->where('subdapertement_id', 10)->groupBy('staffs.id');
+
+            $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
+                ->join('dapertements', 'staffs.dapertement_id', '=', 'dapertements.id')
+                ->join('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
+                ->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')
+                ->where('subdapertement_id', 10)
+                ->orWhere('dapertements.group_unit', '>', 1)
+                ->groupBy('staffs.id');
+        }
+        // untuk admin
+        else {
+            $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
+            $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut, users.id as staff_id, users.name as staff_name ,lock_action.created_at as created_at, lock_action.updated_at as updated_at, tblpelanggan.idareal as idareal')
+                ->FilterStatus(request()->input('status'))
+                ->FilterDate(request()->input('from'), request()->input('to'))
+                ->FilterStaff(request()->input('staff'))
+                ->FilterArea(request()->input('area'))
+                ->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
+                ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+                ->join('users', 'lock_action.staff_id', '=', 'users.id')
+                ->with('customer')
+                ->with('subdapertement')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                // ->where('tblpelanggan.nomorrekening', 'I')->orwhere('tblpelanggan.namapelanggan', 'like', '%' . 'I' . '%')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                ->get();
+            // $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
+            //     ->leftJoin('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
+            //     ->leftJoin('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+            //     ->oin('area_staff', 'staffs.id', '=', 'area_staff.staff_id')->where('subdapertement_id', 10)->groupBy('staffs.id');
+
+            $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
+                ->join('dapertements', 'staffs.dapertement_id', '=', 'dapertements.id')
+                ->join('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
+                ->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')
+                ->where('subdapertement_id', 10)
+                ->orWhere('dapertements.group_unit', '>', 1)
+                ->groupBy('staffs.id');
+        }
+        // dd($qrystf);
         // dd($qry);
         if ($request->ajax() && $qry) {
             $table = Datatables::of($qry);
@@ -177,9 +228,9 @@ class LockController extends Controller
             return $table->make(true);
         }
 
-        $staff = User::where('subdapertement_id', '10')->get();
+        $staff = $qrystf->get();
 
-        return view('admin.lock.index', compact('staff'));
+        return view('admin.lock.index', compact('staff', 'areas'));
         // return $subdepartementlist;
 
     }

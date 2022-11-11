@@ -510,14 +510,14 @@ class ActionsApiController extends Controller
 
                 //if close send notif to user
                 //wa notif
-                $wa_data = [
-                    'phone' => $this->gantiformat($phone),
-                    'customer_id' => $customer_id,
-                    'message' => $message,
-                    'template_id' => 'test1',
-                    'status' => 'gagal',
-                    'ref_id' => $code . $customer_id,
-                ];
+                // $wa_data = [
+                //     'phone' => $this->gantiformat($phone),
+                //     'customer_id' => $customer_id,
+                //     'message' => $message,
+                //     'template_id' => 'test1',
+                //     'status' => 'gagal',
+                //     'ref_id' => $code . $customer_id,
+                // ];
                 //onesignal notif
                 if ($statusAction == 'close') {
                     $customer = CustomerApi::find($ticket->customer_id);
@@ -822,7 +822,8 @@ class ActionsApiController extends Controller
         }
     }
 
-    function list(Request $request) {
+    function list(Request $request)
+    {
         $department = '';
         $subdepartment = 0;
         $staff = 0;

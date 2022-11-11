@@ -53,6 +53,16 @@ class LockAction extends Model
             return;
         }
     }
+
+    public function scopeFilterArea($query, $area)
+    {
+        if ($area != '') {
+            $query->where('tblpelanggan.idareal', $area);
+            return $query;
+        } else {
+        }
+    }
+
     public function scopeFilterStaff($query, $staff)
     {
         if ($staff != '') {

@@ -477,6 +477,8 @@ return [
             'status' => 'Status',
             'img' => 'Foto',
             'year' => 'Tahun',
+            'periode' => 'Periode',
+            'dateRead' => 'Tanggal Baca',
             'month' => 'Bulan',
         ]
     ],

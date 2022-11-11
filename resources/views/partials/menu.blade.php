@@ -120,6 +120,14 @@
                             Buat Surat
                         </a>
                     </li>
+ 
+                    <li class="nav-item">
+                        <a href="{{ route('admin.report.reportLockAction') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-file"></i>
+                       Rekap Segel Meter
+                        </a>
+                    </li>
                     @endcan
                     <!-- <li class="nav-item">
                         <a href="{{ route('admin.spp.index') }}" class="nav-link">
