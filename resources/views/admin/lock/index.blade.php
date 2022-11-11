@@ -34,10 +34,20 @@
                             <select id="staff" name="staff" class="form-control">
                                 <option value="">== Semua Staff ==</option>
                                 @foreach ($staff as $item )
-                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                <option value="{{ $item->id }}">{{ $item->dapertements_name }}-{{ $item->subdapertements_name }}-{{ $item->name }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        <br>
+                        <label>Pilih Wilayah</label>
+                        <div class="input-group">
+                        <select id="area" name="area" class="form-control">
+                            <option value="">== Semua area ==</option>
+                            @foreach ($areas as $item )
+                            <option value="{{ $item->code }}">{{ $item->code }} | {{ $item->NamaWilayah }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                         </div>
 <br>
                         <div class="col-md-6">
@@ -154,6 +164,13 @@
             $("#staff").val('');
         }
 
+        let area = searchParams.get('area')
+        if (area) {
+            $("#area").val(area);
+        }else{
+            $("#area").val('');
+        }
+
   let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
   let deleteButton = {
     text: deleteButtonTrans,
@@ -201,6 +218,7 @@
                 'from': $("#from").val(),
                 'to': $("#to").val(),
                 'staff': $("#staff").val(),
+                'area': $("#area").val(),
                 }
             },
             columns: [

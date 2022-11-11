@@ -28,6 +28,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
 
     // keluhan pelanggan
+    Route::get('customers/editImport', 'CustomersController@editImport')->name('customers.editImport');
+    Route::post('customers/updateImport', 'CustomersController@updateImport')->name('customers.updateImport');
+
     Route::resource('customers', 'CustomersController');
 
     Route::delete('customers/destroy', 'CustomersController@massDestroy')->name('customers.massDestroy');
@@ -98,6 +101,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('customerrequests', 'CustomerRequestController');
 
     //ctm request
+    Route::post('ctmrequests/{id}/reject', 'CtmRequestController@reject')->name('ctmrequests.reject');
     Route::resource('ctmrequests', 'CtmRequestController');
 
     //pbk
@@ -122,6 +126,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('reports/reportssubdistribusi', 'ReportsController@reportSubDistribusi')->name('report.subdistribusi');
 
     Route::post('reports/reportssubdistribusi/proses', 'ReportsController@reportSubDistribusiProses')->name('report.subdistribusiproses');
+
+
+    // baru
+    Route::get('reports/reportLockAction', 'ReportsController@reportLockAction')->name('report.reportLockAction');
+
+    Route::post('reports/reportsLockAction/proses', 'ReportsController@reportLockActionProses')->name('report.reportLockActionproses');
+    // baru
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
 

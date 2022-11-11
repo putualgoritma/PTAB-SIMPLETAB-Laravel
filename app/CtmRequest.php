@@ -44,13 +44,13 @@ class CtmRequest extends Model
             $to =  request()->input('to');
             // $from = '2021-09-01';
             // $to = '2021-09-20';
-            return $query->whereBetween('created_at', [$from, $to]);
+            return $query->whereBetween('datecatatf1', [$from, $to]);
             // return $query->where('froms_id', $from);
             // dd(request()->input('from'));
 
         } else {
-            return $query->whereMonth('created_at', '=', date('m'))
-                ->whereYear('created_at', '=', date('Y'));
+            return $query->whereMonth('datecatatf1', '=', date('m'))
+                ->whereYear('datecatatf1', '=', date('Y'));
         }
     }
 }

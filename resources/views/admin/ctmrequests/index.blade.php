@@ -46,7 +46,7 @@
                 <thead>
                     <tr>
                         <th width="10">
-
+No
                         </th>
                         <th>
                             {{ trans('global.ctmrequest.fields.norek') }}
@@ -58,13 +58,20 @@
                             {{ trans('global.ctmrequest.fields.address') }}
                         </th>
                         <th>
-                            {{ trans('global.ctmrequest.fields.month') }}
+                            {{ trans('global.ctmrequest.fields.dateRead') }}
                         </th>
                         <th>
-                            {{ trans('global.ctmrequest.fields.year') }}
+                            {{ trans('global.ctmrequest.fields.periode') }}
                         </th>
+                    
                         <th>
                             {{ trans('global.ctmrequest.fields.wmmeteran') }}
+                        </th>
+                        <th>
+                            {{ trans('global.ctmrequest.fields.status') }}
+                        </th>
+                        <th>
+                            Phone
                         </th>
                         <th>
                             &nbsp;
@@ -72,10 +79,11 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <?php $i = 1; ?>
                 @foreach($ctmrequests as $key => $ctmrequest)
                         <tr data-entry-id="{{ $ctmrequest->id }}">
                             <td>
-
+{{ $i }}
                             </td>
                             <td>
                             {{ $ctmrequest->norek ?? '' }}
@@ -87,20 +95,43 @@
                             {{ $ctmrequest->customer->address ?? '' }}
                             </td>
                             <td>
-                            {{ $ctmrequest->month ?? '' }}
+                                {{ $ctmrequest->datecatatf1 ?? '' }}
                             </td>
                             <td>
-                            {{ $ctmrequest->year ?? '' }}
+                            {{ $ctmrequest->month ?? '' }}-{{ $ctmrequest->year ?? '' }}
                             </td>
                             <td>
                             {{ $ctmrequest->wmmeteran ?? '' }}
                             </td>
+                            <td>
+                                @if($ctmrequest->status && $ctmrequest->status == "pending")
+                                tunggu
+                                @elseif($ctmrequest->status && $ctmrequest->status == "approve")
+                                disetujui
+                                @else
+                                    ditolak
+                                    @endif 
+                                </td>
+                                <td>
+                                    {{ $ctmrequest->customer->phone ?? '' }}
+                                    </td>  
                             <td>
                                 @if($ctmrequest->status =='pending')
                                 @can('ctmrequests_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.ctmrequests.edit', $ctmrequest->id) }}">
                                         Setujui
                                     </a>
+
+                                    @can('ctmrequests_edit')
+                                    <form action="{{ route('admin.ctmrequests.reject', $ctmrequest->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                        <input type="hidden" name="_method" value="POST">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="submit" class="btn btn-xs btn-danger" value="Tolak">
+                                    </form>
+                                @endcan
+                                    {{-- <a class="btn btn-xs btn-danger" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" href="{{ route('admin.ctmrequests.reject', $ctmrequest->id) }}">
+                                        Ditolak
+                                    </a> --}}
                                 @endcan
                                 @endif    
                                 @if($ctmrequest->status =='approve')
@@ -109,9 +140,10 @@
                                         Edit
                                     </a>
                                 @endcan
-                                @endif                             
+                                @endif                       
                             </td>
                         </tr>
+                        <?php $i++ ?>
                     @endforeach
                 </tbody>
             </table>

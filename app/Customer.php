@@ -176,7 +176,7 @@ class Customer extends Model
     public function scopeFilterWilayah($query, $area)
     {
         if ($area != '') {
-            $query->where('idareal', '=', $area);
+            $query->where('tblpelanggan.idareal', '=', $area);
             return $query;
         } else {
         }

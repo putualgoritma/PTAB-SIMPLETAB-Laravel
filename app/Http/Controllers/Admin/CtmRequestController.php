@@ -160,6 +160,16 @@ class CtmRequestController extends Controller
         return back();
     }
 
+    public function reject($id)
+    {
+        abort_unless(\Gate::allows('ctmrequests_edit'), 403);
+        $ctmrequest = CtmRequest::where('id', $id)->first();
+        $ctmrequest->status = 'close';
+        $ctmrequest->save();
+
+        return back();
+    }
+
     public function massDestory(Request $request)
     {
         CtmRequest::whereIn('id', request('ids'))->delete();
