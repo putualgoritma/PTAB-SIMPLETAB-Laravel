@@ -150,7 +150,7 @@
         { data: 'address', name: 'alamat' },
         { data: 'gender', name: '_gender' },
         { data: 'type', name: '_type' },
-        { data: 'phone', name: 'telp' },
+        { data: 'phone', name: 'telp', searchable: false },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,

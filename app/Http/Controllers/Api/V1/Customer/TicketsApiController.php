@@ -5,19 +5,18 @@ namespace App\Http\Controllers\Api\V1\Customer;
 use App\CategoryApi;
 use App\Customer;
 use App\Http\Controllers\Controller;
-use App\LockAction;
+use App\StaffApi;
 use App\Subdapertement;
 use App\TicketApi;
 use App\Ticket_Image;
 use App\Traits\TraitModel;
+use App\Traits\WablasTrait;
 use App\User;
+use App\wa_history;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use OneSignal;
-use App\Traits\WablasTrait;
-use App\wa_history;
 use Illuminate\Support\Facades\DB;
-use App\StaffApi;
+use OneSignal;
 
 class TicketsApiController extends Controller
 {
@@ -48,8 +47,6 @@ class TicketsApiController extends Controller
             ]);
         }
     }
-
-
 
     public function store(Request $request)
     {
@@ -157,7 +154,7 @@ class TicketsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->title;
-                //wa notif                
+                //wa notif
                 $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
                 $wa_data_group = [];
                 //get phone user
@@ -175,7 +172,7 @@ class TicketsApiController extends Controller
                     'status' => 'gagal',
                     'ref_id' => $wa_code,
                     'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa')
+                    'updated_at' => date('Y-m-d h:i:sa'),
                 ];
                 $wa_data_group[] = $wa_data;
                 DB::table('wa_histories')->insert($wa_data);
@@ -209,7 +206,7 @@ class TicketsApiController extends Controller
             foreach ($admin_arr as $key => $admin) {
                 $id_onesignal = $admin->_id_onesignal;
                 $message = 'Humas: Keluhan Baru Diterima : ' . $dataForm->title;
-                //wa notif                
+                //wa notif
                 $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
                 $wa_data_group = [];
                 //get phone user
@@ -227,7 +224,7 @@ class TicketsApiController extends Controller
                     'status' => 'gagal',
                     'ref_id' => $wa_code,
                     'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa')
+                    'updated_at' => date('Y-m-d h:i:sa'),
                 ];
                 $wa_data_group[] = $wa_data;
                 DB::table('wa_histories')->insert($wa_data);
@@ -251,6 +248,37 @@ class TicketsApiController extends Controller
                         $buttons = null,
                         $schedule = null
                     );
+                }
+            }
+
+            //send notif to user
+            $customer = Customer::find($ticket->customer_id);
+            $message = 'Terimakasih telah menggunakan aplikasi SimpelTAB, Keluhan anda telah kami terima dan segera di Tindak Lanjuti. Mohon maaf atas ketidak nyamanannya.';
+            //wa notif
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            $phone_no = $customer->phone;
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa'),
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
                 }
             }
 

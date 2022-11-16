@@ -132,7 +132,7 @@ class CtmRequestController extends Controller
         $getCtmMeterPrev = $this->getCtmMeterPrev($var['norek'], $var['bulanrekening'], $var['tahunrekening']);
         $meterawal = $var['pencatatanmeterprev'];
 
-        if ((int) $var['namastatus'] == 111) {
+        if ((int) $var['namastatus'] == 118) {
             $meterawal = $getCtmMeterPrev['pencatatanmeter'];
         }
 

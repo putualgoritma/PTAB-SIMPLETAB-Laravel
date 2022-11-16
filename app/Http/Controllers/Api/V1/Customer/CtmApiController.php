@@ -12,10 +12,13 @@ use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use DB;
 use App\CtmPelanggan;
+use App\wa_history;
+use App\Traits\WablasTrait;
 
 class CtmApiController extends Controller
 {
     use TraitModel;
+    use WablasTrait;
 
     public function ctmUse($id)
     {
@@ -223,6 +226,7 @@ class CtmApiController extends Controller
                 ->leftjoin('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
                 ->where('gambarmetersms.nomorrekening', $id)
                 ->where('gambarmetersms.tahunrekening', date('Y'))
+                ->where('gambarmetersms.bulanrekening', '!=', date('n'))
                 ->orderBy('gambarmetersms.bulanrekening', 'DESC')
                 ->get();
             return response()->json([
@@ -343,6 +347,37 @@ class CtmApiController extends Controller
             'year' => $var['year'],
             'month' => $var['month'],
         );
+
+        //send notif to user
+        $customer = Customer::where('nomorrekening',$var['norek'])->first();
+        $message = 'Terimakasih telah menggunakan Aplikasi SimpelTAB. Laporan Baca WM Mandiri anda telah kami terima. Kepedulian Anda merupakan Peningkatan Pelayanan Kami.';
+        //wa notif
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        $phone_no = $customer->phone;
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa'),
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
 
         try {
             $ticket = CtmRequest::create($data);
