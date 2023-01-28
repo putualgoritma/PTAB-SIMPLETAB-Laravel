@@ -19,6 +19,7 @@ use App\Traits\WablasTrait;
 use App\wa_history;
 use Illuminate\Support\Facades\DB;
 use App\StaffApi;
+use App\WaTemplate;
 
 class TicketsApiController extends Controller
 {
@@ -63,7 +64,7 @@ class TicketsApiController extends Controller
                         $join->on('action_staff.action_id', '=', 'actions.id')
                             ->where('action_staff.staff_id', '=', $staff);
                     })
-                    ->FilterStatus(request()->input('status'))
+                    ->FilterStatus($request->status)
                     ->with('department')
                     ->with('customer')
                     ->with('category')
@@ -77,11 +78,13 @@ class TicketsApiController extends Controller
                         $join->on('actions.ticket_id', '=', 'tickets.id')
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
+                    ->FilterStatus($request->status)
                     ->with('department')
                     ->with('customer')
                     ->with('category')
                     ->with('ticket_image')
                     ->with('action')
+                    ->where('tickets.dapertement_id', $department)
                     ->orderBy('created_at', 'DESC')
                     ->paginate(10, ['*'], 'page', $request->page);
             }
@@ -253,10 +256,10 @@ class TicketsApiController extends Controller
                 $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
                 $wa_data_group = [];
                 //get phone user
-                if($admin->staff_id > 0){
+                if ($admin->staff_id > 0) {
                     $staff = StaffApi::where('id', $admin->staff_id)->first();
                     $phone_no = $staff->phone;
-                }else{
+                } else {
                     $phone_no = $admin->phone;
                 }
                 $wa_data = [
@@ -275,7 +278,7 @@ class TicketsApiController extends Controller
                 $array_merg = [];
                 if (!empty(json_decode($wa_sent)->data->messages)) {
                     $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }        
+                }
                 foreach ($array_merg as $key => $value) {
                     if (!empty($value->ref_id)) {
                         wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
@@ -305,10 +308,10 @@ class TicketsApiController extends Controller
                 $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
                 $wa_data_group = [];
                 //get phone user
-                if($admin->staff_id > 0){
+                if ($admin->staff_id > 0) {
                     $staff = StaffApi::where('id', $admin->staff_id)->first();
                     $phone_no = $staff->phone;
-                }else{
+                } else {
                     $phone_no = $admin->phone;
                 }
                 $wa_data = [
@@ -327,7 +330,7 @@ class TicketsApiController extends Controller
                 $array_merg = [];
                 if (!empty(json_decode($wa_sent)->data->messages)) {
                     $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }        
+                }
                 foreach ($array_merg as $key => $value) {
                     if (!empty($value->ref_id)) {
                         wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
@@ -357,10 +360,10 @@ class TicketsApiController extends Controller
                 $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
                 $wa_data_group = [];
                 //get phone user
-                if($admin->staff_id > 0){
+                if ($admin->staff_id > 0) {
                     $staff = StaffApi::where('id', $admin->staff_id)->first();
                     $phone_no = $staff->phone;
-                }else{
+                } else {
                     $phone_no = $admin->phone;
                 }
                 $wa_data = [
@@ -379,7 +382,7 @@ class TicketsApiController extends Controller
                 $array_merg = [];
                 if (!empty(json_decode($wa_sent)->data->messages)) {
                     $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }        
+                }
                 foreach ($array_merg as $key => $value) {
                     if (!empty($value->ref_id)) {
                         wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
@@ -484,10 +487,10 @@ class TicketsApiController extends Controller
             $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
             $wa_data_group = [];
             //get phone user
-            if($admin->staff_id > 0){
+            if ($admin->staff_id > 0) {
                 $staff = StaffApi::where('id', $admin->staff_id)->first();
                 $phone_no = $staff->phone;
-            }else{
+            } else {
                 $phone_no = $admin->phone;
             }
             $wa_data = [
@@ -506,7 +509,7 @@ class TicketsApiController extends Controller
             $array_merg = [];
             if (!empty(json_decode($wa_sent)->data->messages)) {
                 $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-            }        
+            }
             foreach ($array_merg as $key => $value) {
                 if (!empty($value->ref_id)) {
                     wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
@@ -540,12 +543,40 @@ class TicketsApiController extends Controller
         //if close send notif to user
         $customer = CustomerApi::find($ticket->customer_id);
         $id_onesignal = $customer->_id_onesignal;
-        $message = 'Customer: Keluahan Ditutup Karena Sudah Ada Keluhan yang Sama/Terkait Sebelumnya  : ' . $ticket->code;
-        //wa notif                
+        $waTemplate = WaTemplate::where('id', 49)->first();
+        $message = $waTemplate->message;
+        // $message = 'Customer: Keluahan Ditutup Karena Sudah Ada Keluhan yang Sama/Terkait Sebelumnya  : ' . $ticket->code;
+        // //wa notif                
         $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
         $wa_data_group = [];
         //get phone user
         $phone_no = $customer->phone;
+
+        //  pesan baru start
+        $waTemplate = WaTemplate::where('id', 49)->first();
+
+        $jam = date('H');
+        if ($jam > 0 && $jam < 11) {
+            $waktu = "pagi";
+        } else if ($jam > 10 && $jam < 15) {
+            $waktu = "siang";
+        } else if ($jam > 14 && $jam < 19) {
+            $waktu = "sore";
+        } else if ($jam > 18 && $jam < 23) {
+            $waktu = "malam";
+        } else {
+            $waktu = "";
+        }
+
+        $message = $waTemplate->message;
+
+        $message = str_replace("@nama", $customer->name, $message);
+        $message = str_replace("@sbg", $customer->customer_id, $message);
+        $message = str_replace("@alamat", $customer->adress, $message);
+        $message = str_replace("@waktu", $waktu, $message);
+
+        //pesan baru end 
+
         $wa_data = [
             'phone' => $this->gantiFormat($phone_no),
             'customer_id' => null,
@@ -562,7 +593,7 @@ class TicketsApiController extends Controller
         $array_merg = [];
         if (!empty(json_decode($wa_sent)->data->messages)) {
             $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-        }        
+        }
         foreach ($array_merg as $key => $value) {
             if (!empty($value->ref_id)) {
                 wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);

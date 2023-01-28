@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link href="{{ asset('css/printreport.css') }}" rel="stylesheet" />
+<link href="{{ asset('css/printreport1.css') }}" rel="stylesheet" />
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@
                 <span class="v103_252"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_253">{{$ticket->spk}}</span>
                 <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
-                <span class="v103_255">Internal</span>
+                <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
                 <span class="v103_258"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
@@ -52,7 +52,7 @@
         <div class="v103_240">
             <div class="A2Text">
                 <span class="v103_243"><!-- {{$ticket->updated_at->format('d/m/Y')}} --></span>
-                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction){{$index+1}}.{{$ticketaction->memo}}<br>@endforeach</span>
+                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
                 <span class="v103_245"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_246"><!-- {{$ticket->updated_at->format('H:i:s')}} --></span>
                 <span class="v103_247"></span>
@@ -63,7 +63,7 @@
                 <span class="v103_252"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_253">{{$ticket->spk}}</span>
                 <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
-                <span class="v103_255">Internal</span>
+                <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
                 <span class="v103_258"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
@@ -89,7 +89,7 @@
         <div class="v103_240">
             <div class="A3Text">
                 <span class="v103_243"><!-- {{$ticket->updated_at->format('d/m/Y')}} --></span>
-                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction){{$index+1}}.{{$ticketaction->memo}}<br>@endforeach</span>
+                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
                 <span class="v103_245"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_246"><!-- {{$ticket->updated_at->format('H:i:s')}} --></span>
                 <span class="v103_247"></span>
@@ -100,7 +100,7 @@
                 <span class="v103_252"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_253">{{$ticket->spk}}</span>
                 <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
-                <span class="v103_255">Internal</span>
+                <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
                 <span class="v103_258"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
@@ -126,7 +126,7 @@
         <div class="v103_240">
             <div class="A4Text">
                 <span class="v103_243"><!-- {{$ticket->updated_at->format('d/m/Y')}} --></span>
-                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction){{$index+1}}.{{$ticketaction->memo}}<br>@endforeach</span>
+                <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
                 <span class="v103_245"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_246"><!-- {{$ticket->updated_at->format('H:i:s')}} --></span>
                 <span class="v103_247"></span>
@@ -137,7 +137,7 @@
                 <span class="v103_252"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --></span>
                 <span class="v103_253">{{$ticket->spk}}</span>
                 <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
-                <span class="v103_255">Internal</span>
+                <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
                 <span class="v103_257"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>
                 <span class="v103_258"><!-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif --></span>

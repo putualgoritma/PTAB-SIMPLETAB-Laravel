@@ -40,15 +40,18 @@ class User extends Authenticatable
         'dapertement_id',
         'subdapertement_id',
         'staff_id',
-        'phone'
+        'phone',
+        'image',
     ];
 
-    public function dapertement() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    public function dapertement()
+    {
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id');
     }
 
-    public function subdapertement() { 
-        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id'); 
+    public function subdapertement()
+    {
+        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id');
     }
 
     public function getEmailVerifiedAtAttribute($value)

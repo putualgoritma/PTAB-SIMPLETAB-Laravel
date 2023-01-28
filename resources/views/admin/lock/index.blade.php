@@ -233,8 +233,8 @@
                 { data: 'staff_id', name: 'staff_id' },
                 { data: 'staff_name', name: 'staff_name' },
                 { data: 'status', render: function (dataField) { return dataField === 'notice' ?'<button type="button" class="btn btn-primary btn-sm" disabled>P.Surat</button>':dataField === 'lock' ?'<button type="button" class="btn btn-warning btn-sm" disabled>Penyegelan</button>':dataField === 'notice2' ?'<button type="button" class="btn btn-secondary btn-sm" disabled>Kunjungan</button>':'<button type="button" class="btn btn-danger btn-sm" disabled>Cabutan</button>'; } },
-                { data: 'start', name: 'start', searchable: false },
-                { data: 'end', name: 'end', searchable: false },
+                { data: 'start', name: 'created_at', searchable: false },
+                { data: 'end', name: 'updated_at', searchable: false },
                 { data: 'staff', name: '{{ trans('global.staff.title') }}' }
             ],
             // order: [[ 2, 'asc' ]],

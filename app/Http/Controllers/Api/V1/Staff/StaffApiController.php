@@ -155,7 +155,7 @@ class StaffApiController extends Controller
                 $token = Auth::user()->createToken('authToken')->accessToken;
 
                 if (!empty($request->_id_onesignal)) {
-                    if ($admin->subdapertement_id === 10 || $admin->dapertement->group_unit > 1) {
+                    if ($admin->subdapertement_id === 10 || $admin->dapertement->group_unit > 1 || $admin->id === 2) {
                         $admin->update(['_id_onesignal' => $request->_id_onesignal]);
                         return response()->json([
                             'success' => true,
@@ -168,7 +168,7 @@ class StaffApiController extends Controller
                     } else {
                         return response()->json([
                             'success' => false,
-                            'message' => ' Email Yang Di masukkan Salah',
+                            'message' => $admin->id,
                         ]);
                     }
                 } else {

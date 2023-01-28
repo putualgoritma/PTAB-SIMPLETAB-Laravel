@@ -103,15 +103,43 @@
                 @endif
             </div>
 
+            <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
+                <label for="dapertement">{{ trans('global.staff.fields.name') }}*</label>
+                <select id="dapertement" name="dapertement" class="form-control" value="{{ old('dapertement', isset($user) ? $user->dapertement : '') }}" required>
+                    <option value="">--Dapertement--</option>
+                    @foreach ($dapertement as $value)
+                    <option value="{{ $value->name }}">{{ $value->name }}</option>  
+                    @endforeach
+                                  
+                </select>
+                @if($errors->has('dapertement'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('dapertement') }}
+                    </em>
+                @endif
+            </div>
+
             <div class="form-group {{ $errors->has('jenisSurat') ? 'has-error' : '' }}">
                 <label for="jenisSurat">Jenis Surat*</label>
                 <select id="jenisSurat" name="jenis" class="form-control" value="{{ old('jenisSurat', isset($user) ? $user->jenisSurat : '') }}" required>
                     <option value="">--Jenis Surat--</option>
                     <option value="penyegelan">Penyegelan</option>
-                    <option value="pencabutan">Pencabutan</option>
+
+                    @if ($tunggak > 3)
+                    <option value="pencabutan">Pencabutan</option>    
+                    @endif
+                    
                     <option value="perintahPenyegelan">Perintah Penyegelan</option>
+                    
+                    @if ($tunggak > 3)
                     <option value="perintahPencabutan">Perintah Pencabutan</option>
-                    <option value="hambatanPencabutan">Hambatan Pencabutan</option>
+                        
+                    @endif
+                    
+                    @if ($tunggak > 3)
+                    <option value="hambatanPencabutan">Hambatan Pencabutan</option>    
+                    @endif
+                    
                     <option value="hambatanPenyegelan">Hambatan Penyegelan</option>
                                   
                 </select>

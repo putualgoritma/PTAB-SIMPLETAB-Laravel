@@ -35,7 +35,7 @@ class SuratSegelController extends Controller
             ->first();
         $customer->year = date('Y');
         // dd($ctm);
-
+        $jmlTunggakan = 0;
         // ctm pay
         $date_now = date("Y-m-d");
         $date_comp = date("Y-m") . "-20";
@@ -51,113 +51,115 @@ class SuratSegelController extends Controller
         $total = 0;
         $ctm_lock = 0;
         $last_4_month = date("Y-n-d", strtotime('-4 month', strtotime(date('Y-m-01'))));
-        if ($date_now > $date_comp) {
-            $ctm_lock_old = 0;
-            $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
-                ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpembayaran.nomorrekening', $id)
-                ->where('tblpelanggan.status', 1)
-                ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                ->get();
-        } else {
-            $ctm_lock_old = 1;
-            $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
-                ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpembayaran.nomorrekening', $id)
-                ->where('tblpelanggan.status', 1)
-                ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                ->orderBy('tblpembayaran.bulanrekening', 'ASC')
-                ->get();
+        $date_now = date("Y-m-d");
+        $date_comp = date("Y-m") . "-20";
+        $month_now = date('n');
+        $month_next = date('n', strtotime('+1 month')) - 1;
+        // if($month_now === 1){
+
+        // }
+        if ($month_now > $month_next) {
+            $month_next = $month_next + 12;
         }
 
-        $status_paid_this_month = 0;
+        $data = array(
+            'nomorrekening' => $customer->nomorrekening,
+        );
+
+        $url = 'https://yndvck.perumdatab.com/akademi-pelawak-tpi/tgh.api.php';
+
+        //open connection
+        $ch = curl_init();
+
+        //set the url, number of POST vars, POST data
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, count($data));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        //execute post
+        $ctm = curl_exec($ch);
+        $ctm = json_decode($ctm);
+        $ctmDate = $ctm;
+        // dd($ctm);
+        //close connection
+        curl_close($ch);
+        // dd($ctm);
+        if ($date_now > $date_comp) {
+            $ctm_lock = 0;
+        } else {
+            $ctm_lock = 1;
+        }
+
+        $ctm_num_row = count($ctm) - 1;
         foreach ($ctm as $key => $item) {
-            //get this month paid
-            if ($item->bulanrekening == $month_now_new && $item->tahunrekening == $year_now) {
-                if ($item->statuslunas == 2) {
-                    $status_paid_this_month = 1;
-                }
+            //get sudah dibayar
+            $item->sudahdibayar = 0;
+            if ($item->statuslunas == 2) {
+
+                $item->sudahdibayar = $item->wajibdibayar;
+            } else {
+                $total = $total + $item->wajibdibayar - $item->sudahdibayar;
+                $jmlTunggakan = $jmlTunggakan + 1;
             }
-            $m3 = $item->bulanini - $item->bulanlalu;
+            // if ($item->bulanrekening == date('n') && $item->tahunrekening == date('Y') && $date_now < $date_comp) {
+            //     $item->sudahdibayar = $item->wajibdibayar;
+            //     // dd($item);
+            // } else {
+            //     // dd($item->bulanrekening, $item->tahunrekening);
+            // }
             $sisa = $item->wajibdibayar - $item->sudahdibayar;
-            $tagihan = $tagihan + $sisa;
-
-
-            if ($month_now == $item->bulanrekening && $ctm_lock_old == 1) {
-                $ctm_lock = 1;
-            }
-
-            if ($sisa > 0 && $ctm_lock == 0) {
-                $tunggakan = $tunggakan + 1;
-            }
-
             //if not paid
             if ($sisa > 0) {
-                $item->tglbayarterakhir = "";
+                $ctm[$key]->tglbayarterakhir = "";
             }
+            //denda & $item->sudahdibayar=$item->wajibdibayar;
+            $ctm[$key]->denda = 0;
+            $ctm[$key]->sudahdibayar = $item->sudahdibayar;
             //set to prev
-            $periode = date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
-
-            $dataPembayaran[$key] = [
-                // 'no' => $key +1,
-                'norekening' => $item->nomorrekening,
-                'periode' => $periode,
-                'tanggal' => $item->tglbayarterakhir,
-                'm3' => $m3,
-                'wajibdibayar' => $item->wajibdibayar,
-                'sudahbayar' => $item->sudahdibayar,
-                'denda' => $item->denda,
-                'sisa' => $sisa,
-            ];
-        }
-
-        if ($tunggakan > 0 && $tunggakan < 2) {
-            $denda = 10000;
-            $total = $tagihan + $denda;
-            $denda = $denda;
-        }
-        if ($tunggakan > 1 && $tunggakan < 4) {
-            $denda = 50000;
-            $total = $tagihan + $denda;
-            $denda = $denda;
-        }
-        if ($tunggakan > 3) {
-            $denda = 'SSB (Sanksi Denda Setara Sambungan Baru)';
-            $total = $tagihan;
-        }
-
-        if ($tunggakan === 2) {
-            $tindakan = ['tindakan' => "notice"];
-        } else if ($tunggakan === 3) {
-            $cek = LockAction::where('customer_id', $id)->where('type', 'lock')->get();
-            if (count($cek) >= 1) {
-                $tindakan = ['tindakan' => "notice2"];
-            } else {
-                $tindakan = ['tindakan' => "lock"];
+            $ctm[$key]->tahunrekening = date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
+            $ctm[$key]->bulanrekening = date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
+            //if status 0
+            if ($ctm[$key]->status == 0 && $key == $ctm_num_row) {
+                unset($ctm[$key]);
             }
-        } else if ($tunggakan > 3) {
-            $tindakan = ['tindakan' => "cabutan"];
         }
 
-        $cekInput = LockAction::where('customer_id', $id)->where('type', $tindakan)->get();
-        if (count($cekInput) >= 1) {
-            $inputStatus = ["inputStatus" => "sudah"];
-        } else {
-            $inputStatus = ["inputStatus" => "belum"];
+        if ($jmlTunggakan > 0 && $jmlTunggakan < 2) {
+            $denda = 10000;
+            $total = $total + $denda;
         }
-        // foreach ($dataPembayaran as $value) {
-        //     dd($value['speriode']);
-        // }
-
+        if ($jmlTunggakan > 1 && $jmlTunggakan < 4) {
+            $denda = 50000;
+            $total = $total + $denda;
+        }
+        // dd($month_next);
         $recap = [
-            'tagihan' => $tagihan,
-            'denda' => $denda,
-            'total' => $total,
-            'tunggakan' => $tunggakan,
+            'tagihan' => $item->wajibdibayar - $item->sudahdibayar,
+            'denda' => $ctm[$key]->denda,
+            'key' => $key,
+            'tanggal' => $ctm[$key]->tglbayarterakhir,
+            'total' => $item->wajibdibayar - $item->sudahdibayar + $ctm[$key]->denda,
+            'tunggakan' => $jmlTunggakan,
+            'ss1' => $jmlTunggakan,
+            'ss' => $ctm
         ];
+
+        // dd($recap);
+        $thnCtm2 = $ctm[$key]->tahunrekening;
+
+        $blnCtm2 = $ctm[$key]->bulanrekening;
+        if ($jmlTunggakan <= 0) {
+            $thnCtm1 = $ctm[$key - ($jmlTunggakan)]->tahunrekening;
+            $blnCtm1 = $ctm[$key - ($jmlTunggakan)]->bulanrekening;
+        } else {
+            $thnCtm1 = $ctm[$key - ($jmlTunggakan - 1)]->tahunrekening;
+            $blnCtm1 = $ctm[$key - ($jmlTunggakan - 1)]->bulanrekening;
+        }
+
+        // dd($dataPembayaran1, $dataPembayaran, $key, $jmlTunggakan, $ctmDate);
+        // tglbayarterakhir
+        // dd($recap);
 
         // dd($customer);
         $day = date('D');
@@ -355,7 +357,7 @@ class SuratSegelController extends Controller
             if (strlen($total) - $i > 5) {
                 if (substr($total, $i, 1) == "1") {
                     if (strlen($total) - $i != 7) {
-                        $angkaTertulis = $angkaTertulis . ' se' . $nominal[strlen($total) - $i];
+                        $angkaTertulis = $angkaTertulis . ' Se' . strtolower($nominal[strlen($total) - $i]);
                     } else {
                         $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
                     }
@@ -397,7 +399,7 @@ class SuratSegelController extends Controller
                 //     $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)];
                 // }
                 if (strlen($total) - $i === 4) {
-                    $angkaTertulis = $angkaTertulis . ' ribu';
+                    $angkaTertulis = $angkaTertulis . ' Ribu';
                 } else {
                 }
             }
@@ -416,34 +418,39 @@ class SuratSegelController extends Controller
             'yearPuluh' => $yearPuluh[substr(date('Y'), 2, 1)], 'yearSatuan' => $yearSatuan[substr(date('Y'), 3, 1)],
             'nama_staff' => $staff->name, 'dapartement' => 'Pelaksana Meter Segel', 'namapelanggan' => $customer->namapelanggan,
             'nomorrekening' => $customer->nomorrekening, 'address' => $customer->alamat, 'total' => rupiah($total),
-            'idareal' => $customer->idareal, 'jumlahtunggakan' => $tunggakan, 'jumlahtunggakanT' => $jumlahT[$tunggakan]
+            'idareal' => $customer->idareal, 'jumlahtunggakan' => $recap['tunggakan'], 'jumlahtunggakanT' => $jumlahT[$recap['tunggakan']]
         ];
 
-        $firstBulan = $monthList[date('n', strtotime($dataPembayaran[0]['periode']))];
-        $lastBulan = $monthList[date('n', strtotime($dataPembayaran[count($dataPembayaran) - 1]['periode']))];
+        $firstBulan = $monthList[(int)$blnCtm1];
+        $lastBulan = $monthList[(int)$blnCtm2];
 
+        $firstTahun = $thnCtm1;
+        $lastTahun = $thnCtm2;
+
+        $dapertement =  ucwords(strtolower($request->dapertement));
+        // dd($dapertement);
         if ($request->jenis == "penyegelan") {
-            $pdf = pdf::loadView('admin.suratSegel.penyegelan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.penyegelan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else if ($request->jenis == "pencabutan") {
-            $pdf = pdf::loadView('admin.suratSegel.pencabutan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.pencabutan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else if ($request->jenis == "perintahPenyegelan") {
-            $pdf = pdf::loadView('admin.suratSegel.perintahPenyegelan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.perintahPenyegelan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else if ($request->jenis == "perintahPencabutan") {
-            $pdf = pdf::loadView('admin.suratSegel.perintahPencabutan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.perintahPencabutan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else if ($request->jenis == "hambatanPenyegelan") {
-            $pdf = pdf::loadView('admin.suratSegel.hambatanPenyegelan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.hambatanPenyegelan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else if ($request->jenis == "hambatanPencabutan") {
-            $pdf = pdf::loadView('admin.suratSegel.hambatanPencabutan', compact('data', 'lastBulan', 'firstBulan'));
+            $pdf = pdf::loadView('admin.suratSegel.hambatanPencabutan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
             $pdf->setPaper('Legal', 'potrait')->render();
             return $pdf->stream();
         } else {
@@ -489,8 +496,7 @@ class SuratSegelController extends Controller
             }
 
             $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpelanggan.status', 1);
+                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening');
 
             // isi pertama
             if ($date_now > $date_comp) {
@@ -502,6 +508,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -509,6 +516,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->code;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -527,6 +535,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -534,6 +543,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -557,6 +567,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -564,6 +575,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -582,6 +594,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -589,6 +602,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -616,8 +630,7 @@ class SuratSegelController extends Controller
                 ->groupBy('staffs.id');
             // dd($qrystf->get());
             $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpelanggan.status', 1);
+                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening');
             if ($date_now > $date_comp) {
                 if ($request->staff != '') {
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
@@ -627,6 +640,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -634,6 +648,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -647,6 +662,7 @@ class SuratSegelController extends Controller
                     $qry->FilterWilayah(request()->input('area'))->groupBy('tblpembayaran.nomorrekening');
                 } else {
                     $qry->having('jumlahtunggakan', '>', 1)
+                        ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
@@ -664,6 +680,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -671,6 +688,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -684,6 +702,7 @@ class SuratSegelController extends Controller
                     $qry->FilterWilayah(request()->input('area'))->groupBy('tblpembayaran.nomorrekening');
                 } else {
                     $qry->having('jumlahtunggakan', '>', 1)
+                        ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
@@ -705,8 +724,7 @@ class SuratSegelController extends Controller
                 ->groupBy('staffs.id');
             // dd($qrystf->get());
             $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpelanggan.status', 1);
+                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening');
             if ($date_now > $date_comp) {
                 if ($request->staff != '') {
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
@@ -716,6 +734,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -723,6 +742,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -736,6 +756,7 @@ class SuratSegelController extends Controller
                     $qry->FilterWilayah(request()->input('area'))->groupBy('tblpembayaran.nomorrekening');
                 } else {
                     $qry->having('jumlahtunggakan', '>', 1)
+                        ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
@@ -753,6 +774,7 @@ class SuratSegelController extends Controller
                             if ($i < 1) {
 
                                 $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -760,6 +782,7 @@ class SuratSegelController extends Controller
                                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                             } else {
                                 $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
+                                    ->where('tblpelanggan.status', 1)
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                                     ->having('jumlahtunggakan', '>', 1)
@@ -773,6 +796,7 @@ class SuratSegelController extends Controller
                     $qry->FilterWilayah(request()->input('area'))->groupBy('tblpembayaran.nomorrekening');
                 } else {
                     $qry->having('jumlahtunggakan', '>', 1)
+                        ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
@@ -781,11 +805,11 @@ class SuratSegelController extends Controller
                 }
             }
         }
-
+        // dd($qry->limit(3)->get());
         // dd($qry->get());
         if ($request->ajax()) {
 
-            $table = Datatables::of($qry);
+            $table = Datatables::of($qry->limit(3));
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
@@ -838,11 +862,13 @@ class SuratSegelController extends Controller
         return view('admin.suratSegel.suratSegel', compact('staff', 'areas'));
     }
 
-    public function create($id)
+    public function create(Request $request)
     {
         // abort_unless(\Gate::allows('user_create'), 403);
-        $id = $id;
+        $id = $request->id;
+        $tunggak = $request->tunggak;
         $customer = Customer::where('nomorrekening', $id)->first();
+        $dapertement = Dapertement::where('group_unit', '>', 1)->orWhere('id', 2)->get();
         // $staff = Staff::selectRaw('staffs.id as id, staffs.name as name')->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')->where('subdapertement_id', 10)->where('area_id', $customer->idareal)->groupBy('staffs.id')->get();
         $staff = User::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
             ->join('subdapertements', 'subdapertements.id', '=', 'subdapertement_id')
@@ -855,6 +881,6 @@ class SuratSegelController extends Controller
             ->orderBy('users.subdapertement_id', 'ASC')
             ->get();
         // dd($staff);
-        return view('admin.suratSegel.create', compact('staff', 'id', 'customer'));
+        return view('admin.suratSegel.create', compact('staff', 'id', 'customer', 'dapertement', 'tunggak'));
     }
 }

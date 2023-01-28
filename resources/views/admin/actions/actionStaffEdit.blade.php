@@ -45,6 +45,21 @@
                     </em>
                 @endif
             </div>
+
+            <div class="form-group {{ $errors->has('todo') ? 'has-error' : '' }}">
+                <label for="todo">{{ trans('global.action_staff.fields.todo') }}*</label>
+                <select id="todo" name="todo" class="form-control" value="{{ old('todo', isset($action) ? $action->todo : '') }}">
+                    <option value="">--Pilih Pekerja--</option>
+                    <option value="Internal" {{$action->todo == 'Internal' ? 'selected' :''}} >Internal</option>
+                    <option value="Pihak ke-3" {{$action->todo == 'Pihak ke-3' ? 'selected' :''}} >Pihak ke-3</option>          
+                </select>
+                @if($errors->has('todo'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('todo') }}
+                    </em>
+                @endif
+            </div>
+
             <div class="form-group {{ $errors->has('memo') ? 'has-error' : '' }}">
                 <label for="memo">{{ trans('global.action.fields.memo') }}*</label>
                 <textArea id="memo" name="memo" class="form-control" >{{$action->memo}}</textArea>
@@ -54,29 +69,53 @@
                     </em>
                 @endif                
             </div>
-            <div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}">
-                <label for="image">{{ trans('global.ticket.fields.image') }}*</label>
-                {{-- <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($ticket) ? $ticket->image : '') }}">
-                @if($errors->has('image'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('image') }}
-                    </em>
-                @endif --}}
-                <div class="input-group control-group increment" >
-                    <input type="file" name="image[]" class="form-control">
-                    <div class="input-group-btn"> 
-                      <button class="btn btn-success" type="button"><i class="glyphicon glyphicon-plus"></i>Add</button>
-                    </div>
-                  </div>
-                  <div class="clone hide">
-                    <div class="control-group input-group" style="margin-top:10px">
-                      <input type="file" name="image[]" class="form-control">
-                      <div class="input-group-btn"> 
-                        <button class="btn btn-danger" type="button"><i class="glyphicon glyphicon-remove"></i> Remove</button>
-                      </div>
-                    </div>
-                  </div>
-            </div>
+           
+
+
+            {{-- test baru --}}
+            <label>Catatan : Jika sudah menambah upload file maka akan merubah semua foto yang ada(sesuai dengan group foto), bisa dikosongkan jika tidak ingin merubah foto sebelumnya</label>
+  {{-- image --}}
+  <div id="loan_image_prework'+i+'" >
+    <div class="form-group {{ $errors->has('img') ? 'has-error' : '' }}">
+        <label for="image_prework_file">Foto Sebelum Pengerjaan</label>
+        <div class="custom-file"><input id="image_prework_file" name="image_prework" type="file" class="custom-file-input" id="customFile">
+            <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
+    </div>
+    
+  <div class="form-group">
+    <button type="button" class="btn btn-primary image" name="add" id="image"><i class="fas fa-plus"> Tambah Foto Laporan</i></button>
+    <label>Foto Pengerjaan</label>
+    
+    <div id="loan_image" class="p-3 mb-2">
+       </div>
+  </div>
+
+
+
+  <div class="form-group">
+    <button type="button" class="btn btn-primary image_tools" name="add" id="image_tools"><i class="fas fa-plus"> Tambah Foto Alat</i></button>
+    <label>Foto Alat</label>
+    
+    <div id="loan_image_tools" class="p-3 mb-2">
+       </div>
+  </div>
+
+  <div class="form-group">
+    <button type="button" class="btn btn-primary image_done" name="add" id="image_done"><i class="fas fa-plus"> Tambah Foto Selesai</i></button>
+    <label>Foto Selesai</label>
+    
+    <div id="loan_image_done" class="p-3 mb-2">
+       </div>
+  </div>
+
+
+    {{-- <button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_removeimage_prework">
+        <i class="fas fa-minus"> hapus</i></button> --}}
+    </div>
+ 
+
+            {{-- test baru end --}}
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>
@@ -88,12 +127,76 @@
 @section('scripts')
     @parent
     <script>
-            $(".btn-success").click(function(){ 
-                var html = $(".clone").html();
-                $(".increment").after(html);
-            });
-            $("body").on("click",".btn-danger",function(){ 
-                $(this).parents(".control-group").remove();
-            });
+   $(document).ready(function(){  
+              var i=1; 
+              $('#image').click(function(){   
+              
+                // alert(i)
+                if(i <= 4){
+                    i++;  
+                $('#loan_image').append(' <div id="loan_image'+i+'" ><div class="form-group {{ $errors->has('img') ? 'has-error' : '' }}"><label for="image_file">Foto Pengerjaan</label><div class="custom-file"><input id="image_file" name="image[]" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_removeimage"><i class="fas fa-minus"> hapus</i></button></div>');                
+                   $(".custom-file-input").on("change", function() {
+var fileName = $(this).val().split("\\").pop();
+$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+                }
+
+                });
+
+                $(document).on('click','.btn_removeimage', function(){ 
+                var button_id = $(this).attr("id"); 
+                i--;
+                   $('#loan_image'+button_id+'').remove();  
+              });  
+
+                var a=1; 
+              $('#image_tools').click(function(){   
+              
+                // alert(a)
+                if(a <= 3){
+                    a++;  
+                $('#loan_image_tools').append(' <div id="loan_image_tools'+a+'" ><div class="form-group {{ $errors->has('img') ? 'has-error' : '' }}"><label for="image_tools_file">Foto Alat</label><div class="custom-file"><input id="image_tools_file" name="image_tools[]" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" id="'+a+'" class="btn btn-danger btn_removeimage_tools"><i class="fas fa-minus"> hapus</i></button></div>');                
+                   $(".custom-file-input").on("change", function() {
+var fileName = $(this).val().split("\\").pop();
+$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+                }
+
+                });
+              
+              $(document).on('click','.btn_removeimage_tools', function(){ 
+                var button_id = $(this).attr("id"); 
+                i--;
+                   $('#loan_image_tools'+button_id+'').remove();  
+              });  
+
+              var b=1; 
+              $('#image_done').click(function(){   
+                
+                // alert(b)
+                if(b <= 6){
+                    b++; 
+                $('#loan_image_done').append(' <div id="loan_image_done'+b+'" ><div class="form-group {{ $errors->has('img') ? 'has-error' : '' }}"><label for="image_done_file">Foto Selesai</label><div class="custom-file"><input id="image_done_file" name="image_done[]" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" id="'+b+'" class="btn btn-danger btn_removeimage_done"><i class="fas fa-minus"> hapus</i></button></div>');                
+                   $(".custom-file-input").on("change", function() {
+var fileName = $(this).val().split("\\").pop();
+$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+                }
+
+                });
+              
+              $(document).on('click','.btn_removeimage_done', function(){ 
+                var button_id = $(this).attr("id"); 
+                i--;
+                   $('#loan_image_done'+button_id+'').remove();  
+              });  
+        
+              
+            }); 
+
+              $(".custom-file-input").on("change", function() {
+var fileName = $(this).val().split("\\").pop();
+$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
     </script>
 @endsection

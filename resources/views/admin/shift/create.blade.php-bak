@@ -1,0 +1,194 @@
+@extends('layouts.admin')
+@section('content')
+
+<div class="card">
+    <div class="card-header">
+        Jadwal Shift di Bulan
+    </div>
+
+    <div class="card-body">
+        <form action="{{ route("admin.shift.store") }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            @for ($i = 0 ; $i < count($days); $i++)
+            {{-- <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
+                <label for="code">{{ trans('global.shift.fields.code') }}*</label>
+                <input type="text" id="code" name="code1" class="form-control" value="{{ $days[$i] }}" required>
+                @if($errors->has('code'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('code') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('global.shift.fields.code_helper') }}
+                </p>
+            </div> --}}
+            <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
+                <label for="code">Tanggal*</label>
+                <input type="text" id="code" name="code<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="{{ $days[0]["day"] }}, {{ $days[$i]["date"] }}" required>
+            @if($errors->has('code'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('code') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{-- Tanggal --}}
+                </p>
+            </div>
+
+            {{-- uji staff start --}}
+            <label for="staff" style="margin-left: 20px">shift 1*</label>
+
+            <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                <label for="staff">Staff*</label>
+                <input type="text" id="staff" name="staff1<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="1" required>
+            @if($errors->has('staff'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{-- Staff --}}
+                </p>
+            </div>
+            <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                <label for="staff">Staff*</label>
+                <input type="text" id="staff" name="staff1<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="2" required>
+            @if($errors->has('staff'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{-- Staff --}}
+                </p>
+            </div>
+            <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                <label for="staff">Staff*</label>
+                <input type="text" id="staff" name="staff1<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="3" required>
+            @if($errors->has('staff'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{-- Staff --}}
+                </p>
+            </div>
+            {{-- uji staff end --}}
+
+               {{-- uji staff start --}}
+               <label for="staff" style="margin-left: 20px">shift 2*</label>
+
+               <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                   <label for="staff">Staff*</label>
+                   <input type="text" id="staff" name="staff2<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="1" required>
+               @if($errors->has('staff'))
+                       <em class="invalid-feedback">
+                           {{ $errors->first('staff') }}
+                       </em>
+                   @endif
+                   <p class="helper-block">
+                       {{-- Staff --}}
+                   </p>
+               </div>
+               <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                   <label for="staff">Staff*</label>
+                   <input type="text" id="staff" name="staff2<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="2" required>
+               @if($errors->has('staff'))
+                       <em class="invalid-feedback">
+                           {{ $errors->first('staff') }}
+                       </em>
+                   @endif
+                   <p class="helper-block">
+                       {{-- Staff --}}
+                   </p>
+               </div>
+               <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                   <label for="staff">Staff*</label>
+                   <input type="text" id="staff" name="staff2<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="3" required>
+               @if($errors->has('staff'))
+                       <em class="invalid-feedback">
+                           {{ $errors->first('staff') }}
+                       </em>
+                   @endif
+                   <p class="helper-block">
+                       {{-- Staff --}}
+                   </p>
+               </div>
+               {{-- uji staff end --}}
+
+                 {{-- uji staff start --}}
+                 <label for="staff" style="margin-left: 20px">shift 3*</label>
+
+                 <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                     <label for="staff">Staff*</label>
+                     <input type="text" id="staff" name="staff3<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="1" required>
+                 @if($errors->has('staff'))
+                         <em class="invalid-feedback">
+                             {{ $errors->first('staff') }}
+                         </em>
+                     @endif
+                     <p class="helper-block">
+                         {{-- Staff --}}
+                     </p>
+                 </div>
+                 <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                     <label for="staff">Staff*</label>
+                     <input type="text" id="staff" name="staff3<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="2" required>
+                 @if($errors->has('staff'))
+                         <em class="invalid-feedback">
+                             {{ $errors->first('staff') }}
+                         </em>
+                     @endif
+                     <p class="helper-block">
+                         {{-- Staff --}}
+                     </p>
+                 </div>
+                 <div class="form-group {{ $errors->has('staff') ? 'has-error' : '' }}" style="margin-left: 50px">
+                     <label for="staff">Staff*</label>
+                     <input type="text" id="staff" name="staff3<?php echo $days[$i]["date"]  ?>[]" class="form-control" value="3" required>
+                 @if($errors->has('staff'))
+                         <em class="invalid-feedback">
+                             {{ $errors->first('staff') }}
+                         </em>
+                     @endif
+                     <p class="helper-block">
+                         {{-- Staff --}}
+                     </p>
+                 </div>
+                 {{-- uji staff end --}}
+               @endfor
+      
+
+            {{-- <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
+                <label for="name">{{ trans('global.shift.fields.name') }}*</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ old('name', isset($shift) ? $shift->name : '') }}" required>
+                @if($errors->has('name'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('name') }}
+                    </em>
+                @endif
+                <p class="helper-block">
+                    {{ trans('global.shift.fields.name_helper') }}
+                </p>
+            </div>
+
+            <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
+                <label for="description">{{ trans('global.action.fields.description') }}*</label>
+                <textArea id="description" name="description" class="form-control" required>{{ old('name', isset($shift) ? $shift->description : '') }}</textArea>
+                @if($errors->has('description'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('description') }}
+                    </em>
+                @endif
+            </div> --}}
+
+            <div>
+                <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
+            </div>
+        </form>
+    </div>
+</div>
+
+@endsection

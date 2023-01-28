@@ -14,7 +14,6 @@ class PaymentApiController extends Controller
 
     public function index()
     {
-
     }
 
     public function create()
@@ -24,7 +23,6 @@ class PaymentApiController extends Controller
 
     public function store(Request $request)
     {
-
     }
 
     public function show($id)
@@ -61,23 +59,27 @@ class PaymentApiController extends Controller
             ]);
         }
 
-        // $data = json_decode($request->form);
+        $data = json_decode($request->form);
         $arrQry = [];
-        foreach ($request->all() as $key => $dat) {
-            $arrQry[$key] = $dat;
-        }
 
         try {
-            $result = DB::connection('mysql2')->table('tblpembayaran')
-                ->where('tahunrekening', '=', $request->tahunrekening)
-                ->where('bulanrekening', '=', $request->bulanrekening)
-                ->where('nomorrekening', '=', $request->nomorrekening)
-                ->update($arrQry);
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data Pembayaran Update Success',
-                    'data' => $arrQry,
-                ]);
+
+            foreach ($data as $value) {
+                foreach ($value as $key => $dat) {
+                    $arrQry[$key] = $dat;
+                    $result = DB::connection('mysql2')->table('tblpembayaran')
+                        ->where('tahunrekening', '=', $request->tahunrekening)
+                        ->where('bulanrekening', '=', $request->bulanrekening)
+                        ->where('nomorrekening', '=', $request->nomorrekening)
+                        ->update($arrQry);
+                }
+                $arrQry = [];
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Data Pembayaran Update Success',
+                'data' => $arrQry,
+            ]);
         } catch (QueryException $e) {
             return response()->json([
                 'status' => false,
@@ -117,6 +119,5 @@ class PaymentApiController extends Controller
 
     public function destroy(CtmPembayaran $staff)
     {
-
     }
 }

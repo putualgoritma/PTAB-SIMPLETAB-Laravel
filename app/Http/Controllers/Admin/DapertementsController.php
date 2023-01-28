@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreDapertementRequest;
 use App\Http\Requests\UpdateDapertementRequest;
 use App\Dapertement;
+use App\Director;
 use App\Traits\TraitModel;
 use Illuminate\Database\QueryException;
 
@@ -28,10 +29,11 @@ class DapertementsController extends Controller
         $last_code = $this->get_last_code('dapertement');
 
         $code = acc_code_generate($last_code, 8, 3);
+        $directors = Director::get();
 
         abort_unless(\Gate::allows('dapertement_create'), 403);
 
-        return view('admin.dapertements.create', compact('code'));
+        return view('admin.dapertements.create', compact('code', 'directors'));
     }
 
     public function store(StoreDapertementRequest $request)
@@ -54,13 +56,15 @@ class DapertementsController extends Controller
 
         $dapertement = Dapertement::findOrFail($id);
 
-        return view('admin.dapertements.edit', compact('dapertement'));
+        $directors = Director::get();
+
+        return view('admin.dapertements.edit', compact('dapertement', 'directors'));
     }
 
     public function update(UpdateDapertementRequest $request, Dapertement $dapertement)
     {
         abort_unless(\Gate::allows('dapertement_edit'), 403);
-    
+
         $dapertement->update($request->all());
 
         return redirect()->route('admin.dapertements.index');
@@ -70,11 +74,10 @@ class DapertementsController extends Controller
     {
         abort_unless(\Gate::allows('dapertement_delete'), 403);
 
-        try{
+        try {
             $dapertement->delete();
             return back();
-        }
-        catch(QueryException $e) {
+        } catch (QueryException $e) {
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
         }
     }

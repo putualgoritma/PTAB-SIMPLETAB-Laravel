@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.admin2')
 @section('content')
 <!-- @can('ctmrequests_create')
     <div style="margin-bottom: 10px;" class="row">
@@ -113,7 +113,7 @@ No
                                     @endif 
                                 </td>
                                 <td>
-                                    {{ $ctmrequest->customer->phone ?? '' }}
+                                    {{ $ctmrequest->customer->telp.' / '.$ctmrequest->customer->nomorhp ?? '' }}
                                     </td>  
                             <td>
                                 @if($ctmrequest->status =='pending')
@@ -153,7 +153,7 @@ No
     @section('scripts')
 
         @parent
-        <!-- <script>
+      <script>
             $(function () {
         let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
         let deleteButton = {
@@ -188,9 +188,9 @@ No
                 dtButtons.push(deleteButton)
             @endcan
 
-            $('.datatable:not(.ajaxTable)').DataTable({ buttons: dtButtons })
+            $('.datatable:not(.ajaxTable)').DataTable({ buttons: dtButtons,  stateSave: true })
         })
 
-        </script> -->
+        </script>
     @endsection 
 @endsection

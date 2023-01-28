@@ -29,6 +29,9 @@
         margin: auto;
         /* text-align: center; */
     }
+    PRE {
+        white-space: normal;
+    }
 
 </style>
 
@@ -39,23 +42,28 @@
         display: flex;
     }
     .kiri {
-        width: 16%;
+        margin-top: 25px;
+        width: 35%;
         /* background-color: rgb(5, 0, 69); */
         align-items: left;
         /* text-align: center; */
    
     }
     .kanan {
-        width: 16%;
+        width: 35%;
         /* background-color: rgb(69, 18, 0); */
         margin-left: auto;
         /* text-align: center; */
     }
     .tengah {
-        width: 16%;
+        margin-top: 20px;
+        width: 30%;
         /* background-color: rgb(69, 18, 0); */
         margin: auto;
         /* text-align: center; */
+    }
+    PRE {
+        white-space: normal;
     }
     @media print {
     @page {
@@ -101,9 +109,20 @@
                         <td>{{$ticket->description}}</td>
                         <td>{{$ticket->spk}}</td>
                         <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</td>
-                        <td>Internal</td>
-                        <td> @foreach ($ticket->action as $ticketaction)*{{$ticketaction->description}}"<br>@endforeach
-                        </td>
+                        <td>{{count($ticket->action) > 0 ? $ticket->action[0]->todo : '' }}</td>
+                      
+                        <td>  @if($ticket->action != null) 
+                            @foreach ($ticket->action as $ticketaction)
+                                @if($ticketaction->memo != null) 
+                                <pre>{{$ticketaction->memo}}</pre>
+                                    
+                                    <p></p>
+                                @endif
+                            @endforeach
+                        @endif
+                    </td>
+                        {{-- <td> @foreach ($ticket->action as $ticketaction)*{{$ticketaction->description}}"<br>@endforeach
+                        </td> --}}
                     </tr>
                 @endforeach
                
@@ -111,26 +130,27 @@
         </table>
     </section>
     <div class="baris1">
-    <div class="kiri">
-        <div class="" style="text-align : center">Mengetahui</div>
-        <div class="jabatan" style="margin-bottom : 80px;">Ka.</div>
-<div class="nama"></div>
-<div class="nip" style = "border-top-style: solid; ">NIK.</div>
+        <div class="kiri">
+            <div class="" style="text-align : center">Mengetahui</div>
+            <div class="jabatan" style="margin-bottom : 80px; ; text-align : center">Ka.{{ $mengetahui }}</div>
+    <div class="nama"></div>
+    <div class="nip" style = "border-top-style: solid; "></div>
+        </div>
+    
+        <div class="kanan">
+            <div class="" style="text-align : center">Tabanan, {{ date('d') }} {{ $month }} {{ date('Y') }}</div>
+            <div class="" style="text-align : center">Di buat oleh</div>
+            <div class="jabatan" style="margin-bottom : 80px ; text-align : center">Ka.{{ $dibuat }}</div>
+            <div class="nama" style = ""></div>
+    <div class="nama" style = "border-bottom-style: solid; "></div>
+        </div>
     </div>
-
-    <div class="kanan">
-        <div class="" style="text-align : center">Tabanan, {{ date('d') }} {{ $month }} {{ date('Y') }}</div>
-        <div class="" style="text-align : center">Di buat oleh</div>
-        <div class="jabatan" style="margin-bottom : 80px">Ka.</div>
-<div class="nama" style = "border-bottom-style: solid; "></div>
+    <div class="tengah">
+        <div class="" style="text-align : center">Menyetujui</div>
+        <div class="jabatan" style="margin-bottom : 80px; text-align : center">{{ $menyetujui }}</div>
+    <div class="nama" style="text-align : center">{{ $director_name }}</div>
+    <div class="nip" style = "border-top-style: solid; "></div>
     </div>
-</div>
-<div class="tengah">
-    <div class="" style="text-align : center">Menyetujui</div>
-    <div class="jabatan" style="margin-bottom : 80px; text-align : center">Direktur Teknik</div>
-<div class="nama"></div>
-<div class="nip" style = "border-top-style: solid; ">NIK.</div>
-</div>
 <script>
 onload = function (){
     window.print();

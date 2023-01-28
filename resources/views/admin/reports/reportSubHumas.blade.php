@@ -12,20 +12,20 @@
         }
         .kiri {
             margin-left: 30px;
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(5, 0, 69); */
             align-items: left;
             /* text-align: center; */
         }
         .kanan {
             margin-right: 30px;
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(69, 18, 0); */
             margin-left: auto;
             /* text-align: center; */
         }
         .tengah {
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(69, 18, 0); */
             margin: auto;
             /* text-align: center; */
@@ -40,20 +40,20 @@
             display: flex;
         }
         .kiri {
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(5, 0, 69); */
             align-items: left;
             /* text-align: center; */
        
         }
         .kanan {
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(69, 18, 0); */
             margin-left: auto;
             /* text-align: center; */
         }
         .tengah {
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(69, 18, 0); */
             margin: auto;
             /* text-align: center; */
@@ -128,19 +128,19 @@
                 <td>{{$hasil->format('%H:%I:%S')}}</td>
                 <td>{{$ticket->category->code}}</td>
                 <td>{{$ticket->category->name}}</td>
-                <? $type = '';
+                <td>        
+                    <?php $type = '';
                     if($ticket->category->categorytype->name == 'Teknik'){
-                        $type='T';
+                        echo 'T';
                     }elseif($ticket->category->categorytype->name == 'Pelayanan'){
-                        $type='P';
+                        echo  'P';
                     }elseif($ticket->category->categorytype->name == 'Rekening'){
-                        $type='R';
+                        echo  'R';
                     }else{
-                        $type='L';
-
+                        echo  'L';
                     }
                 ?>
-                <td>{{$type}}</td>
+                </td>
                 <td>0</td>
                 <td>{{$ticket->updated_at->format('d/m/Y')}}</td>
                    <?php 
@@ -165,23 +165,24 @@
     <div class="baris1">
         <div class="kiri">
             <div class="" style="text-align : center">Mengetahui</div>
-            <div class="jabatan" style="margin-bottom : 80px;">Ka.</div>
+            <div class="jabatan" style="margin-bottom : 80px; text-align : center">Ka.{{ $mengetahui }}</div>
     <div class="nama"></div>
-    <div class="nip" style = "border-top-style: solid; ">NIK.</div>
+    <div class="nip" style = "border-top-style: solid; "></div>
         </div>
     
         <div class="kanan">
             <div class="" style="text-align : center">Tabanan, {{ date('d') }} {{ $month }} {{ date('Y') }}</div>
             <div class="" style="text-align : center">Di buat oleh</div>
-            <div class="jabatan" style="margin-bottom : 80px">Ka.</div>
+            <div class="jabatan" style="margin-bottom : 80px; text-align : center">Ka.{{ $dibuat }}</div>
+            <div class="nama" style = ""></div>
     <div class="nama" style = "border-bottom-style: solid; "></div>
         </div>
     </div>
     <div class="tengah">
         <div class="" style="text-align : center">Menyetujui</div>
-        <div class="jabatan" style="margin-bottom : 80px; text-align : center">Direktur Teknik</div>
-    <div class="nama"></div>
-    <div class="nip" style = "border-top-style: solid; ">NIK.</div>
+        <div class="jabatan" style="margin-bottom : 80px; text-align : center">{{ $menyetujui }}</div>
+    <div class="nama" style="text-align : center;">{{ $director_name }}</div>
+    <div class="nip" style = "border-top-style: solid; "></div>
     </div>
     <script>
     onload = function (){

@@ -23,7 +23,7 @@
              <form action="" id="filtersForm">
                 <div class="input-group">
                     <select id="status_tunggakan" name="status_tunggakan" class="form-control">
-                        <option value="">== Status Tunggaakan ==</option>
+                        <option value="">== Status Tunggakan ==</option>
                         {{-- <option value="0" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==0 ?'selected' : '' }} >Lunas</option>
                         <option value="1" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Perhatian</option> --}}
                         <option value="2" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Tunggak</option>

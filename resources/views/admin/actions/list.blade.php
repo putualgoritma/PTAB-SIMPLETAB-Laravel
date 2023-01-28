@@ -154,7 +154,7 @@
                                 @endif -->
 
                                 <!-- end surya buat -->
-
+                                @if ($action->status == "pending")
                                 @can('action_delete')
                                     <form action="{{ route('admin.actions.destroy', $action->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
@@ -162,6 +162,7 @@
                                         <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
                                     </form>
                                 @endcan
+                                @endif
                             </td>
                         </tr>
                     @endforeach

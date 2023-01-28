@@ -426,17 +426,59 @@ class ActionsApiController extends Controller
             }
 
             // foto alat
-            if ($request->file('image_tools')) {
-                $resource_image_tools = $request->file('image_tools');
-                $id_name_image_tools = strtolower($action->id);
-                $file_ext_image_tools = $request->file('image_tools')->extension();
-                $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
+            if ($action->status == 'pending' && $dataForm->status == 'active') {
+                for ($i = 1; $i <= $request->countImageTool; $i++) {
+                    if ($request->file('image_tools' . $i)) {
+                        $resourceImage = $request->file('image_tools' . $i);
+                        $nameImage = strtolower($action->id);
+                        $file_extImage = $request->file('image_tools' . $i)->extension();
+                        $nameImage = str_replace(" ", "-", $nameImage);
 
-                $name_image_tools = $img_path . '/' . $id_name_image_tools . '-' . $dataForm->action_id . '-tools.' . $file_ext_image_tools;
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
 
-                $resource_image_tools->move($basepath . $img_path, $name_image_tools);
-                $data_image_tools = $name_image_tools;
+                        $resourceImage->move($basepath . $img_path, $img_name);
+
+                        $dataImageNameTool[] = $img_name;
+                    } else {
+                        $responseImage = 'Image tidak di dukung';
+                        break;
+                    }
+                }
+            } else if ($action->status == 'active' && $dataForm->status == 'active') {
+                $oldImage = json_decode($action->image_tool);
+                $index = 0;
+
+                for ($i = 1; $i <= $request->countImageTool; $i++) {
+                    if ($request->file('image_tools' . $i)) {
+                        $resourceImage = $request->file('image_tools' . $i);
+                        $nameImage = strtolower($action->id);
+                        $file_extImage = $request->file('image_tools' . $i)->extension();
+                        $nameImage = str_replace(" ", "-", $nameImage);
+
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+
+                        $resourceImage->move($basepath . $img_path, $img_name);
+
+                        $dataImageNameTool[] = $img_name;
+                    } else {
+                        $dataImageNameTool[] = $oldImage[$i - 1];
+                        $responseImage = 'Image tidak di dukung';
+                    }
+                    // $index++;
+                }
             }
+
+            // if ($request->file('image_tools')) {
+            //     $resource_image_tools = $request->file('image_tools');
+            //     $id_name_image_tools = strtolower($action->id);
+            //     $file_ext_image_tools = $request->file('image_tools')->extension();
+            //     $id_name_image_tools = str_replace(' ', '-', $id_name_image_tools);
+
+            //     $name_image_tools = $img_path . '/' . $id_name_image_tools . '-' . $dataForm->action_id . '-tools.' . $file_ext_image_tools;
+
+            //     $resource_image_tools->move($basepath . $img_path, $name_image_tools);
+            //     $data_image_tools = $name_image_tools;
+            // }
 
             for ($i = 1; $i <= 2; $i++) {
 
@@ -473,7 +515,8 @@ class ActionsApiController extends Controller
             if ($action->status != 'close' && $dataForm->status != 'close') {
 
                 if ($request->file('image_tools')) {
-                    $dataNewAction['image_tools'] = $data_image_tools;
+                    $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_tools));
+                    $uploadAction = true;
                 }
 
                 if ($request->file('image_prework')) {
@@ -1546,7 +1589,12 @@ class ActionsApiController extends Controller
 
             $action_staffs = ActionApi::where('id', $action_id)->with('staff')->first();
 
-            $staffs = StaffApi::where('subdapertement_id', $action->subdapertement_id)->get();
+            $staffs = StaffApi::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
+                ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+                ->where('subdapertement_id', $action->subdapertement_id)
+                ->orderBy('work_units.serial_number', 'ASC')
+                ->get();
 
             // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 

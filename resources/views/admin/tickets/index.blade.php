@@ -161,15 +161,15 @@
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
+        { data: 'DT_RowIndex', name: 'no', searchable : false },
         { data: 'code', name: 'code' },
         { data: 'created_at', name: 'created_at' },
-        { data: 'dapertement', name: 'dapertement' },
+        { data: 'dapertement', name: 'dapertement', searchable : false  },
         { data: 'title', name: 'title' },
         { data: 'description', name: 'description' },
-        { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>':dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
-        { data: 'category', name: 'category' },
-        { data: 'customer', name: 'customer' },
+        { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>': dataField === 'close2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'close'+'</button>': dataField === 'pending2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'pending'+'</button>': dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
+        { data: 'category', name: 'category', searchable : false  },
+        { data: 'customer', name: 'customer_id' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
 
     ],

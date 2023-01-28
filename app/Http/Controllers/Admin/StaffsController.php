@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\CtmPbk;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffRequest;
@@ -11,6 +12,7 @@ use App\CtmWilayah;
 use App\Subdapertement;
 use App\Traits\TraitModel;
 use App\User;
+use App\WorkUnit;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -122,9 +124,12 @@ class StaffsController extends Controller
 
         abort_unless(\Gate::allows('staff_create'), 403);
         //user role
-        $area = CtmWilayah::select('id as code','NamaWilayah')->get();
-   
+        $area = CtmWilayah::select('id as code', 'NamaWilayah')->get();
+
+        $work_units = WorkUnit::get();
+
         $user_id = Auth::check() ? Auth::user()->id : null;
+        $pbks = CtmPbk::get();
         $department = '';
         $subdepartment = 0;
         $staff = 0;
@@ -145,14 +150,14 @@ class StaffsController extends Controller
             $dapertements = Dapertement::all();
         }
 
-        return view('admin.staffs.create', compact('dapertements', 'code','area'));
+        return view('admin.staffs.create', compact('dapertements', 'code', 'area', 'work_units', 'pbks'));
     }
 
     public function store(StoreStaffRequest $request)
     {
         $staff = Staff::create($request->all());
-        $areas = $request->input('area',[]);
-        for($area=0; $area < count($areas); $area++){
+        $areas = $request->input('area', []);
+        for ($area = 0; $area < count($areas); $area++) {
             $staff->area()->attach($areas[$area]);
         }
         return redirect()->route('admin.staffs.index');
@@ -166,10 +171,11 @@ class StaffsController extends Controller
     public function edit($id)
     {
         abort_unless(\Gate::allows('staff_edit'), 403);
-        $area = CtmWilayah::select('id as code','NamaWilayah')->get();
+        $area = CtmWilayah::select('id as code', 'NamaWilayah')->get();
         // $staff = Staff::findOrFail($id);
         $staff = Staff::where('id', $id)->with('area')->first();
-
+        $work_units = WorkUnit::get();
+        $pbks = CtmPbk::get();
         //user role
         $user_id = Auth::check() ? Auth::user()->id : null;
         $department = '';
@@ -189,18 +195,18 @@ class StaffsController extends Controller
         } else {
             $dapertements = Dapertement::all();
         }
-       
+
         $subdapertements = Subdapertement::where('dapertement_id', $staff->dapertement_id)->get();
-        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements','area'));
+        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements', 'area', 'work_units', 'pbks'));
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)
     {
         abort_unless(\Gate::allows('staff_edit'), 403);
         $staff->update($request->all());
-        $areas = $request->input('area',[]);
+        $areas = $request->input('area', []);
         $staff->area()->detach();
-        for($area=0; $area < count($areas); $area++){
+        for ($area = 0; $area < count($areas); $area++) {
             $staff->area()->attach($areas[$area]);
         }
         return redirect()->route('admin.staffs.index');
