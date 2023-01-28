@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\actionWms;
 use App\CtmPelanggan;
+use App\CtmWilayah;
 use App\Dapertement;
+use App\Director;
 use App\Http\Controllers\Controller;
 use App\LockAction;
+use App\Subdapertement;
 use App\Ticket;
 use App\Traits\TraitModel;
 use DateTime;
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Support\Facades\Auth;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ReportsController extends Controller
 {
@@ -56,9 +63,26 @@ class ReportsController extends Controller
             11 => 'November',
             12 => 'Desember'
         );
-        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        if ($request->subdapertement_id) {
+            $tickets = Ticket::selectRaw('tickets.*')->join('actions', 'tickets.id', '=', 'actions.ticket_id')->where('actions.subdapertement_id', $request->subdapertement_id)->whereBetween(DB::raw('DATE(tickets.created_at)'), [$request->from, $request->to])
+                ->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])
+                ->get();
+        } else if ($request->dapertement_id === 22 || $request->dapertement_id === 20 || $request->dapertement_id === 21 || $request->dapertement_id === 23) {
+            $tickets = Ticket::where('dapertement_id', $dapertement_id)->whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        } else {
+            $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        }
+        // dd($tickets[0]->category->categorytype);
+        $director = Director::selectRaw('directors.name,directors.director_name,dapertements.name as dapertement_name')->join('dapertements', 'dapertements.director_id', '=', 'directors.id')
+            ->where('dapertements.id', $request->dapertement_id)->first();
+        $menyetujui = $director ? $director->name : "";
+        $director_name = $director ? $director->director_name : "";
+        $mengetahui =  $director ? $director->dapertement_name : "";
+        $subdapertement_name = Subdapertement::where('id', $request->subdapertement_id)->first();
+        $dibuat = $subdapertement_name ?  $subdapertement_name->name : "";
+        // dd($request->all());
         $month = $monthList[date('n')];
-        return view('admin.reports.reportSubHumas', compact('tickets', 'request', 'month'));
+        return view('admin.reports.reportSubHumas', compact('director_name', 'tickets', 'request', 'month', 'menyetujui', 'mengetahui', 'dibuat'));
     }
 
     public function reportSubDistribusi()
@@ -104,8 +128,24 @@ class ReportsController extends Controller
             12 => 'Desember'
         );
         $month = $monthList[date('n')];
-        $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
-        return view('admin.reports.reportSubDistribusi', compact('tickets', 'request', 'month'));
+        if ($request->subdapertement_id) {
+            $tickets = Ticket::selectRaw('tickets.*')->join('actions', 'tickets.id', '=', 'actions.ticket_id')->where('actions.subdapertement_id', $request->subdapertement_id)->whereBetween(DB::raw('DATE(tickets.created_at)'), [$request->from, $request->to])
+                ->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])
+                ->get();
+        } else {
+            $tickets = Ticket::whereBetween(DB::raw('DATE(created_at)'), [$request->from, $request->to])->FilterDepartment($request->dapertement_id)->FilterStatus($request->status)->with(['action', 'customer', 'category', 'dapertement'])->get();
+        }
+        $director = Director::selectRaw('directors.name, directors.director_name,dapertements.name as dapertement_name')->join('dapertements', 'dapertements.director_id', '=', 'directors.id')
+            ->where('dapertements.id', $request->dapertement_id)->first();
+        $menyetujui = $director ? $director->name : "";
+        $director_name = $director ? $director->director_name : "";
+        $mengetahui =   $director ? $director->dapertement_name : "";
+        $subdapertement_name = Subdapertement::where('id', $request->subdapertement_id)->first();
+        $dibuat = $subdapertement_name ?  $subdapertement_name->name : "";
+        // dd($request->all());
+        $month = $monthList[date('n')];
+
+        return view('admin.reports.reportSubDistribusi', compact('director_name', 'tickets', 'request', 'month', 'menyetujui', 'mengetahui', 'dibuat'));
     }
 
     public function reportLockAction()
@@ -423,5 +463,168 @@ class ReportsController extends Controller
         $jum = $request->jum;
         $take = $request->take - 1;
         return view('admin.reports.reportLockAction', compact('customer', 'request', 'month', 'monthR', 'd1', 'take', 'jum'));
+    }
+
+    public function reportProposalWm()
+    {
+
+
+
+        $monthList = array(
+            0 => '',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juli',
+            7 => 'Juni',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+        $departementlist = Dapertement::all();
+        $areas = CtmWilayah::select('id as code', 'NamaWilayah');
+
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+            $areas =   $areas->get();
+        } else {
+            $group_unit = Dapertement::select('dapertements.group_unit')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+            $areas->where('tblwilayah.group_unit', $group_unit);
+            $areas =   $areas->get();
+        }
+
+        $month = $monthList[date('n')];
+        // return view ('admin.reports.reportSubDistribusi');
+        return view('admin.reports.proposalWm', compact('departementlist', 'month', 'areas'));
+    }
+
+    public function reportProposalWmProses(Request $request)
+    {
+        $time = strtotime($request->monthyear);
+        $monthR = date("n", $time);
+        $yearR = date("Y", $time);
+        $monthYear = $request->monthyear;
+        $monthList = array(
+            0 => '',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juli',
+            7 => 'Juni',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+        $monthRomawi = array(
+            0 => '',
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        );
+
+        $month = $monthList[$monthR];
+        $monthR = $monthRomawi[$monthR];
+
+
+        $proposalWm = actionWms::selectRaw('action_wms.id, action_wms.code,
+        action_wms.proposal_wm_id,
+        action_wms.memo,
+        action_wms.old_image,
+        action_wms.new_image,
+        action_wms.image_done,
+        action_wms.noWM1,
+        action_wms.updated_at as date,
+        action_wms.brandWM1,
+        action_wms.standWM1,
+        action_wms.noWM2,
+        action_wms.brandWM2,
+        action_wms.standWM2,
+        action_wms.subdapertement_id,
+        proposal_wms.code,
+        proposal_wms.queue,
+        proposal_wms.customer_id,
+        proposal_wms.status,
+        proposal_wms.status_wm,
+        proposal_wms.priority,
+        proposal_wms.created_at as diterima,
+        proposal_wms.updated_at,
+        tblpelanggan.namapelanggan,
+        tblpelanggan.nomorrekening,
+        tblpelanggan.alamat,
+        tblpelanggan.telp,
+        tblpelanggan.idareal,
+        tblpelanggan.idgol,
+        subdapertements.name,
+        action_wm_staff.created_at as dikeluarkan
+        ')
+            ->rightJoin('proposal_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
+            ->join('action_wm_staff', 'action_wm_staff.action_wm_id', '=', 'action_wms.id')
+            ->leftJoin('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
+            ->join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
+            ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+            ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
+            // ->where('proposal_wms.created_at', 'like', date('Y-m-1', strtotime('-1 month', strtotime($request->monthyear))) . '%')
+            ->where('proposal_wms.status', 'close')
+            ->FilterAreas($request->areas);
+
+
+        // ->where('proposal_wms.status', 'close');
+
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+            $dapertement = "";
+            $sub_dapertement = "";
+            $proposalWm =  $proposalWm->get();
+        } else {
+            $group_unit = Dapertement::select('dapertements.group_unit')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+            $dapertement = Dapertement::select('dapertements.name')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->name;
+            $sub_dapertement = Subdapertement::where('id', Auth::user()->subdapertement_id)->first()->name;
+            // $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();
+            // $areas = $data;
+            // $proposalWm = proposalWms::selectRaw('tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+            //     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening');
+
+            $proposalWm->where('tblwilayah.group_unit', $group_unit);
+            $proposalWm =  $proposalWm->get();
+            // dd($proposalWm);
+            // dd($proposalWm->get());
+            // else {
+            //     for ($i = 0; $i < count($data); $i++) {
+            //         if ($i < 1) {
+
+            //             $proposalWm->where('tblpelanggan.idareal', $data[$i]->code);
+
+            //             // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
+            //         } else {
+            //             $proposalWm->orWhere('tblpelanggan.idareal', $data[$i]->code);
+            //         }
+            //     }
+        }
+
+        $director = Director::selectRaw('directors.name,directors.director_name,dapertements.name as dapertement_name')->join('dapertements', 'dapertements.director_id', '=', 'directors.id')
+            ->where('dapertements.id', Auth::user()->dapertement_id)->first();
+        $menyetujui = $director ? $director->name : "";
+        $director_name = $director ? $director->director_name : "";
+
+        $d1 = $proposalWm;
+        return view('admin.reports.reportProposalWm', compact('director_name', 'menyetujui', 'sub_dapertement', 'dapertement', 'proposalWm', 'd1', 'monthR', 'request', 'month', 'monthYear'));
     }
 }

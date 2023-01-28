@@ -35,6 +35,7 @@ Route::group(['prefix' => 'close/customer', 'namespace' => 'Api\V1\Customer', 'm
     Route::get('ctm/customer/{id}', 'CtmApiController@ctmCustomer');
 
     Route::post('ctm/request', 'CtmApiController@ctmRequest');
+    Route::get('ctm/requesthistory/{id}', 'CtmApiController@ctmRequestHistory');
 
     Route::get('ctm/use/{id}', 'CtmApiController@ctmUse');
 
@@ -175,6 +176,27 @@ Route::group(['prefix' => 'open/staff', 'as' => 'staff.', 'namespace' => 'Api\V1
     Route::post('code', 'CustomersApiController@scanBarcode');
 });
 
+Route::group(['prefix' => 'close/staff', 'as' => 'staff.', 'namespace' => 'Api\V1\WaterMeter'], function () {
+    Route::post('watermeter/actionWmNewImageUpdate',  'actionWmApiController@actionWmNewImageUpdate');
+    Route::post('watermeter/actionWmdoneImageUpdate',  'actionWmApiController@actionWmdoneImageUpdate');
+    Route::get('watermeter/area/{id}',  'actionWmApiController@area');
+
+    Route::get('watermeter/approve/{id}',  'actionWmApiController@approve');
+    Route::post('watermeter/approveProses',  'actionWmApiController@approveProses');
+
+    Route::get('watermeter/show/{id}',  'actionWmApiController@show');
+    Route::get('watermeter/showHistory/{id}',  'actionWmApiController@showHistory');
+    Route::get('watermeter/indexStaff/{id}',  'actionWmApiController@indexStaff');
+    Route::get('watermeter/addStaff/{id}',  'actionWmApiController@addStaff');
+    Route::post('watermeter/addStaffStore',  'actionWmApiController@addStaffStore');
+    Route::post('watermeter/destroy',  'actionWmApiController@destroy');
+    Route::get('watermeter/indexActionWm/{id}',  'actionWmApiController@indexActionWm');
+    Route::get('watermeter/{id}',  'actionWmApiController@index');
+
+    // Route::post('code', 'CustomersApiController@scanBarcode');
+});
+
+
 
 Route::group(['prefix' => 'close/staff', 'as' => 'staff.', 'namespace' => 'Api\V1\Staff', 'middleware' => 'auth:apiadmin'], function () {
     Route::get('logout',  'StaffApiController@logout');
@@ -188,4 +210,64 @@ Route::group(['prefix' => 'close/staff', 'as' => 'staff.', 'namespace' => 'Api\V
 
     Route::get('ctm/pay/{id}', 'CustomerApiController@ctmPay');
     Route::get('ctm/customer/{id}', 'CustomerApiController@ctmCustomer');
+
+    // test
+    Route::get('sealtest/{id}',  'SealTestApiController@index');
+});
+
+
+Route::group(['prefix' => 'close/admin1', 'namespace' => 'Api\V1\Admin1', 'middleware' => 'auth:apiadmin'], function () {
+
+
+    // dapettement
+    Route::resource('dapertements', 'DapertementsApiController');
+    Route::get('dapertements/list/{page}', 'DapertementsApiController@dapertements');
+
+    // staffs
+    Route::resource('staffs', 'StaffsApiController');
+    Route::post('staffs/list', 'StaffsApiController@staffs');
+    // ticket
+    Route::resource('tickets', 'TicketsApiController');
+    Route::post('ticket/list', 'TicketsApiController@tickets1');
+    Route::post('ticket-close', 'TicketsApiController@close');
+    // ticket detail
+    Route::post('ticket-detail', 'TicketsApiController@detailTicket');
+
+    // action
+    Route::resource('actions', 'ActionsApiController');
+    Route::post('actionlists', 'ActionsApiController@list');
+    Route::get('actionStaffs/{action_id}', 'ActionsApiController@actionStaffs');
+    Route::get('actionStaffLists/{action_id}', 'ActionsApiController@actionStaffLists');
+    Route::post('actionStaffStore', 'ActionsApiController@actionStaffStore');
+    Route::put('actionStaffUpdate', 'ActionsApiController@actionStaffUpdate');
+    Route::delete('actionStaffDestroy/{action}/{staff}', 'ActionsApiController@actionStaffDestroy');
+    Route::post('actionStatusUpdate', 'ActionsApiController@actionStatusUpdate');
+});
+
+// absence
+// Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence', 'middleware' => 'auth:apiadmin'], function () {
+
+//     Route::post('absence', 'AbsenceApiController@cekradius');
+// });
+
+// sementara
+Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], function () {
+    Route::get('absence', 'AbsenceApiController@index');
+    Route::get('history', 'AbsenceApiController@history');
+    Route::get('requests/history', 'RequestApiController@history');
+    Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
+    Route::get('menu', 'MenuApiController@index');
+    Route::get('shift', 'ShiftApiController@index');
+    Route::get('shift/listChange', 'ShiftApiController@listChange');
+    Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
+    Route::post('absence/store', 'AbsenceApiController@store');
+    Route::post('absence/storeLocation', 'AbsenceApiController@storeLocation');
+    Route::post('requests/store', 'RequestApiController@store');
+    Route::post('shift/update', 'ShiftApiController@update');
+    Route::post('shift/approve', 'ShiftApiController@approve');
+    Route::post('login', 'UserApiController@login');
+    Route::post('user/update', 'UserApiController@update');
+    Route::get('shift/myShift', 'ShiftApiController@myShift');
+    Route::get('shiftChange', 'ShiftChangeApiController@index');
+    Route::post('shiftChange/store', 'ShiftChangeApiController@store');
 });

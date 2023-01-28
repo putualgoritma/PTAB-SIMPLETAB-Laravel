@@ -95,13 +95,16 @@
             <th rowspan="3">NAMA</th>
             <th rowspan="3">ALAMAT</th>
             <th rowspan="3">GOL</th>
-            <th colspan="2" style="border-bottom-width : 0;">NO SPK</th>
-            <th colspan="2">TANGGAL SURAT</th>
-            <th colspan="4">TINDAKAN</th>
-            <th colspan="1">Jumlah</th>
-            <th colspan="2">SERVICE</th>
-            <th colspan="2">PETUGAS</th>
-            <th rowspan="3">KET.</th>
+
+            <th colspan="4">Service</th>
+ <th colspan="4">Tanggal Surat</th>
+ <th colspan="4">Tindakan</th>
+ <th rowspan="3">JML HARI</th>
+<th colspan="4">WATER METER LAMA</th>
+<th colspan="4">WATER METER BARU</th>
+<th rowspan="3">DIKERJAKAN OLEH</th>
+<th rowspan="3">KET</th>
+
         </tr>
         <tr>
             <th rowspan="2" style="border-width : 0;" class="text-center"></th>

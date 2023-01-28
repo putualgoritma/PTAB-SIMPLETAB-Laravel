@@ -119,11 +119,25 @@
                         </div>
                     @endforeach
                     @foreach ($ticket->action as $acti)
-                        <div class="col-md-5">
-                            <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/" . $acti->image_tools}} alt="">
-                            <p class="my-2"><a href="{{'https://simpletabadmin.ptab-vps.com/' . $acti->image_tools}}"  target="_blank" class="btn btn-primary">Tampilkan</a></p>
-                        </div>
+                    @if ($acti->image_tools != null) 
+                    @if (json_decode($acti->image_tools))
+                    @foreach (json_decode($acti->image_tools) as $itemdone)
+                    <div class="col-md-5">
+                        <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/$itemdone"}} alt="">
+                        <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$itemdone"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                    </div>
                     @endforeach
+
+
+                    @else
+                    <div class="col-md-5">
+                        <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/" . $acti->image_tools}} alt="">
+                        <p class="my-2"><a href="{{'https://simpletabadmin.ptab-vps.com/' . $acti->image_tools}}"  target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                    </div>
+                    @endif
+                        
+                    @endif
+                @endforeach
                 </div>
 
                 <h5 style="font-weight:bold">Foto Pengerjaan</h5>
@@ -164,24 +178,49 @@
        
         <br>
         @can('action_print_service')
-        
-            <a class="btn btn-lg btn-primary fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
+        @if($ticket->print_status == "1")
+            <a class="btn btn-lg btn-danger fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
                 {{ trans('global.action.print_service') }}
             </a>
+        
+        @else
+        <a class="btn btn-lg btn-primary fa fa-print" target="_blank" href="{{ route('admin.tickets.printservice',$ticket->id) }}">
+            {{ trans('global.action.print_service') }}
+        </a>
+        @endif
+          
         
         @endcan
         @can('action_print_spk')
         
-            <a class="btn btn-lg btn-info fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
-                {{ trans('global.action.print_SPK') }}
-            </a>
+        @if($ticket->print_spk_status == "1")
+        <a class="btn btn-lg btn-danger fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
+            {{ trans('global.action.print_SPK') }}
+        </a>
+    
+    @else
+    <a class="btn btn-lg btn-info fa fa-print " target="_blank" href="{{ route('admin.tickets.printspk',$ticket->id) }}">
+        {{ trans('global.action.print_SPK') }}
+    </a>
+    @endif
+      
+    
+    @endcan
+          
         
-        @endcan
         @can('action_print_report')
         @if ($ticket->status == "close")
-            <a class="btn btn-lg btn-success fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
-                {{ trans('global.action.print_Report') }}
-            </a>
+        @if($ticket->print_report_status == "1")
+        <a class="btn btn-lg btn-danger fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
+            {{ trans('global.action.print_Report') }}
+        </a>
+    
+    @else
+    <a class="btn btn-lg btn-success fa fa-print" target="_blank" href="{{ route('admin.tickets.printreport',$ticket->id) }}">
+        {{ trans('global.action.print_Report') }}
+    </a>
+    @endif
+           
         @endif
         @endcan
     </div>

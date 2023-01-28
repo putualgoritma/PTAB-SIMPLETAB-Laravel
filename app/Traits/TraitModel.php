@@ -22,8 +22,10 @@ use Illuminate\Database\QueryException;
 use App\Lock;
 use App\CtmWilayah;
 use App\LockAction;
+use App\proposalWms;
 use App\wa_history;
 use App\WaTemplate;
+use App\WorkUnit;
 
 trait TraitModel
 {
@@ -594,6 +596,29 @@ trait TraitModel
             }
         }
 
+        if ($type == "proposal_wm") {
+            $proposal_wm = proposalWms::where('code', 'like', 'PWM%')->orderBy('id', 'desc')
+                ->first();
+            if ($proposal_wm && (strlen($proposal_wm->code) == 8)) {
+                $code = $proposal_wm->code;
+            } else {
+                $code = acc_codedef_generate('PWM', 8);
+            }
+        }
+
+
+
+        if ($type == "workUnit") {
+            $workUnit = WorkUnit::orderBy('id', 'desc')
+                ->first();
+            if ($workUnit && (strlen($workUnit->code) == 8)) {
+                $code = $workUnit->code;
+            } else {
+                $code = acc_codedef_generate('WUN', 8);
+            }
+        }
+
+
         return $code;
     }
 
@@ -729,5 +754,51 @@ trait TraitModel
         } else {
             return $ref_arr;
         }
+    }
+
+
+
+    public function get_last_codeS($type, $gU, $arr = [])
+    {
+
+        if ($gU == "1") {
+            $s = "BAP";
+            $n = 14;
+        } else if ($gU == "2") {
+            $s = "BAPUK";
+            $n = 15;
+        } else if ($gU == "4") {
+            $s = "BAPUP";
+            $n = 15;
+        } else if ($gU == "5") {
+            $s = "BAPUB";
+            $n = 15;
+        } else if ($gU == "3") {
+            $s = "BAPUS";
+            $n = 15;
+        } else {
+            $s = "";
+            $n = 15;
+        }
+
+        $surat = '/' . $s . '/' . date('n') . '/' . date('Y');
+
+        if ($type == "proposal_wm") {
+            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->orderBy('id', 'desc')
+                ->first();
+            // dd($proposal_wm);
+            if ($proposal_wm && (strlen($proposal_wm->queue) >= 1)) {
+                $code = $proposal_wm->queue + 1;
+            } else {
+                $code = 1;
+            }
+        }
+
+
+
+
+
+
+        return $code;
     }
 }

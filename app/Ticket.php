@@ -24,29 +24,38 @@ class Ticket extends Model
         'spk',
         'dapertement_receive_id',
         'delegated_at',
+        'print_status',
+        'print_spk_status',
+        'print_report_status'
     ];
 
-    public function dapertementReceive() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_receive_id', 'id'); 
-    }
-    
-    public function dapertement() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    public function dapertementReceive()
+    {
+        return $this->belongsTo(Dapertement::class, 'dapertement_receive_id', 'id');
     }
 
-    public function department() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
-    }
-    
-    public function customer() { 
-        return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening'); 
+    public function dapertement()
+    {
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id');
     }
 
-    public function category() { 
-        return $this->belongsTo('App\Category')->with('categorygroup')->with('categorytype')->select('*'); 
+    public function department()
+    {
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id');
     }
 
-    public function action() { 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo('App\Category')->with('categorygroup')->with('categorytype')->select('*');
+    }
+
+    public function action()
+    {
         return $this->hasMany(Action::class, 'ticket_id', 'id')->with('staff')->with('subdapertement')->select('*');
     }
     public function ticket_image()
@@ -56,33 +65,41 @@ class Ticket extends Model
 
     public function scopeFilterStatus($query, $status)
     {
-        if($status !=''){
-        $query->where('status', $status);        
+        if ($status != '') {
+            $query->where('tickets.status', $status);
         }
         return $query;
     }
 
-    
+
     public function scopeFilterDepartment($query, $department)
     {
-        if($department !=''){
-        $query->where('dapertement_id', $department);        
+        if ($department != '') {
+            $query->where('tickets.dapertement_id', $department);
         }
         return $query;
     }
 
     public function scopeFilterJoinStatus($query, $status)
     {
-        if($status !=''){
-        $query->where('tickets.status', $status);        
+        if ($status != '') {
+            $query->where('tickets.status', $status);
         }
         return $query;
     }
 
     public function scopeFilterJoinDepartment($query, $department)
     {
-        if($department !=''){
-        $query->where('actions.dapertement_id', $department);        
+        if ($department != '') {
+            $query->where('actions.dapertement_id', $department);
+        }
+        return $query;
+    }
+
+    public function scopeFilterJoinSubDepartment($query, $subdepartment)
+    {
+        if ($subdepartment != '') {
+            $query->where('actions.subdapertement_id', $subdepartment);
         }
         return $query;
     }

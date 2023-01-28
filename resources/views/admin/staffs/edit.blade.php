@@ -65,6 +65,37 @@
                     </em>
                 @endif
             </div>
+
+            <div class="form-group {{ $errors->has('work_unit') ? 'has-error' : '' }}">
+                <label for="work_unit_id">{{ trans('global.staff.fields.work_unit') }}*</label>
+                <select id="work_unit_id" name="work_unit_id" class="form-control" value="{{ old('work_unit', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih work_unit--</option>
+                    @foreach ($work_units as $key=>$work_unit )
+                        <option value="{{$work_unit->id}}" {{$work_unit->id == $staff->work_unit_id ? 'selected' : ''}} >{{$work_unit->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('work_unit'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('work_unit') }}
+                    </em>
+                @endif
+            </div>
+
+            <div class="form-group {{ $errors->has('pbk') ? 'has-error' : '' }}">
+                <label for="pbk">{{ trans('global.staff.fields.pbk') }}*</label>
+                <select id="pbk" name="pbk" class="form-control" value="{{ old('pbk', isset($customer) ? $customer->pbk : '') }}">
+                    <option value="">--Pilih pbk--</option>
+                    @foreach ($pbks as $key=>$pbk )
+                        <option value="{{$pbk->Name}}">{{$pbk->Name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('pbk'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('pbk') }}
+                    </em>
+                @endif
+            </div>
+
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>
                 <select name="area[]" id="area" class="form-control select2" multiple="multiple">

@@ -73,6 +73,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('actions/printreport', 'ActionsController@printreport')->name('actions.printreport');
     // end surya buat
 
+
     Route::resource('actions', 'ActionsController', ['only' => ['index', 'store', 'edit', 'update', 'destroy']]);
 
     Route::get('actions/create/{ticket_id}', 'ActionsController@create')->name('actions.create');
@@ -132,6 +133,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('reports/reportLockAction', 'ReportsController@reportLockAction')->name('report.reportLockAction');
 
     Route::post('reports/reportsLockAction/proses', 'ReportsController@reportLockActionProses')->name('report.reportLockActionproses');
+
+    Route::get('reports/reportProposalWm', 'ReportsController@reportProposalWm')->name('report.reportProposalWm');
+
+    Route::post('reports/reportProposalWm/proses', 'ReportsController@reportProposalWmProses')->name('report.reportProposalWmproses');
     // baru
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
@@ -264,8 +269,95 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('wablast/history', 'WhatsappBlastController@history')->name('wablast.history');
 
     Route::get('suratsegel', 'SuratSegelController@index')->name('suratsegel.index');
-    Route::get('suratsegel/create/{id}', 'SuratSegelController@create')->name('suratsegel.create');
+    Route::get('suratsegel/create', 'SuratSegelController@create')->name('suratsegel.create');
     Route::post('suratsegel/suratPdf', 'SuratSegelController@suratPdf')->name('suratsegel.suratPdf');
+
+    // 11-2022
+    Route::get('statuswm', 'StatusWmController@index')->name('statuswm.index');
+    Route::get('statuswm/approveall', 'StatusWmController@approveAll')->name('statuswm.approveall');
+    Route::get('statuswm/create', 'StatusWmController@create')->name('statuswm.create');
+    Route::post('statuswm/approve', 'StatusWmController@approve')->name('statuswm.approve');
+    Route::get('statuswm/reject', 'StatusWmController@reject')->name('statuswm.reject');
+
+    Route::get('proposalwm', 'ProposalWmController@index')->name('proposalwm.index');
+
+    Route::get('proposalwm/create', 'ProposalWmController@create')->name('proposalwm.create');
+    Route::get('proposalwm/{id}/report', 'ProposalWmController@report')->name('proposalwm.report');
+    Route::get('proposalwm/{id}/approve', 'ProposalWmController@approve')->name('proposalwm.approve');
+    Route::get('proposalwm/{id}/actionStaff', 'ProposalWmController@actionStaff')->name('proposalwm.actionStaff');
+    Route::post('proposalwm/approveProses', 'ProposalWmController@approveProses')->name('proposalwm.approveProses');
+    Route::post('proposalwm/store', 'ProposalWmController@store')->name('proposalwm.store');
+
+    Route::get('proposalwm/{id}/edit', 'ProposalWmController@edit')->name('proposalwm.edit');
+    Route::put('proposalwm/{id}/update', 'ProposalWmController@update')->name('proposalwm.update');
+    Route::post('proposalwm/updatestatus', 'ProposalWmController@updatestatus')->name('proposalwm.updatestatus');
+    Route::get('proposalwm/show/{id}', 'ProposalWmController@show')->name('proposalwm.show');
+    Route::get('proposalwm/{id}/printspk', 'ProposalWmController@printspk')->name('proposalwm.printspk');
+    Route::delete('proposalwm/{id}/destroy', 'ProposalWmController@destroy')->name('proposalwm.destroy');
+
+
+    Route::get('proposalwm/approveAll', 'ProposalWmController@approveAll')->name('proposalwm.approveAll');
+
+    Route::get('actionWmStaff/{id}', 'ActionWmStaffController@index')->name('actionWmStaff.index');
+    Route::get('actionWmStaff/{id}/create', 'ActionWmStaffController@create')->name('actionWmStaff.create');
+    Route::post('actionWmStaff/{id}/store', 'ActionWmStaffController@store')->name('actionWmStaff.store');
+    Route::post('actionWmStaff/destroy', 'ActionWmStaffController@destroy')->name('actionWmStaff.destroy');
+
+    Route::get('actionWms/{id}/index', 'ActionWmsController@index')->name('actionWms.index');
+    Route::get('actionWms/{id}/create', 'ActionWmsController@create')->name('actionWms.create');
+    Route::post('actionWms/store', 'ActionWmsController@store')->name('actionWms.store');
+    Route::get('actionWms/{id}/edit', 'ActionWmsController@edit')->name('actionWms.edit');
+    Route::put('actionWms/{id}/update', 'ActionWmsController@update')->name('actionWms.update');
+    Route::delete('actionWms/{id}/destroy', 'ActionWmsController@destroy')->name('actionWms.destroy');
+
+    Route::delete('workUnit/destroy', 'workUnitController@massDestroy')->name('workUnit.massDestroy');
+    Route::get('workUnit/test', 'workUnitController@test')->name('workUnit.test');
+    Route::resource('workUnit', 'WorkUnitController');
+
+    Route::delete('director/destroy', 'DirectorController@massDestroy')->name('director.massDestroy');
+    Route::get('director/test', 'DirectorController@test')->name('director.test');
+    Route::resource('director', 'DirectorController');
+
+    // sementara
+    Route::get('actions/ubahData', 'ActionsController@ubahData')->name('actions.ubahData');
+
+
+    Route::get('absence/absenceMenu', 'AbsenceController@absenceMenu')->name('absence.absenceMenu');
+    Route::resource('absence', 'AbsenceController');
+    Route::get('attendance', 'AttendanceController@index')->name('attendance.index');
+    Route::get('attendance/create', 'AttendanceController@create')->name('attendance.create');
+    Route::get('attendance/test', 'AttendanceController@test')->name('attendance.test');
+    Route::get('attendance/attendanceMenu', 'AttendanceController@attendanceMenu')->name('attendance.attendanceMenu');
+    Route::get('attendance/cekradius', 'AttendanceController@cekradius')->name('attendance.getCoordinatesWithinRadius');
+    Route::get('schedule', 'ScheduleController@index')->name('schedule.index');
+    Route::get('schedule/{id}/edit', 'ScheduleController@edit')->name('schedule.edit');
+    Route::put('schedule/{id}/update', 'ScheduleController@update')->name('schedule.update');
+    Route::get('schedule/test', 'ScheduleController@test')->name('schedule.test');
+
+    Route::resource('problematicabsence', 'ProblematicAbsenceController');
+    Route::get('leave', 'LeaveController@index')->name('leave.index');
+
+    Route::resource('holiday', 'HolidayController');
+    Route::resource('shift', 'ShiftController');
+    Route::post('duty/{id}/approve', 'DutyController@approve')->name('duty.approve');
+    Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');
+    Route::resource('duty', 'DutyController');
+
+    Route::post('leave/{id}/approve', 'LeaveController@approve')->name('leave.approve');
+    Route::post('leave/{id}/reject', 'LeaveController@reject')->name('leave.reject');
+    Route::resource('leave', 'LeaveController');
+
+    Route::post('workPermit/{id}/approve', 'WorkPermitController@approve')->name('workPermit.approve');
+    Route::post('workPermit/{id}/reject', 'WorkPermitController@reject')->name('workPermit.reject');
+    Route::resource('workPermit', 'WorkPermitController');
+
+    Route::post('extra/{id}/approve', 'ExtraController@approve')->name('extra.approve');
+    Route::post('extra/{id}/reject', 'ExtraController@reject')->name('extra.reject');
+    Route::resource('extra', 'ExtraController');
+
+    Route::post('permit/{id}/approve', 'PermitController@approve')->name('permit.approve');
+    Route::post('permit/{id}/reject', 'PermitController@reject')->name('permit.reject');
+    Route::resource('permit', 'PermitController');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

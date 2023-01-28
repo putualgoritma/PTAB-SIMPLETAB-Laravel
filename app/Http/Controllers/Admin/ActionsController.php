@@ -91,7 +91,6 @@ class ActionsController extends Controller
         $staffs = Staff::all();
 
         return view('admin.actions.edit', compact('dapertements', 'tickets', 'staffs', 'action'));
-
     }
 
     public function update(Request $request, Action $action)
@@ -101,7 +100,6 @@ class ActionsController extends Controller
         $action->update($request->all());
 
         return redirect()->route('admin.actions.list', $action->ticket_id);
-
     }
 
     public function destroy(Request $request, Action $action)
@@ -130,7 +128,8 @@ class ActionsController extends Controller
     }
 
     // list tindakan
-    function list($ticket_id) {
+    function list($ticket_id)
+    {
         abort_unless(\Gate::allows('action_access'), 403);
 
         $user_id = Auth::check() ? Auth::user()->id : null;
@@ -160,13 +159,15 @@ class ActionsController extends Controller
                 ->with('subdapertement')
                 ->with('ticket')
                 ->where('ticket_id', $ticket_id)
+                // ->orderBy('dapertements.group', 'desc')
                 ->orderBy('start', 'desc')
                 ->get();
-        }else{
+        } else {
             $actions = Action::with('staff')
                 ->with('dapertement')
                 ->with('subdapertement')
                 ->with('ticket')
+                // ->orderBy('dapertements.group', 'desc')
                 ->where('ticket_id', $ticket_id)
                 ->orderBy('start', 'desc')
                 ->get();
@@ -176,7 +177,7 @@ class ActionsController extends Controller
         // dd($actions);
     }
 
-// list pegawai
+    // list pegawai
     public function actionStaff($action_id)
     {
         abort_unless(\Gate::allows('action_staff_access'), 403);
@@ -198,7 +199,14 @@ class ActionsController extends Controller
 
         $action_staffs = Action::where('id', $action_id)->with('staff')->first();
 
-        $staffs = Staff::where('subdapertement_id', $action->subdapertement_id)->get();
+        $staffs = Staff::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
+            ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+            ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+            ->where('subdapertement_id', $action->subdapertement_id)
+            ->orderBy('work_units.serial_number', 'ASC')
+            ->get();
+
+        // dd($staffs);
 
         // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
@@ -261,6 +269,7 @@ class ActionsController extends Controller
         abort_unless(\Gate::allows('action_staff_edit'), 403);
 
         $action = Action::with('ticket')->findOrFail($action_id);
+        // dd($action);
         return view('admin.actions.actionStaffEdit', compact('action'));
     }
 
@@ -273,7 +282,6 @@ class ActionsController extends Controller
 
         // upload image
         if ($request->file('image')) {
-
             foreach ($request->file('image') as $key => $image) {
                 $resourceImage = $image;
                 $nameImage = strtolower($request->action_id);
@@ -286,18 +294,93 @@ class ActionsController extends Controller
             }
         }
 
+        // foto sebelum pengerjaan
+        if ($request->file('image_prework')) {
+            $resource_image_prework = $request->file('image_prework');
+            $id_name_image_prework = strtolower($request->action_id);
+            $file_ext_image_prework = $request->file('image_prework')->extension();
+            $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
+
+            $name_image_prework = $img_path . '/' . $id_name_image_prework . '-' . $request->action_id . '-pre.' . $file_ext_image_prework;
+
+            $resource_image_prework->move($basepath . $img_path, $name_image_prework);
+            $data_image_prework = $name_image_prework;
+        }
+
+        // foto alat
+        if ($request->file('image_tools')) {
+            foreach ($request->file('image_tools') as $key => $image) {
+
+                $resourceImage = $image;
+                $nameImage = strtolower($request->action_id);
+                $file_extImage = $resourceImage->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "." . $file_extImage;
+
+                $resourceImage->move($basepath . $img_path, $img_name);
+
+                $dataImageNameTool[] = $img_name;
+            }
+        }
+
+        if ($request->file('image_done')) {
+            foreach ($request->file('image_done') as $key => $image) {
+                $resourceImageDone = $image;
+                $nameImageDone = strtolower($request->action_id);
+                $file_extImageDone = $image->extension();
+                $nameImageDone = str_replace(" ", "-", $nameImageDone);
+
+                $img_name_done = $img_path . "/" . $nameImageDone . "-" . $request->action_id . $key . "-done." . $file_extImageDone;
+
+                $resourceImageDone->move($basepath . $img_path, $img_name_done);
+
+                $dataImageNameDone[] = $img_name_done;
+            }
+        }
+
+        // upload image end
+
         $action = Action::where('id', $request->action_id)->with('ticket')->with('staff')->first();
         $cekAllStatus = false;
         $statusAction = $request->status;
 
         $dateNow = date('Y-m-d H:i:s');
 
-        $dataNewAction = array(
-            'status' => $statusAction,
-            'image' => str_replace("\/", "/", json_encode($dataImageName)),
-            'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
-            'memo' => $request->memo,
-        );
+        if ($request->file('image')) {
+            $dataNewAction = array(
+                'status' => $statusAction,
+                'image' => str_replace("\/", "/", json_encode($dataImageName)),
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'memo' => $request->memo,
+                'todo' => $request->todo
+            );
+        } else {
+            $dataNewAction = array(
+                'status' => $statusAction,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'memo' => $request->memo,
+                'todo' => $request->todo
+            );
+        }
+        if ($request->file('image_tools')) {
+            $dataNewAction = array_merge(
+                $dataNewAction,
+                ['image_tools' => str_replace("\/", "/", json_encode($dataImageNameTool))]
+            );
+        }
+        if ($request->file('image_prework')) {
+            $dataNewAction = array_merge(
+                $dataNewAction,
+                ['image_prework' => $data_image_prework]
+            );
+        }
+        if ($request->file('image_done')) {
+            $dataNewAction = array_merge(
+                $dataNewAction,
+                ['image_done' => str_replace("\/", "/", json_encode($dataImageNameDone))]
+            );
+        }
 
         $action->update($dataNewAction);
         //update staff
@@ -311,7 +394,6 @@ class ActionsController extends Controller
         $ticket->save();
 
         return redirect()->route('admin.actions.list', $ticket->id);
-
     }
 
     // editt status tindakan pegawai
@@ -348,7 +430,6 @@ class ActionsController extends Controller
                     'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 ]);
             }
-
         }
 
         return redirect()->route('admin.actions.actionStaff', $action_id);
@@ -367,6 +448,17 @@ class ActionsController extends Controller
     public function printReport()
     {
         return view('admin.actions.printreport');
+    }
+
+
+    public function ubahData()
+    {
+        $t = Action::get();
+        foreach ($t as $key => $value) {
+            $db = Action::where('id', $value->id)->first();
+            $db->image_tools = '["' . $value->image_tools . '"]';
+            $db->update();
+        }
     }
 
     //end surya buat

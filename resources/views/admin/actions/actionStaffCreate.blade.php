@@ -15,6 +15,9 @@
 
                         </th>
                         <th>
+                            Work Unit
+                        </th>
+                        <th>
                             {{ trans('global.action_staff.fields.code') }}
                         </th>
                         <th>
@@ -34,6 +37,9 @@
                             <td>
 
                             </td>
+                            <td>
+                                {{ $staff->work_unit_name ?? '    ' }}
+                                </td>
                             <td>
                             {{ $staff->code ?? '' }}
                             </td>

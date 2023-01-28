@@ -14,6 +14,7 @@ use DB;
 use App\CtmPelanggan;
 use App\wa_history;
 use App\Traits\WablasTrait;
+use App\WaTemplate;
 
 class CtmApiController extends Controller
 {
@@ -52,7 +53,6 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
-
     }
 
     public function ctmCustomer($id)
@@ -71,7 +71,6 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
-
     }
 
     public function ctmPayOLD($id)
@@ -80,12 +79,12 @@ class CtmApiController extends Controller
             $date_now = date("Y-m-d");
             $date_comp = date("Y-m") . "-20";
             $month_now = date('n');
-            $month_next = date('n', strtotime('+1 month'))-1;
-            if($month_now>$month_next){
-                $month_next=$month_next+12;
+            $month_next = date('n', strtotime('+1 month')) - 1;
+            if ($month_now > $month_next) {
+                $month_next = $month_next + 12;
             }
             if ($date_now > $date_comp) {
-                $ctm_lock=0;
+                $ctm_lock = 0;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
@@ -94,27 +93,27 @@ class CtmApiController extends Controller
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             } else {
-                $ctm_lock=1;
+                $ctm_lock = 1;
                 $ctm = CtmPembayaran::selectRaw("tblpembayaran.*,tblpelanggan.*")
                     ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->where('tblpembayaran.nomorrekening', $id)
-                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01')) 
-                    ->orderBy('tblpembayaran.tahunrekening', 'ASC')                   
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                    ->orderBy('tblpembayaran.tahunrekening', 'ASC')
                     ->orderBy('tblpembayaran.bulanrekening', 'ASC')
                     ->get();
             }
-            $ctm_num_row=count($ctm)-1;
+            $ctm_num_row = count($ctm) - 1;
             foreach ($ctm as $key => $item) {
                 $sisa = $item->wajibdibayar - $item->sudahdibayar;
                 //if not paid
-                if($sisa>0){
-                    $ctm[$key]->tglbayarterakhir="";
+                if ($sisa > 0) {
+                    $ctm[$key]->tglbayarterakhir = "";
                 }
                 //set to prev
-                $ctm[$key]->tahunrekening=date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
-                $ctm[$key]->bulanrekening=date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+                $ctm[$key]->tahunrekening = date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
+                $ctm[$key]->bulanrekening = date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
                 //if status 0
-                if($ctm[$key]->status==0 && $key==$ctm_num_row){
+                if ($ctm[$key]->status == 0 && $key == $ctm_num_row) {
                     unset($ctm[$key]);
                 }
             }
@@ -130,7 +129,6 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
-
     }
 
     public function ctmPay($id)
@@ -140,66 +138,70 @@ class CtmApiController extends Controller
             $date_comp = date("Y-m") . "-20";
             $month_now = date('n');
             $year_now = date('Y');
-            $month_next = date('n', strtotime('+1 month'))-1;
-            if($month_now>$month_next){
-                $month_next=$month_next+12;
+            if ($month_now == 1) {
+                $month_next = 13;
+            } else {
+                $month_next = date('n', strtotime('+1 month')) - 1;
+            }
+            if ($month_now > $month_next) {
+                $month_next = $month_next + 12;
             }
 
             $data = array(
                 'nomorrekening' => $id,
             );
-    
+
             $url = 'https://yndvck.perumdatab.com/akademi-pelawak-tpi/tgh.api.php';
-    
+
             //open connection
             $ch = curl_init();
-    
+
             //set the url, number of POST vars, POST data
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_POST, count($data));
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
-    
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
             //execute post
             $ctm = curl_exec($ch);
             $ctm = json_decode($ctm);
-    
+
             //close connection
             curl_close($ch);
 
             if ($date_now > $date_comp) {
-                $ctm_lock=0;                
+                $ctm_lock = 0;
             } else {
-                $ctm_lock=1;
+                $ctm_lock = 1;
             }
 
-            $ctm_num_row=count($ctm)-1;
-            $status_paid_this_month=0;
+            $ctm_num_row = count($ctm) - 1;
+            $status_paid_this_month = 0;
             foreach ($ctm as $key => $item) {
                 //get this month paid
-                if($item->bulanrekening == $month_now && $item->tahunrekening == $year_now){
-                    if($item->statuslunas==2){
-                        $status_paid_this_month=1;
+                if ($item->bulanrekening == $month_now && $item->tahunrekening == $year_now) {
+                    if ($item->statuslunas == 2) {
+                        $status_paid_this_month = 1;
                     }
                 }
                 //get sudah dibayar
-                $item->sudahdibayar=0;
-                if($item->statuslunas==2){
-                    $item->sudahdibayar=$item->wajibdibayar;
+                $item->sudahdibayar = 0;
+                if ($item->statuslunas == 2) {
+                    $item->sudahdibayar = $item->wajibdibayar;
                 }
                 $sisa = $item->wajibdibayar - $item->sudahdibayar;
                 //if not paid
-                if($sisa>0){
-                    $ctm[$key]->tglbayarterakhir="";
+                if ($sisa > 0) {
+                    $ctm[$key]->tglbayarterakhir = "";
                 }
                 //denda & $item->sudahdibayar=$item->wajibdibayar;
-                $ctm[$key]->denda=0;
-                $ctm[$key]->sudahdibayar=$item->sudahdibayar;
+                $ctm[$key]->denda = 0;
+                $ctm[$key]->sudahdibayar = $item->sudahdibayar;
                 //set to prev
-                $ctm[$key]->tahunrekening=date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
-                $ctm[$key]->bulanrekening=date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening .'-01')." -1 month"));
+                $ctm[$key]->tahunrekening = date('Y', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
+                $ctm[$key]->bulanrekening = date('m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
                 //if status 0
-                if($ctm[$key]->status==0 && $key==$ctm_num_row){
+                if ($ctm[$key]->status == 0 && $key == $ctm_num_row) {
                     unset($ctm[$key]);
                 }
             }
@@ -216,7 +218,6 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
-
     }
 
     public function ctmList($id)
@@ -239,7 +240,6 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
-
     }
 
     public function ctmListBAK($id)
@@ -284,7 +284,24 @@ class CtmApiController extends Controller
                 'err' => $ex,
             ]);
         }
+    }
 
+    public function ctmRequestHistory($id)
+    {
+        try {
+            $ctmrequests = CtmRequest::with('customer')->where('norek', $id)
+                ->orderBy('created_at', 'DESC')->get();
+
+            return response()->json([
+                'message' => 'Success',
+                'data' => $ctmrequests,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'Gagal Mengambil data',
+                'err' => $ex,
+            ]);
+        }
     }
 
     public function ctmRequest(Request $request)
@@ -309,6 +326,7 @@ class CtmApiController extends Controller
 
         //img path
         $img_path = "/gambar-test";
+        // $img_path = "/gambar";
         $basepath = str_replace("laravel-simpletab", "public_html/pdam/", \base_path());
         $path = $basepath . $img_path . "/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
         if (!is_dir($path)) {
@@ -349,9 +367,35 @@ class CtmApiController extends Controller
         );
 
         //send notif to user
-        $customer = Customer::where('nomorrekening',$var['norek'])->first();
-        $message = 'Terimakasih telah menggunakan Aplikasi SimpelTAB. Laporan Baca WM Mandiri anda telah kami terima. Kepedulian Anda merupakan Peningkatan Pelayanan Kami.';
-        //wa notif
+        $customer = Customer::where('nomorrekening', $var['norek'])->first();
+
+        //  pesan baru start
+        $waTemplate = WaTemplate::where('id', 50)->first();
+
+        $jam = date('H');
+        if ($jam > 0 && $jam < 11) {
+            $waktu = "pagi";
+        } else if ($jam > 10 && $jam < 15) {
+            $waktu = "siang";
+        } else if ($jam > 14 && $jam < 19) {
+            $waktu = "sore";
+        } else if ($jam > 18 && $jam < 23) {
+            $waktu = "malam";
+        } else {
+            $waktu = "";
+        }
+
+        $message = $waTemplate->message;
+
+        $message = str_replace("@nama", $customer->name, $message);
+        $message = str_replace("@sbg", $customer->customer_id, $message);
+        $message = str_replace("@alamat", $customer->adress, $message);
+        $message = str_replace("@waktu", $waktu, $message);
+
+        //pesan baru end 
+
+        // $message = 'Terimakasih telah menggunakan Aplikasi SimpelTAB. Laporan Baca WM Mandiri anda telah kami terima. Kepedulian Anda merupakan Peningkatan Pelayanan Kami.';
+        // //wa notif
         $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
         $wa_data_group = [];
         //get phone user
@@ -360,7 +404,7 @@ class CtmApiController extends Controller
             'phone' => $this->gantiFormat($phone_no),
             'customer_id' => null,
             'message' => $message,
-            'template_id' => '',
+            'template_id' => $waTemplate->id,
             'status' => 'gagal',
             'ref_id' => $wa_code,
             'created_at' => date('Y-m-d h:i:sa'),
@@ -384,7 +428,6 @@ class CtmApiController extends Controller
             return response()->json([
                 'message' => 'Baca Meter Mandiri Terkirim',
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal',
@@ -545,5 +588,4 @@ class CtmApiController extends Controller
             'data' => $data,
         ]);
     }
-
 }

@@ -11,12 +11,13 @@ class CtmPbk extends Model
     protected $table = 'pbk';
 
     protected $primaryKey = ['Number'];
-    
+
     public $incrementing = false;
 
     public $timestamps = false;
 
     protected $fillable = [
+        'Name',
         'Status',
     ];
 }

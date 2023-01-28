@@ -138,6 +138,203 @@
                 </ul>
             </li>
             @endcan
+
+            {{-- start pergantian WM --}}
+                
+            {{-- @endif --}}
+            @can('Wm_access')
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link  nav-dropdown-toggle">
+                    <i class="nav-icon fas fa-lock">
+        
+                    </i>
+                    {{-- {{ trans('global.segelmeter.index') }} --}}
+                    Pergantian WM
+                </a>
+                <ul class="nav-dropdown-items">
+                    <!-- <li class="nav-item">
+                        <a href="{{ route('admin.statuswm.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-lock">
+        
+                            </i>
+                            {{ trans('global.statuswm.title') }}
+                        </a>
+
+                    </li> -->
+                    @can('statusWm_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.statuswm.index') }}" class="nav-link">
+                            <i class="nav-icon fa fa-check-square-o"></i>
+                            Status WM
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('proposalWm_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.proposalwm.index') }}" class="nav-link">
+                            <i class="nav-icon fa fa-hand-pointer-o"></i>
+                            Usulan Pergantian
+                        </a>
+                    </li>
+                    @endcan
+ 
+                    @can('proposalWm_report')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.report.reportProposalWm') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-file"></i>
+                       Rekap Pergantian Wm
+                        </a>
+                    </li>
+                    @endcan
+                    <!-- <li class="nav-item">
+                        <a href="{{ route('admin.spp.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-file "></i>
+                            Print SPP
+                        </a>
+                    </li> -->
+                </ul>
+            </li>
+            @endcan
+
+            {{-- end pergantian WM --}}
+
+               {{-- start pergantian WM --}}
+                
+            {{-- @endif --}}
+            
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link  nav-dropdown-toggle">
+                    <i class="nav-icon fas fa-book">
+        
+                    </i>
+                    {{-- {{ trans('global.segelmeter.index') }} --}}
+                    Absen (Uji)
+                </a>
+                <ul class="nav-dropdown-items">
+              
+                    @can('absence_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.absence.index') }}" class="nav-link">
+                            <i class="nav-icon fa fa-address-book-o"></i>
+                           Absen
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('shift_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.shift.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-tasks"></i>
+                        Shift
+                        </a>
+                    </li>
+                    @endcan
+
+
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link  nav-dropdown-toggle">
+                            <i class="fas fa-hand-o-up  nav-icon">
+        
+                            </i>
+                            Permohonan
+                        </a>
+                        <ul class="nav-dropdown-items">                       
+                            @can('duty_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.duty.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-car"></i>
+                               Dinas
+                                </a>
+                            </li>
+                            @endcan
+        
+                            @can('extra_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.extra.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-wrench"></i>
+                               Lembur
+                                </a>
+                            </li>
+                            @endcan
+        
+                            @can('permit_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.permit.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-motorcycle"></i>
+                               Permisi
+                                </a>
+                            </li>
+                            @endcan
+        
+                            @can('leave_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.leave.index') }}" class="nav-link">
+                                    <i class="nav-icon fa fa-plane"></i>
+                                    Cuti
+                                </a>
+                            </li>
+                            @endcan
+        
+                            @can('workpermit_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.workPermit.index') }}" class="nav-link">
+                                    <i class="nav-icon fa fa-hand-pointer-o"></i>
+                                    Izin
+                                </a>
+                            </li>
+                            @endcan
+                        </ul>
+                    </li>
+
+              
+
+                    @can('holiday_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.holiday.index') }}" class="nav-link">
+                            <i class="nav-icon fa fa-picture-o"></i>
+                            Hari Libur
+                        </a>
+                    </li>
+                    @endcan
+ 
+                    @can('schedule_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.schedule.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-calendar"></i>
+                       Jadwal
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('absence_report')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.schedule.test') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-bar-chart"></i>
+                       Statistik
+                        </a>
+                    </li>
+                    @endcan
+                    
+                    <!-- <li class="nav-item">
+                        <a href="{{ route('admin.spp.index') }}" class="nav-link">
+                            <i class="nav-icon fas fa-file "></i>
+                            Print SPP
+                        </a>
+                    </li> -->
+                </ul>
+            </li>
+            
+
+            {{-- end pergantian WM --}}
+
 {{-- wa --}}
 @can('wablast_access')
  
@@ -290,7 +487,26 @@
                             {{ trans('global.pbk.title') }}
                         </a>
                     </li>
-                    @endcan                
+                    @endcan  
+                    @can('workUnit_access')          
+                    <li class="nav-item">
+                        <a href="{{ route('admin.workUnit.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class=" nav-icon fas fa-thumb-tack"></i>
+                            {{ trans('global.workUnit.title') }}
+                        </a>
+                    </li>
+                    @endcan  
+
+                    @can('workUnit_access')          
+                    <li class="nav-item">
+                        <a href="{{ route('admin.workUnit.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class=" nav-icon fas fa-thumb-tack"></i>
+                            {{ trans('global.workUnit.title') }}
+                        </a>
+                    </li>
+                    @endcan  
                 </ul>
             </li>
             @can('user_management_access') 

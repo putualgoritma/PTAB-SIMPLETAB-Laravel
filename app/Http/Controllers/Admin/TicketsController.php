@@ -15,6 +15,7 @@ use App\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class TicketsController extends Controller
@@ -27,6 +28,7 @@ class TicketsController extends Controller
         $departementlist = Dapertement::all();
         $ticket = Ticket::all();
         $user_id = Auth::check() ? Auth::user()->id : null;
+
         $department = '';
         $subdepartment = 0;
         $staff = 0;
@@ -39,59 +41,96 @@ class TicketsController extends Controller
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
                 $staff = $admin->staff_id;
-                $departementlist = Dapertement::where('id', $department)->get();
+                $departementlist = Dapertement::where('id', $department);
+                // ->get();
             }
         }
+        if (Auth::user()->email == "pengamatmeter@ptab-vps.com") {
+            $department = $request->departement;
+        }
+
+
+        if ($request->departement != "") {
+            $department = $request->departement;
+        }
+
+        $statusn = ['pending', 'active', 'close'];
+
+        // set query
+
+        if (Auth::user()->email == "pengamatmeter@ptab-vps.com") {
+            $departementlist = Dapertement::all();
+            $qry = Ticket::FilterStatus(request()->input('status'))
+                ->FilterDepartment($department)
+                ->with('department')
+                ->with('customer')
+                ->with('category')
+                ->with('ticket_image')
+                ->with('action')
+
+
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+                ->orderBy('created_at', 'DESC');
+        } else if ($subdepartment == 0) {
+            $qry = Ticket::FilterStatus(request()->input('status'))
+                ->FilterDepartment($department)
+                ->with('department')
+                ->with('customer')
+                ->with('category')
+                ->with('ticket_image')
+                ->with('action')
+
+
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+                ->orderBy('created_at', 'DESC');
+            // ->orderByRaw("case tickets.status when 'edit' then 1 when 'active' then 2 when 'pending' then close end")
+            // ->limit(3)
+            // ->get();
+        } else if ($subdepartment > 0 && $staff > 0) {
+            $qry = Ticket::selectRaw('DISTINCT tickets.*')
+                ->join('actions', function ($join) use ($subdepartment) {
+                    $join->on('actions.ticket_id', '=', 'tickets.id')
+                        ->where('actions.subdapertement_id', '=', $subdepartment);
+                })
+                ->join('action_staff', function ($join) use ($staff) {
+                    $join->on('action_staff.action_id', '=', 'actions.id')
+                        ->where('action_staff.staff_id', '=', $staff);
+                })
+                ->FilterJoinStatus(request()->input('status'))
+
+                ->with('department')
+                ->with('customer')
+                ->with('category')
+                ->with('ticket_image')
+                ->with('action')
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+                ->orderBy('created_at', 'DESC');
+            // ->limit(3)
+            // ->get();
+        } else {
+            $qry = Ticket::selectRaw('DISTINCT tickets.*')
+                ->join('actions', function ($join) use ($subdepartment) {
+                    $join->on('actions.ticket_id', '=', 'tickets.id')
+                        ->where('actions.subdapertement_id', '=', $subdepartment);
+                })
+                ->FilterJoinStatus(request()->input('status'))
+
+                ->with('department')
+                ->with('customer')
+                ->with('category')
+                ->with('ticket_image')
+                ->with('action')
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+                ->orderBy('created_at', 'DESC');
+            // ->sortBy(function ($model) use ($statusn) {
+            //     return array_search($model->getKey(), $statusn);
+            // });
+            // ->limit(3)
+            // ->get();
+        }
+        // dd($qry);
+
         if ($request->ajax()) {
-            if ($request->departement != "") {
-                $department = $request->departement;
-            }
-            // set query
-            if ($subdepartment == 0) {
-                $qry = Ticket::FilterStatus(request()->input('status'))
-                    ->FilterDepartment($department)
-                    ->with('department')
-                    ->with('customer')
-                    ->with('category')
-                    ->with('ticket_image')
-                    ->with('action')
-                    ->orderBy('created_at', 'DESC')
-                    ->get();
-            } else if ($subdepartment > 0 && $staff > 0) {
-                $qry = Ticket::selectRaw('DISTINCT tickets.*')
-                    ->join('actions', function ($join) use ($subdepartment) {
-                        $join->on('actions.ticket_id', '=', 'tickets.id')
-                            ->where('actions.subdapertement_id', '=', $subdepartment);
-                    })
-                    ->join('action_staff', function ($join) use ($staff) {
-                        $join->on('action_staff.action_id', '=', 'actions.id')
-                            ->where('action_staff.staff_id', '=', $staff);
-                    })
-                    ->FilterJoinStatus(request()->input('status'))
-
-                    ->with('department')
-                    ->with('customer')
-                    ->with('category')
-                    ->with('ticket_image')
-                    ->with('action')
-                    ->orderBy('created_at', 'DESC')
-                    ->get();
-            } else {
-                $qry = Ticket::selectRaw('DISTINCT tickets.*')
-                    ->join('actions', function ($join) use ($subdepartment) {
-                        $join->on('actions.ticket_id', '=', 'tickets.id')
-                            ->where('actions.subdapertement_id', '=', $subdepartment);
-                    })
-                    ->FilterJoinStatus(request()->input('status'))
-
-                    ->with('department')
-                    ->with('customer')
-                    ->with('category')
-                    ->with('ticket_image')
-                    ->with('action')
-                    ->orderBy('created_at', 'DESC')
-                    ->get();
-            }
 
             $table = Datatables::of($qry);
 
@@ -121,8 +160,8 @@ class TicketsController extends Controller
                 return $row->code ? $row->code : "";
             });
 
-            $table->editColumn('date', function ($row) {
-                return $row->created_at ? $row->created_at : "";
+            $table->editColumn('created_at', function ($row) {
+                return $row->created_at ?  strval($row->created_at) : "";
             });
 
             $table->editColumn('dapertement', function ($row) {
@@ -136,7 +175,15 @@ class TicketsController extends Controller
                 return $row->description ? $row->description : "";
             });
             $table->editColumn('status', function ($row) {
-                return $row->status ? $row->status : "pending";
+                if ($row->print_report_status == "1") {
+                    return "close2";
+                } else if ($row->status == "pending" && count($row->action) > 0) {
+                    return "pending2";
+                } else if (Auth::user()->dapertement_id === 1 && $row->status == 'pending' && $row->dapertement_id > 1 && count($row->action) < 1) {
+                    return "pending2";
+                } else {
+                    return $row->status ? $row->status : "pending";
+                }
             });
 
             $table->editColumn('category', function ($row) {
@@ -377,6 +424,7 @@ class TicketsController extends Controller
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category', 'dapertementReceive'])->findOrFail($id);
         // dd($ticket);
+        Ticket::where('id', $id)->update(['print_status' => 1]);
         return view('admin.tickets.printservice', compact('ticket'));
     }
 
@@ -389,12 +437,14 @@ class TicketsController extends Controller
             $subdapertement = $ticket->action[0]->subdapertement;
             $staffs = $ticket->action[0]->staff;
         }
+        Ticket::where('id', $id)->update(['print_spk_status' => 1]);
         return view('admin.tickets.printspk', compact('ticket', 'subdapertement', 'staffs'));
     }
 
     public function printReport($id)
     {
         $ticket = Ticket::with(['customer', 'dapertement', 'action', 'category', 'dapertementReceive'])->findOrFail($id);
+        Ticket::where('id', $id)->update(['print_report_status' => 1]);
         return view('admin.tickets.printreport', compact('ticket'));
     }
 }

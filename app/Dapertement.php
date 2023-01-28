@@ -10,6 +10,7 @@ class Dapertement extends Model
     protected $fillable = [
         'code',
         'name',
-        'description'
+        'description',
+        'director_id'
     ];
 }

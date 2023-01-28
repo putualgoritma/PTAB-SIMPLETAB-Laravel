@@ -12,17 +12,33 @@ class CtmStatussmPelanggan extends Model
 
     public function scopeFilterMonth($query, $month)
     {
-        if($month !=''){
+        if ($month != '') {
             $query->where('tblstatussmpelanggan.bulan', $month);
-        }        
+        }
         return $query;
     }
 
     public function scopeFilterYear($query, $year)
     {
-        if($year !=''){
+        if ($year != '') {
             $query->where('tblstatussmpelanggan.tahun', $year);
-        }        
+        }
+        return $query;
+    }
+
+    public function scopeFilterStatusWM($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('tblstatussmpelanggan.statussm', $ststussm);
+        }
+        return $query;
+    }
+
+    public function scopeFilterAreas($query, $idareal)
+    {
+        if ($idareal != '') {
+            $query->where('tblpelanggan.idareal', $idareal);
+        }
         return $query;
     }
 }

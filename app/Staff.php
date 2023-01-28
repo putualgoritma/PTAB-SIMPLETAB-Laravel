@@ -12,15 +12,19 @@ class Staff extends Model
         'name',
         'phone',
         'dapertement_id',
-        'subdapertement_id'
+        'subdapertement_id',
+        'work_unit_id',
+        'pbk'
     ];
 
-    public function dapertement() { 
-        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id'); 
+    public function dapertement()
+    {
+        return $this->belongsTo(Dapertement::class, 'dapertement_id', 'id');
     }
 
-    public function subdapertement() { 
-        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id'); 
+    public function subdapertement()
+    {
+        return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id');
     }
 
     public function action()
@@ -32,12 +36,12 @@ class Staff extends Model
     }
     public function area()
     {
-        return $this->belongsToMany(CtmWilayah::class, 'ptabroot_simpletab.area_staff','staff_id', 'area_id');
+        return $this->belongsToMany(CtmWilayah::class, 'ptabroot_simpletab.area_staff', 'staff_id', 'area_id');
     }
     public function scopeFilterDapertement($query, $dapertement)
     {
-        if($dapertement !=''){
-        $query->where('dapertement_id', $dapertement);        
+        if ($dapertement != '') {
+            $query->where('dapertement_id', $dapertement);
         }
         return $query;
     }

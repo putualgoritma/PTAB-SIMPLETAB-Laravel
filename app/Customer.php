@@ -173,6 +173,18 @@ class Customer extends Model
         }
     }
 
+    // new
+    public function scopeFilterCustomerId($query, $customer)
+    {
+        if ($customer != '') {
+            $query->having('tblpelanggan.nomorrekening', '=', $customer);
+            return $query;
+        } else {
+        }
+    }
+
+    // end new
+
     public function scopeFilterWilayah($query, $area)
     {
         if ($area != '') {

@@ -52,7 +52,7 @@
                             {{ $customerrequest->customer->name ?? '' }}
                             </td>
                             <td>
-                            {{ $customerrequest->phone ?? '' }}
+                            {{ $customerrequest->customer->telp ?? '' }}
                             </td>
                             <td>
                             {{ $customerrequest->address ?? '' }}

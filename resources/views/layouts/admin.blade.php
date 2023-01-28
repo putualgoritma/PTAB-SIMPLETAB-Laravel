@@ -97,6 +97,7 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script src="{{asset('js/emojionearea.min.js')}}" type="text/javascript"></script>
+    <script type="text/javascript" src="{{ asset('chartjs/Chart.js') }}"></script>
     <script>
         $(function() {
   let copyButtonTrans = '{{ trans('global.datatables.copy') }}'

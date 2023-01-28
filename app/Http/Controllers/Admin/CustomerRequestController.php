@@ -16,7 +16,7 @@ class CustomerRequestController extends Controller
     {
         abort_unless(\Gate::allows('customerrequests_access'), 403);
         $customerrequests = CustomerRequest::with('customer')
-        ->get();
+            ->get();
 
         return view('admin.customerrequests.index', compact('customerrequests'));
     }
@@ -51,7 +51,7 @@ class CustomerRequestController extends Controller
         return view('admin.customerrequests.edit', compact('customerrequest'));
     }
 
-    public function update(Request $request,CustomerRequest $customerrequest)
+    public function update(Request $request, CustomerRequest $customerrequest)
     {
         abort_unless(\Gate::allows('customerrequests_edit'), 403);
         //update phone

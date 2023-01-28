@@ -51,12 +51,15 @@
     </style>
 </head>
 <body onload="onload()" >
-    <div class="title">
+    <img src="{{ "https://simpletabadmin.ptab-vps.com/images/QRCodeSimTab.png" }}" alt="" style="height: 100px; margin-left: 800px; ">
+    <br>
+    <img src="{{ "https://simpletabadmin.ptab-vps.com/images/kopSuratPDAM.PNG" }}" alt="" style="width: 800px; height: 200px; ">
+    {{-- <div class="title">
         <h4>PERUSAHAAN DAERAH AIR MINUM KABUPATEN TABANAN
             <hr style="width: 240px;">
         </h4>
     </div>
-    
+     --}}
     <div class="text-center">
         <h3>SURAT PERINTAH KERJA
             <hr style="width: 190px;">
