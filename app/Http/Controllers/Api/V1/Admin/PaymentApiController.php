@@ -42,22 +42,23 @@ class PaymentApiController extends Controller
 
     public function updatePay(Request $request)
     {
-        $rules = array(
-            'nomorrekening' => 'required',
-            'bulanrekening' => 'required',
-            'tahunrekening' => 'required',
-        );
+        // $rules = array(
+        //     'nomorrekening' => 'required',
+        //     'bulanrekening' => 'required',
+        //     'tahunrekening' => 'required',
+        // );
 
-        $validator = \Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            $messages = $validator->messages();
-            $errors = $messages->all();
-            return response()->json([
-                'status' => false,
-                'message' => $errors,
-                'data' => $request->all(),
-            ]);
-        }
+        // $validator = \Validator::make($request->all(), $rules);
+        // if ($validator->fails()) {
+        //     $messages = $validator->messages();
+        //     $errors = $messages->all();
+        //     return response()->json([
+        //         'status' => false,
+        //         'cek' => json_decode($request->form),
+        //         'message' => $errors,
+        //         'data' => $request->all(),
+        //     ]);
+        // }
 
         $data = json_decode($request->form);
         $arrQry = [];
@@ -65,24 +66,27 @@ class PaymentApiController extends Controller
         try {
 
             foreach ($data as $value) {
-                foreach ($value as $key => $dat) {
-                    $arrQry[$key] = $dat;
-                    $result = DB::connection('mysql2')->table('tblpembayaran')
-                        ->where('tahunrekening', '=', $request->tahunrekening)
-                        ->where('bulanrekening', '=', $request->bulanrekening)
-                        ->where('nomorrekening', '=', $request->nomorrekening)
-                        ->update($arrQry);
+
+                $result = DB::connection('mysql2')->table('tblpembayaran')
+                    ->where('tahunrekening', '=', $value->tahunrekening)
+                    ->where('bulanrekening', '=', $value->bulanrekening)
+                    ->where('nomorrekening', '=', $value->nomorrekening)
+                    ->update(['statuslunas' => 0]);
+                if ($result != 1) {
+                    $arrQry[] = ['nomorrekening' => $value->nomorrekening, 'bulanrekening' => $value->bulanrekening, 'tahunrekening' => $value->tahunrekening];
                 }
-                $arrQry = [];
+                // $arrQry = [];
             }
             return response()->json([
                 'status' => true,
                 'message' => 'Data Pembayaran Update Success',
-                'data' => $arrQry,
+                'data' => $result,
+                'failed' => $arrQry
             ]);
         } catch (QueryException $e) {
             return response()->json([
                 'status' => false,
+                'cek' => $request->form,
                 'message' => 'Data Pembayaran Update Gagal.',
                 'data' => $e,
             ]);
