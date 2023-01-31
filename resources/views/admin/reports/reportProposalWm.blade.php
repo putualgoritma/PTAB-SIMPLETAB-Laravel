@@ -88,6 +88,7 @@
     <section class="sheet padding-10mm">
         {{-- @if ($jum+1 === 1) --}}
         <h2>REKAPITULASI PERGANTIAN WATER METER</h2>
+        <h3>{{ $unitName }}</h3>
         {{-- <!-- <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3> --> --}}
         <h3>Bulan {{$month}} {{date('Y')}}</h3>
         {{-- @endif --}}

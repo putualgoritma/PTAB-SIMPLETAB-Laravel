@@ -255,6 +255,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('absence', 'AbsenceApiController@index');
     Route::get('history', 'AbsenceApiController@history');
     Route::get('requests/history', 'RequestApiController@history');
+    Route::get('requests/absenceList', 'RequestApiController@absenceList');
     Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
     Route::get('menu', 'MenuApiController@index');
     Route::get('shift', 'ShiftApiController@index');

@@ -504,6 +504,7 @@ class ReportsController extends Controller
 
     public function reportProposalWmProses(Request $request)
     {
+        $unitName = "";
         $time = strtotime($request->monthyear);
         $monthR = date("n", $time);
         $yearR = date("Y", $time);
@@ -601,6 +602,17 @@ class ReportsController extends Controller
             // $areas = $data;
             // $proposalWm = proposalWms::selectRaw('tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
             //     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening');
+            if ($group_unit == "1") {
+                $unitName = "Kota";
+            } else if ($group_unit == "2") {
+                $unitName = "Unit Kerambitan";
+            } else if ($group_unit == "3") {
+                $unitName = "Unit Selemadeg";
+            } else if ($group_unit == "4") {
+                $unitName = "Unit Penebel";
+            } else if ($group_unit == "5") {
+                $unitName = "Unit Baturiti";
+            }
 
             $proposalWm->where('tblwilayah.group_unit', $group_unit);
             $proposalWm =  $proposalWm->get();
@@ -625,6 +637,6 @@ class ReportsController extends Controller
         $director_name = $director ? $director->director_name : "";
 
         $d1 = $proposalWm;
-        return view('admin.reports.reportProposalWm', compact('director_name', 'menyetujui', 'sub_dapertement', 'dapertement', 'proposalWm', 'd1', 'monthR', 'request', 'month', 'monthYear'));
+        return view('admin.reports.reportProposalWm', compact('director_name', 'menyetujui', 'sub_dapertement', 'dapertement', 'proposalWm', 'd1', 'monthR', 'request', 'month', 'monthYear', 'unitName'));
     }
 }
