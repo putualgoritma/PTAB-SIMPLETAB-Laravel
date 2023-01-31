@@ -56,7 +56,6 @@ class CustomersApiController extends Controller
                     'message' => 'Foto Gagal Di Simpan',
                 ]);
             }
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'Permintaan Gagal Dikirim',
@@ -124,7 +123,6 @@ class CustomersApiController extends Controller
                 'message' => $message,
                 'data' => $customer,
             ]);
-
         }
     }
 
@@ -143,6 +141,7 @@ class CustomersApiController extends Controller
             $customer->password = $password_ency;
             $customer->phone = $request->phone;
             $customer->_id_onesignal = $request->_id_onesignal;
+            $customer->_synced = 0;
             $customer->save();
             Auth::login($customer);
             //$customer->update(['_id_onesignal' => $request->_id_onesignal]);
@@ -155,7 +154,6 @@ class CustomersApiController extends Controller
                 'data' => $customer,
                 'sugnal' => $request->_id_onesignal,
             ]);
-
         }
     }
 
@@ -197,7 +195,6 @@ class CustomersApiController extends Controller
                 //     'message' => 'Email Atau Password Yang Di masukkan Salah',
                 // ];
             }
-
         } catch (QueryException $e) {
             return response()->json([
                 'message' => $e->message,
@@ -327,14 +324,14 @@ class CustomersApiController extends Controller
                         'status' => '0',
                         'message' => 'Data Kosong',
                     ]);
-                }}
+                }
+            }
         } catch (QueryException $ex) {
             return response()->json([
                 'status' => '0',
                 'message' => $ex,
             ]);
         }
-
     }
 
     public function logout(Request $res)

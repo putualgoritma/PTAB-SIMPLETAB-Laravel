@@ -126,4 +126,18 @@ class RequestApiController extends Controller
             'data' => $cat,
         ]);
     }
+
+    public function absenceList(Request $request)
+    {
+        $duty = Requests::where('category', 'duty')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->get();
+        $extra = Requests::where('category', 'extra')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->get();
+        $permit = Requests::where('category', 'permit')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->get();
+
+        return response()->json([
+            'message' => 'Succes',
+            'duty' => $duty,
+            'extra' => $extra,
+            'permit' => $permit,
+        ]);
+    }
 }

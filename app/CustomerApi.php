@@ -11,7 +11,7 @@ class CustomerApi extends Authenticatable
     use HasApiTokens;
 
     protected $hidden = [
-        '_password', 
+        '_password',
     ];
 
     protected $connection = 'mysql2';
@@ -34,16 +34,19 @@ class CustomerApi extends Authenticatable
         '_gender',
         '_type',
         '_id_onesignal',
+        '_synced',
     ];
 
-    protected $maps = array('nomorrekening' => 'code',
+    protected $maps = array(
+        'nomorrekening' => 'code',
         'namapelanggan' => 'name',
         'telp' => 'phone',
         'alamat' => 'address',
         '_email' => 'mail',
         '_password' => 'password',
         '_gender' => 'gender',
-        '_type' => 'type');
+        '_type' => 'type'
+    );
 
     public function getIdAttribute()
     {
@@ -172,7 +175,7 @@ class CustomerApi extends Authenticatable
         return $query;
     }
 
-    public function scopeWhereMaps($query, $fld, $comp, $operator='=')
+    public function scopeWhereMaps($query, $fld, $comp, $operator = '=')
     {
         if ($fld != 'id') {
             $fld_db = $this->fldMaps($fld);

@@ -193,6 +193,7 @@ class CustomersController extends Controller
         for ($i = 0; $i < count($customers); $i++) {
             $customer = Customer::find($customers[$i]['nomorrekening']);
             $customer->phone = $customers[$i]['phone'];
+            $customer->_synced = 0;
             $customer->save();
         }
 

@@ -26,6 +26,7 @@ class Customer extends Model
         '_password',
         '_gender',
         '_type',
+        '_synced'
     ];
 
     protected $maps = array(
