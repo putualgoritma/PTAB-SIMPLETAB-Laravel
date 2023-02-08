@@ -113,6 +113,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //test
     Route::resource('test-customers', 'TestController');
     Route::get('test-get', 'TestController@getTest');
+    Route::get('test-action-staff-store', 'ActionsController@actionStaffStoreTest');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 
@@ -351,6 +352,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('shift', 'ShiftController');
 
     Route::get('duty/edit1', 'DutyController@edit1')->name('duty.edit1');
+
     Route::get('duty/check', 'DutyController@check')->name('duty.check');
     Route::post('duty/{id}/approve', 'DutyController@approve')->name('duty.approve');
     Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');
