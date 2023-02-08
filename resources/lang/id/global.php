@@ -395,6 +395,8 @@ return [
         'fields' => [
             'code' => 'Kode',
             'name' => 'Nama Staff',
+            'pbk' => 'Pilih Pbk',
+            'NIK' => 'NIK',
             'description' => 'Deskripsi',
             'phone' => 'No Ponsel',
             'dapertement' => "Dapertemen",
@@ -421,7 +423,8 @@ return [
             'description' => 'Deskripsi',
             'date' => 'Tanggal',
             'departement' => 'Nama Departement',
-            'memo' => 'Memo'
+            'memo' => 'Memo',
+            'creator' => 'Oleh',
         ]
     ],
     'action' => [

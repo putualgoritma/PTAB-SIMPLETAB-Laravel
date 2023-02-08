@@ -168,13 +168,13 @@
         @endcan
 
         @can('proposalWm_spk')
-        {{-- @if ($proposalWm->status == "close") --}}
+        @if ($proposalWm->status == "close")
             
         <a class="btn btn-lg btn-info fa fa-print " target="_blank" href="{{ route('admin.proposalwm.report',$proposalWm->proposal_wm_id) }}">
             Berita Acara
         </a>
         
-        {{-- @endif --}}
+        @endif
     
     @endcan
 @endif

@@ -11,7 +11,7 @@ class Requests extends Model
     protected $fillable = [
         'id',
         'user_id',
-        'description',
+        'title',
         'date',
         'end',
         'type',

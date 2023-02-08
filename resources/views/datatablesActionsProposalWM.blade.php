@@ -21,7 +21,7 @@
 </a>
 @endcan
 
-@if (($row->status == "active" || $row->status == "work" || $row->status == "close" ) )
+@if (($row->status == "active" || $row->status == "work" ) )
 
 @can('actionWm_access')
 <a class="btn btn-xs btn-success" href="{{ route('admin.' . 'actionWms' . '.index', $row->id) }}">

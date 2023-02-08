@@ -13,6 +13,7 @@ class Holiday extends Model
         'title',
         'description',
         'day_id',
-        'date',
+        'start',
+        'end',
     ];
 }

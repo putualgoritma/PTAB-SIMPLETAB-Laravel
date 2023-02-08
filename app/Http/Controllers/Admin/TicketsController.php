@@ -190,8 +190,13 @@ class TicketsController extends Controller
                 return $row->category ? $row->category->name : "";
             });
 
+
             $table->editColumn('customer', function ($row) {
                 return $row->customer ? $row->customer->name : "";
+            });
+
+            $table->editColumn('creator', function ($row) {
+                return $row->creator ? $row->creator : "";
             });
 
             $table->rawColumns(['actions', 'placeholder']);
@@ -250,12 +255,15 @@ class TicketsController extends Controller
             }
 
             // video
-            $video_path = "/videos/complaint";
-            $resource = $request->file('video');
-            $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
+            if ($request->file('video')) {
+                $video_path = "/videos/complaint";
+                $resource = $request->file('video');
+                $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
 
-            $resource->move($basepath . $video_path, $video_name);
-
+                $resource->move($basepath . $video_path, $video_name);
+            } else {
+                $video_name = "";
+            }
             // data
             $dapertement_id = Auth::check() ? Auth::user()->dapertement_id : 1;
             //set SPK

@@ -14,18 +14,19 @@ class PermitController extends Controller
     {
 
         abort_unless(\Gate::allows('permit_access'), 403);
-        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'permit')->get();
+        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'permit')
+            ->orderBy('requests.created_at', 'DESC');
         // dd($qry);
         if ($request->ajax()) {
             //set query
-            $table = Datatables::of($qry);
+            $table = Datatables::of($qry->orderBy('requests.created_at', 'DESC'));
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
                 $viewGate = '';
-                $editGate = 'permit_edit';
+                $editGate = '';
                 $deleteGate = 'permit_delete';
                 $crudRoutePart = 'permit';
 

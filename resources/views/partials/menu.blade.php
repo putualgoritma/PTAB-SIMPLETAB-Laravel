@@ -188,6 +188,16 @@
                         </a>
                     </li>
                     @endcan
+
+                    @can('proposalWm_report')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.proposalwm.index5Year') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-exclamation-triangle"></i>
+                       Pergantian Wm (>2x)
+                        </a>
+                    </li>
+                    @endcan
                     <!-- <li class="nav-item">
                         <a href="{{ route('admin.spp.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-file "></i>

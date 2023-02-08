@@ -15,18 +15,18 @@ class LeaveController extends Controller
     {
 
         abort_unless(\Gate::allows('leave_access'), 403);
-        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'leave')->get();
-        // dd($qry);
+        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'leave')
+            ->orderBy('requests.created_at', 'DESC');
         if ($request->ajax()) {
             //set query
-            $table = Datatables::of($qry);
+            $table = Datatables::of($qry->orderBy('requests.created_at', 'DESC'));
 
             $table->addColumn('placeholder', '&nbsp;');
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
                 $viewGate = '';
-                $editGate = 'leave_edit';
+                $editGate = '';
                 $deleteGate = 'leave_delete';
                 $crudRoutePart = 'leave';
 

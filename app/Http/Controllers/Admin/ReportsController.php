@@ -597,7 +597,12 @@ class ReportsController extends Controller
                 ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
             $dapertement = Dapertement::select('dapertements.name')
                 ->where('dapertements.id', Auth::user()->dapertement_id)->first()->name;
-            $sub_dapertement = Subdapertement::where('id', Auth::user()->subdapertement_id)->first()->name;
+            if (Auth::user()->subdapertement_id != 0 && Auth::user()->subdapertement_id != null) {
+                $sub_dapertement = Subdapertement::where('id', Auth::user()->subdapertement_id)->first()->name;
+            } else {
+                $sub_dapertement = "";
+            }
+
             // $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();
             // $areas = $data;
             // $proposalWm = proposalWms::selectRaw('tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')

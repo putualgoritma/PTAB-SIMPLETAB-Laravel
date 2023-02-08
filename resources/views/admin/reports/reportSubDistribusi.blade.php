@@ -86,14 +86,14 @@
             <thead>
                 <tr>
                     <th>NO.</th>
-                    <th>NAMA</th>
+                    <th>PELAPOR</th>
                     <th>ALAMAT</th>
                     <th>AREA</th>
                     <th>TGL MASUK</th>
                     <th>KELUHAN</th>
                     <th>NO SPK</th>
                     <th>TGL DIKERJAKAN</th>
-                    <th>PEKERJA</th>
+                    {{-- <th>PEKERJA</th> --}}
                     <th>KET / TINDAKAN</th>
                 </tr>
             </thead>
@@ -109,7 +109,7 @@
                         <td>{{$ticket->description}}</td>
                         <td>{{$ticket->spk}}</td>
                         <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</td>
-                        <td>{{count($ticket->action) > 0 ? $ticket->action[0]->todo : '' }}</td>
+                        {{-- <td>{{count($ticket->action) > 0 ? $ticket->action[0]->todo : '' }}</td> --}}
                       
                         <td>  @if($ticket->action != null) 
                             @foreach ($ticket->action as $ticketaction)

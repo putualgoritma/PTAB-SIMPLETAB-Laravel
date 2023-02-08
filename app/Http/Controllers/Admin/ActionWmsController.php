@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\actionWms;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
+use App\proposalWms;
 use App\Subdapertement;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
@@ -150,6 +151,52 @@ class ActionWmsController extends Controller
                 // dd($request->file('old_image')->move($folder_upload, $img_name));
             }
         }
+
+        // untuk menambah nomor urut start
+        $proposal = proposalWms::join('action_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
+            ->join('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
+            ->join('dapertements', 'subdapertements.dapertement_id', '=', 'dapertements.id')
+            ->where('proposal_wms.id', $actionWm->proposal_wm_id)->first();
+        if ($proposal->close_queue == "" && $request->status == "close") {
+
+            $gU = $proposal->group_unit;
+            if ($gU == "1") {
+                $s = "BAP";
+                // $n = 14;
+            } else if ($gU == "2") {
+                $s = "BAPUK";
+                // $n = 15;
+            } else if ($gU == "4") {
+                $s = "BAPUP";
+                // $n = 15;
+            } else if ($gU == "5") {
+                $s = "BAPUB";
+                // $n = 15;
+            } else if ($gU == "3") {
+                $s = "BAPUS";
+                // $n = 15;
+            } else {
+                $s = "";
+                // $n = 15;
+            }
+
+
+            $last_code = $this->get_last_codeS('proposal_wm', $gU);
+
+            $proposal = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
+            $proposal->status = $request->status;
+            $proposal->close_queue = $last_code;
+            $proposal->code = '/' . $s . '/' . date('n') . '/' . date('Y');
+            $proposal->save(['updated_at' => false]);
+            // dd('test1');
+        } else {
+            $proposal = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
+            $proposal->status = $request->status;
+            $proposal->save(['updated_at' => false]);
+            // dd('test2');
+        }
+
+        // untuk menambah nomor urut end
 
         $actionWm->update($data);
         return redirect()->route('admin.actionWms.index', [$actionWm->proposal_wm_id]);

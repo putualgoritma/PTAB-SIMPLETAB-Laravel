@@ -18,6 +18,15 @@
                     </em>
                 @endif
             </div>
+            <div class="form-group {{ $errors->has('NIK') ? 'has-error' : '' }}">
+                <label for="NIK">{{ trans('global.staff.fields.NIK') }}*</label>
+                <input type="number" id="NIK" name="NIK" class="form-control" value="{{ old('NIK', isset($staff) ? $staff->NIK : '') }}">
+                @if($errors->has('NIK'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('NIK') }}
+                    </em>
+                @endif
+            </div>
             <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
                 <label for="name">{{ trans('global.staff.fields.name') }}*</label>
                 <input type="text" id="name" name="name" class="form-control" value="{{ old('name', isset($staff) ? $staff->name : '') }}">
@@ -113,6 +122,9 @@
                 @endif
                
             </div>
+
+        
+
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

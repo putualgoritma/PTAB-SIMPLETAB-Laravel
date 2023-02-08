@@ -41,14 +41,25 @@ class ProposalWmController extends Controller
         $subdapertement_id = Auth::user()->subdapertement_id;
         $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
         if (in_array('8', $roles)) {
-            $statussm = proposalWms::selectRaw('queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
-                ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
-                ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
-                ->FilterPriority($request->priority)
-                ->FilterStatus($request->status)
-                ->FilterStatusWM($request->statussm)
-                ->FilterAreas($request->areas)
-                ->FilterDate(request()->input('from'), request()->input('to'));
+            if (date('d') > 20) {
+                $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+                    ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                    ->FilterPriority($request->priority)
+                    ->FilterStatus($request->status)
+                    ->FilterStatusWM($request->statussm)
+                    ->FilterAreas($request->areas)
+                    ->FilterDate(request()->input('from'), request()->input('to'));
+            } else {
+                $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+                    ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                    ->FilterPriority($request->priority)
+                    ->FilterStatus($request->status)
+                    ->FilterStatusWM($request->statussm)
+                    ->FilterAreas($request->areas)
+                    ->FilterDate(request()->input('from'), request()->input('to'));
+            }
         } else {
             $group_unit = Dapertement::select('dapertements.group_unit')
                 ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
@@ -66,11 +77,12 @@ class ProposalWmController extends Controller
             proposal_wms.created_at,
             proposal_wms.updated_at,
             tblpelanggan.namapelanggan,
-            tblpelanggan.nomorrekening as customer_id,
+            proposal_wms.customer_id,
             tblpelanggan.alamat,
             tblpelanggan.idareal,
             proposal_wms.year,
-            proposal_wms.month
+            proposal_wms.month,
+            print_status
             ')
                 ->rightJoin('action_wms', 'action_wms.id', '=', 'action_wm_staff.action_wm_id')
                 ->rightJoin('proposal_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
@@ -86,30 +98,47 @@ class ProposalWmController extends Controller
             // dd();
 
             if (in_array('18', $roles) || in_array('15', $roles) || in_array('16', $roles) || in_array('14', $roles) || in_array('17', $roles)) {
-
-                $statussm->where('tblwilayah.group_unit', $group_unit)
-                    ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
-                    ->FilterPriority($request->priority)
-                    ->FilterStatus($request->status)
-                    ->FilterStatusWM($request->statussm)
-                    ->FilterAreas($request->areas)
-                    ->FilterDate(request()->input('from'), request()->input('to'));
-
-                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-
+                if (date('d') > 20) {
+                    $statussm->where('tblwilayah.group_unit', $group_unit)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'));
+                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
+                } else {
+                    $statussm->where('tblwilayah.group_unit', $group_unit)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'));
+                }
             }
             // dd($statussm->get());
             else {
-
-                $statussm->orWhere('staffs.id', Auth::user()->id)
-                    ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
-                    ->FilterPriority($request->priority)
-                    ->FilterStatus($request->status)
-                    ->FilterStatusWM($request->statussm)
-                    ->FilterAreas($request->areas)
-                    ->FilterDate(request()->input('from'), request()->input('to'));
+                if (date('d') > 20) {
+                    $statussm->orWhere('staffs.id', Auth::user()->id)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'));
+                } else {
+                    $statussm->orWhere('staffs.id', Auth::user()->id)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'));
+                }
             }
         }
+        // dd($statussm->get());
 
         if ($request->ajax()) {
             //set query
@@ -168,7 +197,11 @@ class ProposalWmController extends Controller
                 return $value;
             });
             $table->editColumn('status', function ($row) {
-                return $row->status ? $row->status : "";
+                if ($row->print_status == 1 && $row->status == "close") {
+                    return "close2";
+                } else {
+                    return $row->status ? $row->status : "";
+                }
             });
             $table->editColumn('periode', function ($row) {
                 return $row->year && $row->month ? $row->year . '-' . $row->month : "";
@@ -414,7 +447,7 @@ class ProposalWmController extends Controller
                 ->leftJoin('action_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
                 ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
                 ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
-                ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
+                ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                 ->where('action_wms.id', '=', null)
                 ->FilterPriority($request->priority)
                 ->FilterStatus($request->status)
@@ -461,7 +494,7 @@ class ProposalWmController extends Controller
 
                 $proposalWm->where('tblwilayah.group_unit', $group_unit)
                     ->where('action_wms.id', '=', null)
-                    ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
@@ -473,7 +506,7 @@ class ProposalWmController extends Controller
             } else {
 
                 $proposalWm->orWhere('staffs.id', Auth::user()->id)
-                    ->where('proposal_wms.created_at', 'like', date('Y-m') . '%')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
@@ -734,6 +767,8 @@ class ProposalWmController extends Controller
         action_wms.standWM2,
         action_wms.subdapertement_id,
         proposal_wms.code,
+        proposal_wms.queue,
+        proposal_wms.close_queue,
         proposal_wms.customer_id,
         proposal_wms.status,
         proposal_wms.status_wm,
@@ -745,11 +780,13 @@ class ProposalWmController extends Controller
         tblpelanggan.alamat,
         tblpelanggan.telp,
         tblpelanggan.idareal,
-        subdapertements.name
+        subdapertements.name,
+        dapertements.name as dapertement_name
         ')
             ->with('staff')->join('proposal_wms', 'proposal_wms.id', '=', 'action_wms.proposal_wm_id')
             ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
             ->join('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
+            ->join('dapertements', 'subdapertements.dapertement_id', '=', 'dapertements.id')
             ->where('proposal_wms.id', $id)->first();
         // dd($proposalWm);
         $staffs = actionWmStaff::selectRaw('staffs.id as staff_id, staffs.name as staff_name, staffs.code as staff_code,staffs.phone as staff_phone ')
@@ -763,6 +800,349 @@ class ProposalWmController extends Controller
         $date = date('d', strtotime($proposalWm->created_at));
         $year = date('Y', strtotime($proposalWm->created_at));
 
+        $proposal = proposalWms::where('id', $id)->first();
+        $proposal->print_status = 1;
+        $proposal->save(['updated_at' => false]);
+        // proposalWms::where('id', $id)->update(['print_status' => 1]);
+
         return view('admin.proposalWm.report', compact('proposalWm', 'dayName', 'monthName', 'date', 'year', 'staffs'));
+    }
+
+
+    // 5 tahun terakhir
+    public function index5Year(Request $request)
+    {
+        // asli
+        // $permissions = CtmStatussmPelanggan::where('statussm', 101)->where('tahun', date('Y'))->where('bulan', date('n'))
+        //     ->orWhere('statussm', 102)->where('tahun', date('Y'))->where('bulan', (date('n') - 1))
+        //     ->orWhere('statussm', 103)->where('tahun', date('Y'))->where('bulan', (date('n') - 1))->get();
+
+        abort_unless(\Gate::allows('proposalWm_report'), 403);
+        // uji coba
+        foreach (Auth::user()->roles as $data) {
+            $roles[] = $data->id;
+        }
+
+        $subdapertement_id = Auth::user()->subdapertement_id;
+        $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
+        if (in_array('8', $roles)) {
+            if (date('d') > 20) {
+                $statussm = proposalWms::selectRaw('
+                queue,tblpelanggan.idareal,
+                proposal_wms.code,
+                proposal_wms.customer_id,
+                proposal_wms.status_wm,
+                proposal_wms.priority,
+                proposal_wms.year,
+                proposal_wms.month,
+                proposal_wms.id,
+                proposal_wms.created_at,
+                proposal_wms.updated_at, 
+                proposal_wms.status,
+                count(customer_id) as jumlahpergantian')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                    ->having('jumlahpergantian', '>=', 2)
+                    ->FilterPriority($request->priority)
+                    ->FilterStatus($request->status)
+                    ->FilterStatusWM($request->statussm)
+                    ->FilterJmlhPergantian($request->jmlhpergantian)
+                    ->FilterAreas($request->areas)
+                    ->FilterDate(request()->input('from'), request()->input('to'))
+                    ->where('proposal_wms.status', 'close');
+            } else {
+                $statussm = proposalWms::selectRaw('
+                queue,tblpelanggan.idareal,
+                proposal_wms.code,
+                proposal_wms.customer_id,
+                proposal_wms.status_wm,
+                proposal_wms.priority,
+                proposal_wms.year,
+                proposal_wms.month,
+                proposal_wms.id,
+                proposal_wms.created_at,
+                proposal_wms.updated_at, 
+                proposal_wms.status,
+                count(customer_id) as jumlahpergantian')
+                    ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
+                    ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('-1 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                    ->having('jumlahpergantian', '>=', 2)
+                    ->FilterPriority($request->priority)
+                    ->FilterStatus($request->status)
+                    ->FilterStatusWM($request->statussm)
+                    ->FilterJmlhPergantian($request->jmlhpergantian)
+                    ->FilterAreas($request->areas)
+                    ->FilterDate(request()->input('from'), request()->input('to'))
+                    ->where('proposal_wms.status', 'close');
+            }
+        } else {
+            $group_unit = Dapertement::select('dapertements.group_unit')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+            $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();
+            $areas = $data;
+            // $statussm = proposalWms::selectRaw('tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+            //     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening');
+
+            $statussm = actionWmStaff::selectRaw('proposal_wms.status_wm,
+            queue,
+                proposal_wms.code,
+            proposal_wms.priority,
+            proposal_wms.status,
+            proposal_wms.id as id,
+            proposal_wms.created_at,
+            proposal_wms.updated_at,
+            tblpelanggan.namapelanggan,
+            proposal_wms.customer_id,
+            tblpelanggan.alamat,
+            tblpelanggan.idareal,
+            proposal_wms.year,
+            proposal_wms.month,
+            count(customer_id) as jumlahpergantian
+            ')
+                ->rightJoin('action_wms', 'action_wms.id', '=', 'action_wm_staff.action_wm_id')
+                ->rightJoin('proposal_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
+                ->join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
+                ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+
+
+                ->leftJoin('staffs', 'staffs.id', '=', 'action_wm_staff.staff_id');
+            foreach (Auth::user()->roles as $data) {
+                $roles[] = $data->id;
+            }
+            // dd(in_array('18', $roles));
+            // dd();
+
+            if (in_array('18', $roles) || in_array('15', $roles) || in_array('16', $roles) || in_array('14', $roles) || in_array('17', $roles)) {
+                if (date('d') > 20) {
+                    $statussm->where('tblwilayah.group_unit', $group_unit)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->having('jumlahpergantian', '>=', 2)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterJmlhPergantian($request->jmlhpergantian)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->where('proposal_wms.status', 'close');
+                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
+                } else {
+                    $statussm->where('tblwilayah.group_unit', $group_unit)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('-1 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->having('jumlahpergantian', '>=', 2)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterJmlhPergantian($request->jmlhpergantian)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->where('proposal_wms.status', 'close');
+                }
+            }
+            // dd($statussm->get());
+            else {
+                if (date('d') > 20) {
+                    $statussm->orWhere('staffs.id', Auth::user()->id)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->having('jumlahpergantian', '>=', 2)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterJmlhPergantian($request->jmlhpergantian)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->where('proposal_wms.status', 'close');
+                } else {
+                    $statussm->orWhere('staffs.id', Auth::user()->id)
+                        ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('-1 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        ->FilterPriority($request->priority)
+                        ->FilterStatus($request->status)
+                        ->having('jumlahpergantian', '>=', 2)
+                        ->FilterStatusWM($request->statussm)
+                        ->FilterJmlhPergantian($request->jmlhpergantian)
+                        ->FilterAreas($request->areas)
+                        ->FilterDate(request()->input('from'), request()->input('to'))
+                        ->where('proposal_wms.status', 'close');
+                }
+            }
+        }
+        // dd($statussm->groupBy('customer_id')->limit(10)->get());
+
+        if ($request->ajax()) {
+            //set query
+            $qry = $statussm->groupBy('customer_id')->orderBy('proposal_wms.updated_at', 'desc');
+
+            $table = Datatables::of($qry);
+
+            $table->addColumn('placeholder', '&nbsp;');
+            $table->addColumn('actions', '&nbsp;');
+
+            $table->editColumn('actions', function ($row) {
+                $viewGate = 'proposalWm_show';
+                $editGate = '';
+                $deleteGate = '';
+                $crudRoutePart = 'proposalwm';
+
+                return view('partials.datatablesActions5Year', compact(
+                    'viewGate',
+                    'editGate',
+                    'deleteGate',
+                    'crudRoutePart',
+                    'row'
+                ));
+            });
+
+            $table->editColumn('code', function ($row) {
+                return $row->code ? $row->queue . $row->code : "";
+            });
+
+            $table->editColumn('customer_id', function ($row) {
+                return $row->customer_id ? $row->customer_id : "";
+            });
+
+            $table->editColumn('status_wm', function ($row) {
+
+                if ($row->status_wm == 101) {
+                    return "WM Kabur";
+                } else if ($row->status_wm == 102) {
+                    return "WM Rusak";
+                } else if ($row->status_wm == 103) {
+                    return "WM Mati";
+                } else {
+                    "";
+                }
+            });
+
+            $table->editColumn('priority', function ($row) {
+                if ($row->priority === "3") {
+                    $value = "Hight";
+                } else if ($row->priority === "2") {
+                    $value = "Medium";
+                } else {
+                    $value = "";
+                }
+
+                return $value;
+            });
+            $table->editColumn('status', function ($row) {
+                return $row->status ? $row->status : "";
+            });
+            $table->editColumn('periode', function ($row) {
+                return $row->year && $row->month ? $row->year . '-' . $row->month : "";
+            });
+
+            $table->editColumn('created_at', function ($row) {
+                return $row->created_at ? $row->created_at : "";
+            });
+
+            $table->editColumn('updated_at', function ($row) {
+                return $row->updated_at ? $row->updated_at : "";
+            });
+
+
+            $table->editColumn('jumlahpergantian', function ($row) {
+                return $row->jumlahpergantian ? $row->jumlahpergantian : "";
+            });
+            $table->editColumn('idareal', function ($row) {
+                return $row->idareal ? $row->idareal : "";
+            });
+
+            $table->rawColumns(['actions', 'placeholder']);
+
+            $table->addIndexColumn();
+            return $table->make(true);
+        }
+        return view('admin.proposalWm.index5Year', compact('areas', 'subdapertement_id', 'roles'));
+    }
+
+    public function index5YearDetail($customer_id)
+    {
+        // asli
+        // $permissions = CtmStatussmPelanggan::where('statussm', 101)->where('tahun', date('Y'))->where('bulan', date('n'))
+        //     ->orWhere('statussm', 102)->where('tahun', date('Y'))->where('bulan', (date('n') - 1))
+        //     ->orWhere('statussm', 103)->where('tahun', date('Y'))->where('bulan', (date('n') - 1))->get();
+
+        abort_unless(\Gate::allows('proposalWm_report'), 403);
+        // uji coba
+        foreach (Auth::user()->roles as $data) {
+            $roles[] = $data->id;
+        }
+
+
+        if (date('d') > 20) {
+            $proposalWm = actionWms::selectRaw('action_wms.id, action_wms.code,
+                action_wms.proposal_wm_id,
+                action_wms.memo,
+                action_wms.old_image,
+                action_wms.new_image,
+                action_wms.image_done,
+                action_wms.noWM1,
+                action_wms.lng,
+                action_wms.lat,
+                action_wms.brandWM1,
+                action_wms.standWM1,
+                action_wms.noWM2,
+                action_wms.brandWM2,
+                action_wms.standWM2,
+                action_wms.subdapertement_id,
+                proposal_wms.code,
+                proposal_wms.queue,
+                proposal_wms.customer_id,
+                proposal_wms.status,
+                proposal_wms.priority,
+                proposal_wms.created_at,
+                proposal_wms.updated_at,
+                tblpelanggan.namapelanggan,
+                tblpelanggan.nomorrekening,
+                tblpelanggan.alamat,
+                tblpelanggan.telp,
+                tblpelanggan.idareal,
+                subdapertements.name
+                ')
+                ->with('staff')->join('proposal_wms', 'proposal_wms.id', '=', 'action_wms.proposal_wm_id')
+                ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
+                ->join('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
+                ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                ->where('proposal_wms.status', 'close')
+                ->where('customer_id', $customer_id)->get();
+        } else {
+            $proposalWm = actionWms::selectRaw('action_wms.id, action_wms.code,
+                action_wms.proposal_wm_id,
+                action_wms.memo,
+                action_wms.old_image,
+                action_wms.new_image,
+                action_wms.image_done,
+                action_wms.noWM1,
+                action_wms.lng,
+                action_wms.lat,
+                action_wms.brandWM1,
+                action_wms.standWM1,
+                action_wms.noWM2,
+                action_wms.brandWM2,
+                action_wms.standWM2,
+                action_wms.subdapertement_id,
+                proposal_wms.code,
+                proposal_wms.queue,
+                proposal_wms.customer_id,
+                proposal_wms.status,
+                proposal_wms.priority,
+                proposal_wms.created_at,
+                proposal_wms.updated_at,
+                tblpelanggan.namapelanggan,
+                tblpelanggan.nomorrekening,
+                tblpelanggan.alamat,
+                tblpelanggan.telp,
+                tblpelanggan.idareal,
+                subdapertements.name
+                ')
+                ->with('staff')->join('proposal_wms', 'proposal_wms.id', '=', 'action_wms.proposal_wm_id')
+                ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
+                ->join('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
+                ->whereBetween('proposal_wms.created_at', [date('Y-m-20', strtotime('-1 month', strtotime(date('Y-m-20', strtotime('-5 year', strtotime(date('Y-m-d'))))))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                ->where('proposal_wms.status', 'close')
+                ->where('customer_id', $customer_id)->get();
+        }
+        $customer = Customer::where('nomorrekening', $customer_id)->first();
+        // dd($proposalWm);
+
+        return view('admin.proposalWm.show5Year', compact('proposalWm', 'customer'));
     }
 }

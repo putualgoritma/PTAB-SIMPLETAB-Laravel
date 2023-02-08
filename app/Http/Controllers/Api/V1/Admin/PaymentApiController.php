@@ -42,23 +42,21 @@ class PaymentApiController extends Controller
 
     public function updatePay(Request $request)
     {
-        // $rules = array(
-        //     'nomorrekening' => 'required',
-        //     'bulanrekening' => 'required',
-        //     'tahunrekening' => 'required',
-        // );
+        $rules = array(
+            'form' => 'required',
+        );
 
-        // $validator = \Validator::make($request->all(), $rules);
-        // if ($validator->fails()) {
-        //     $messages = $validator->messages();
-        //     $errors = $messages->all();
-        //     return response()->json([
-        //         'status' => false,
-        //         'cek' => json_decode($request->form),
-        //         'message' => $errors,
-        //         'data' => $request->all(),
-        //     ]);
-        // }
+        $validator = \Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $messages = $validator->messages();
+            $errors = $messages->all();
+            return response()->json([
+                'status' => false,
+                'cek' => json_decode($request->form),
+                'message' => $errors,
+                'data' => $request->all(),
+            ]);
+        }
 
         $data = json_decode($request->form);
         $arrQry = [];
@@ -71,7 +69,7 @@ class PaymentApiController extends Controller
                     ->where('tahunrekening', '=', $value->tahunrekening)
                     ->where('bulanrekening', '=', $value->bulanrekening)
                     ->where('nomorrekening', '=', $value->nomorrekening)
-                    ->update(['statuslunas' => 0]);
+                    ->update(['statuslunas' => $value->statuslunas]);
                 if ($result != 1) {
                     $arrQry[] = ['nomorrekening' => $value->nomorrekening, 'bulanrekening' => $value->bulanrekening, 'tahunrekening' => $value->tahunrekening];
                 }

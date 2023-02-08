@@ -2,7 +2,7 @@
 @section('content')
 <div class="card">
     <div class="card-header">
-        Daftar Status WM
+        Daftar Status WM (Pergantian Lebih dari 2x dalam 5 tahun)
     </div>
 
     <div class="card-body">
@@ -29,13 +29,21 @@
                         <br>
                             </div> --}}
                             <div class="col-md-6">
-                            <label>Pilih Prioritas</label>
+                            <label>Pilih Jumlah Pergantian</label>
                             <div class="input-group">
-                                <select id="priority" name="priority" class="form-control">
-                                    <option value="">== Semua Prioritas ==</option>
+                                <select id="jmlhpergantian" name="jmlhpergantian" class="form-control">
+                                    <option value="">== Jumlah Pergantian ==</option>
                                     {{-- <option value="1">Low</option> --}}
-                                    <option value="2">Medium</option>
-                                    <option value="3">High</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                     <option value="4">4</option>
+                                    <option value="5">5</option>
+                                     <option value="6">6</option>
+                                    <option value="7">7</option>
+                                     <option value="8">8</option>
+                                     <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">>10</option>
                                 </select>
                             </div>  
                         </div>
@@ -66,17 +74,16 @@
                     <div class="col-md-12 row">
                     <div class="col-md-6">
                         
-                        <label>Pilih Status Usulan</label>
+                        {{-- <label>Pilih Status Usulan</label>
                     <div class="input-group">
                         <select id="status" name="status" class="form-control">
                             <option value="">== Semua status ==</option>
-                            <option value="pending">Menunggu</option>
-                            <option value="active">Aktif</option>
-                            <option value="work">Dikerjakan</option>
-                            <option value="close">Selesai</option>
-                            <option value="reject">Ditolak</option>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="work">Work</option>
+                            <option value="close">CLose</option>
                         </select>
-                    </div>
+                    </div> --}}
 
                  
 
@@ -114,17 +121,6 @@
         {{-- <a class="btn btn btn-danger" href="{{ route('admin.historywa.deletefilter', ['statussm'=>request()->input('statussm'), 'custom'=>request()->input('custom'), 'to'=>request()->input('to'), 'from'=>request()->input('from')]) }}" onclick="return confirm('Apakah anda ingin menghapus data(sesuai filter) ?')">
             hapus(sesuai filter)
         </a> --}}
-        @if (in_array('8',$roles)|| in_array('14', $roles) || in_array('17', $roles))
-        <a class="btn btn btn-success" href="{{ route('admin.proposalwm.create') }}">
-            Tambah Usulan WM
-        </a>            
-        @endif
-
-        @if (in_array('8',$roles)|| in_array('15', $roles) || in_array('16', $roles) || in_array('18', $roles))
-        <a class="btn btn btn-success" href="{{ route('admin.proposalwm.approveAll', ['statussm'=>request()->input('statussm'), 'priority'=>request()->input('priority'), 'areas'=>request()->input('areas')]) }}">
-            Setujui Semua
-        </a>            
-        @endif
 
         {{-- <a class="btn btn btn-warning" href="{{ route('admin.proposalwm.approveall') }}" onclick="return confirm('Apakah anda yakin mengirim semua usulan ?')">
             Teruskan Semua
@@ -143,7 +139,7 @@
                         <th>
                             No SBG
                         </th>
-                        <th>
+                        {{-- <th>
                             Status WM
                         </th>
                         <th>
@@ -151,16 +147,14 @@
                         </th>
                         <th>
                            Periode
-                        </th>
+                        </th> --}}
                         <th>
-                            Dibuat Tanggal
+                            Jumlah Pergantian
                          </th>
-                         <th>
+                         {{-- <th>
                             Diubah Tanggal
-                         </th>
-                        <th>
-                            Status
-                        </th>
+                         </th> --}}
+                      
                         <th>
                          
                         </th>
@@ -215,11 +209,11 @@
         }
 
 
-        let priority = searchParams.get('priority')
-        if (priority) {
-            $("#priority").val(priority);
+        let jmlhpergantian = searchParams.get('jmlhpergantian')
+        if (jmlhpergantian) {
+            $("#jmlhpergantian").val(jmlhpergantian);
         }else{
-            $("#priority").val('');
+            $("#jmlhpergantian").val('');
         }
         // console.log('custom : ', custom);
 
@@ -263,11 +257,11 @@
     retrieve: true,
     aaSorting: [],
     ajax: {
-      url: "{{ route('admin.proposalwm.index') }}",
+      url: "{{ route('admin.proposalwm.index5Year') }}",
       data: {
         'statussm': $("#statussm").val(),
         'status': $("#status").val(),
-        'priority': $("#priority").val(),
+        'jmlhpergantian': $("#jmlhpergantian").val(),
         'from': $("#from").val(),
         'to': $("#to").val(),
         'areas': $("#areas").val(),
@@ -277,14 +271,14 @@
         { data: 'code', name: 'code',searchable : false  },
         { data: 'idareal', name: 'idareal', searchable : false },
         { data: 'customer_id', name: 'proposal_wms.customer_id' },
-        { data: 'status_wm', name: 'status_wm', searchable : false  },
-        { data: 'priority', name: 'priority', searchable : false  },
-        { data: 'periode', name: 'periode', searchable : false  },
-        { data: 'created_at', name: 'created_at' },
-        { data: 'updated_at', name: 'updated_at' },
+        // { data: 'status_wm', name: 'status_wm', searchable : false  },
+        // { data: 'priority', name: 'priority', searchable : false  },
+        // { data: 'periode', name: 'periode', searchable : false  },
+         { data: 'jumlahpergantian', name: 'jumlahpergantian', searchable : false },
+        // { data: 'created_at', name: 'created_at' },
+        // { data: 'updated_at', name: 'updated_at' },
         // { data: 'status', name: 'status' },
-        { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>' +dataField+ '</button>' : dataField === 'close2' ?'<button type="button" class="btn btn-secondary btn-sm" disabled>' +'close'+ '</button>' : dataField === 'active' ?
-        '<button type="button" class="btn btn-success btn-sm" disabled> active </button>': dataField === 'close' ?'<button type="button" class="btn btn-primary btn-sm" disabled> close </button>': '<button type="button" class="btn btn-secondary btn-sm" disabled>' +dataField+ '</button>'; }, searchable : false  },
+     
         { data: 'actions', name: '{{ trans('global.actions') }}', searchable : false  }
     ],
     pageLength: 100,

@@ -15,6 +15,7 @@ class TicketApi extends Model
         'video',
         'lat',
         'lng',
+        'creator',
         'status',
         'category_id',
         'dapertement_id',

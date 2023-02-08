@@ -28,7 +28,7 @@
             /* text-align: center; */
         }
         .tengah {
-            width: 16%;
+            width: 25%;
             /* background-color: rgb(69, 18, 0); */
             margin: auto;
             /* text-align: center; */
@@ -93,12 +93,12 @@
     @for ($i = 0; $i < 5 ; $i++)
     <div class="" style="page-break-inside: avoid; ">
     <img src="{{ "https://simpletabadmin.ptab-vps.com/images/kopSuratPDAM.PNG" }}" alt="" style="width: 800px; height: 200px; ">
-    <div class="title" style="border-bottom : 1px">
+    {{-- <div class="title" style="border-bottom : 1px">
         <h4>PERUSAHAAB UMUM DAERAH AIR MINUM TIRTA AMERTHA BUANA KABUPATEN TABANAN
             <hr style="width: 240px;">
         </h4>
    
-    </div>
+    </div> --}}
     
     <div class="text-center">
         <h3>BERITA ACARA</h3>
@@ -106,7 +106,7 @@
             <hr style="width: 190px;">
         </h3>
         <div class="text-height">
-            Nomor : Perumda.TAB {{ $proposalWm->queue }}{{ $proposalWm->code }}
+            Nomor : Perumda.TAB {{ $proposalWm->close_queue }}{{ $proposalWm->code }}
         </div>
     </div>
     <br>
@@ -200,10 +200,10 @@ Water Meter mati
     <div class="">
         <div class="baris1">
             <div class="kiri">
-                <div class="" style="text-align : center">Mengetahui</div>
-                <div class="jabatan">pelanggan,</div>
+                <div class="" style="text-align : center">Pengawas</div>
+                <div class="jabatan"></div>
                 <div class="" style="text-align : center; margin-bottom : 70px;"></div>
-        <div class="nama"></div>
+        <div class="nama">{{ $staffs[count($staffs)-1]->staff_name }}</div>
         <div class="nip" style = "border-top-style: solid; "></div>
             </div>
         
@@ -211,19 +211,19 @@ Water Meter mati
                 {{-- <div class="" style="text-align : center">Tabanan,</div> --}}
                 <div class="" style="text-align : center">Dilaksanakan oleh</div>
                 <div class="jabatan" style="margin-bottom : 80px"></div>
-        <div class="nama" style = "border-bottom-style: solid; ">{{ $staffs[count($staffs)-1]->staff_name }}</div>
+        <div class="nama" style = "border-bottom-style: solid; "></div>
             </div>
         </div>
         <div class="tengah">
-            <div class="" style="text-align : center">Menyetujui</div>
+            <div class="" style="text-align : center">Mengetahui</div>
             <div class="jabatan" style="margin-bottom : 80px; text-align : center"></div>
         <div class="nama"></div>
 
-        <div class="nama" style = "border-bottom-style: solid; "></div>
+        <div class="nama" style = "border-bottom-style: solid; ">{{ $proposalWm->dapertement_name }}</div>
         {{-- <div class="nip" style = "border-top-style: solid; ">NIK.</div> --}}
         </div>
     </div> 
-    <br>
+    {{-- <br>
     <br>
     <br>
     Lembaran :
@@ -231,7 +231,7 @@ Water Meter mati
     <p>&nbsp &nbsp &nbsp &nbsp 1. Hub. Langganan</p>
     <p>&nbsp &nbsp &nbsp &nbsp 2. Pelanggan</p>
     <p>&nbsp &nbsp &nbsp &nbsp 3. Bag. Meter Segel</p>
-    <p>&nbsp &nbsp &nbsp &nbsp 4. Bag. SPI</p>
+    <p>&nbsp &nbsp &nbsp &nbsp 4. Bag. SPI</p> --}}
     <img src="{{ "https://simpletabadmin.ptab-vps.com/images/QRCodeSimTab.png" }}" alt="" style="height: 80px; margin-left: 700px;">
 </div>
     @endfor

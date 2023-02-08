@@ -801,4 +801,44 @@ trait TraitModel
 
         return $code;
     }
+
+
+
+    public function get_last_codeC($type, $gU, $arr = [])
+    {
+
+        if ($gU == "1") {
+            $s = "BAP";
+            $n = 14;
+        } else if ($gU == "2") {
+            $s = "BAPUK";
+            $n = 15;
+        } else if ($gU == "4") {
+            $s = "BAPUP";
+            $n = 15;
+        } else if ($gU == "5") {
+            $s = "BAPUB";
+            $n = 15;
+        } else if ($gU == "3") {
+            $s = "BAPUS";
+            $n = 15;
+        } else {
+            $s = "";
+            $n = 15;
+        }
+
+        $surat = '/' . $s . '/' . date('n') . '/' . date('Y');
+
+        if ($type == "proposal_wm") {
+            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->where('status', 'close')->orderBy('id', 'desc')
+                ->first();
+            // dd($proposal_wm);
+            if ($proposal_wm && (strlen($proposal_wm->close_queue) >= 1)) {
+                $code = $proposal_wm->close_queue + 1;
+            } else {
+                $code = 1;
+            }
+        }
+        return $code;
+    }
 }
