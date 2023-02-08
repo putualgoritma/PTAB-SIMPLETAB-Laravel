@@ -113,6 +113,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //test
     Route::resource('test-customers', 'TestController');
     Route::get('test-get', 'TestController@getTest');
+    Route::get('test-action-staff-store', 'ActionsController@actionStaffStoreTest');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 
@@ -279,6 +280,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('statuswm/approve', 'StatusWmController@approve')->name('statuswm.approve');
     Route::get('statuswm/reject', 'StatusWmController@reject')->name('statuswm.reject');
 
+    Route::get('proposalwm/index5Year', 'ProposalWmController@index5Year')->name('proposalwm.index5Year');
+    Route::get('proposalwm/index5YearDetail/{customer_id}', 'ProposalWmController@index5YearDetail')->name('proposalwm.index5YearDetail');
     Route::get('proposalwm', 'ProposalWmController@index')->name('proposalwm.index');
 
     Route::get('proposalwm/create', 'ProposalWmController@create')->name('proposalwm.create');
@@ -339,9 +342,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::resource('holiday', 'HolidayController');
     Route::resource('shift', 'ShiftController');
+
+    Route::get('duty/edit1', 'DutyController@edit1')->name('duty.edit1');
     Route::post('duty/{id}/approve', 'DutyController@approve')->name('duty.approve');
     Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');
+    Route::post('duty/action', 'DutyController@action')->name('duty.action');
     Route::resource('duty', 'DutyController');
+
+
 
     Route::post('leave/{id}/approve', 'LeaveController@approve')->name('leave.approve');
     Route::post('leave/{id}/reject', 'LeaveController@reject')->name('leave.reject');
@@ -363,7 +371,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {
     Route::post('wablast/callback', 'WhatsappBlastController@callback')->name('wablast.callback');
 });
+Route::get('full-calender', [FullCalenderController::class, 'index']);
 
+Route::post('full-calender/action', [FullCalenderController::class, 'action']);
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin\whatsapp', 'middleware' => ['auth']], function () {
     Route::delete('categoryWA/destroy', 'CategoryController@massDestroy')->name('categoryWA.massDestroy');
     Route::resource('categoryWA', 'CategoryController');
