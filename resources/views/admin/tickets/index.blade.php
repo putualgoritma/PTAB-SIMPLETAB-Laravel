@@ -82,6 +82,9 @@
                             {{ trans('global.ticket.fields.customer') }}
                         </th>
                         <th>
+                            {{ trans('global.ticket.fields.creator') }}
+                        </th>
+                        <th>
                             &nbsp;
                         </th>
                     </tr>
@@ -170,6 +173,7 @@
         { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>': dataField === 'close2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'close'+'</button>': dataField === 'pending2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'pending'+'</button>': dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
         { data: 'category', name: 'category', searchable : false  },
         { data: 'customer', name: 'customer_id' },
+        { data: 'creator', name: 'creator' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
 
     ],

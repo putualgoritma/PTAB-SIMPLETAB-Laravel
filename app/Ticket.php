@@ -26,7 +26,8 @@ class Ticket extends Model
         'delegated_at',
         'print_status',
         'print_spk_status',
-        'print_report_status'
+        'print_report_status',
+        'creator'
     ];
 
     public function dapertementReceive()

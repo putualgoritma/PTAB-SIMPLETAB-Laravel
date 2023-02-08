@@ -14,7 +14,8 @@ class ExtraController extends Controller
     {
 
         abort_unless(\Gate::allows('extra_access'), 403);
-        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'extra')->get();
+        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'extra')
+            ->orderBy('requests.created_at', 'DESC');
         // dd($qry);
         if ($request->ajax()) {
             //set query
@@ -25,8 +26,8 @@ class ExtraController extends Controller
 
             $table->editColumn('actions', function ($row) {
                 $viewGate = '';
-                $editGate = 'extra_edit';
-                $deleteGate = '';
+                $editGate = '';
+                $deleteGate = 'extra_delete';
                 $crudRoutePart = 'extra';
 
                 return view('partials.datatablesDuties', compact(

@@ -138,6 +138,7 @@ class TicketsApiController extends Controller
             'customer_id' => $dataForm->customer_id,
             'lat' => $dataForm->lat,
             'lng' => $dataForm->lng,
+            'creator' => 'member',
         );
 
         try {

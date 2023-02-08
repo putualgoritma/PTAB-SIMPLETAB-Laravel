@@ -20,6 +20,7 @@ class proposalWms extends Model
         'status',
         'queue',
         'staffAdd_date',
+        'print_status',
     ];
 
     public function scopeFilterStatusWM($query, $ststussm)
@@ -49,6 +50,16 @@ class proposalWms extends Model
     {
         if ($status != '') {
             $query->where('proposal_wms.status', $status);
+        }
+        return $query;
+    }
+
+    public function scopeFilterJmlhPergantian($query, $jmlhpergantian)
+    {
+        if ($jmlhpergantian == '11') {
+            $query->having('jumlahpergantian', '>', '10');
+        } else if ($jmlhpergantian != '') {
+            $query->having('jumlahpergantian', $jmlhpergantian);
         }
         return $query;
     }

@@ -368,6 +368,7 @@ class ActionsApiController extends Controller
             $img_path = "/images/action";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
             $dataImageName = [];
+            $dataImageNameTool = [];
 
             // cek status dan upload gambar dalam pengerjaan
             if ($action->status == 'pending' && $dataForm->status == 'active') {
@@ -445,7 +446,7 @@ class ActionsApiController extends Controller
                     }
                 }
             } else if ($action->status == 'active' && $dataForm->status == 'active') {
-                $oldImage = json_decode($action->image_tool);
+                $oldImage = json_decode($action->image_tools);
                 $index = 0;
 
                 for ($i = 1; $i <= $request->countImageTool; $i++) {
@@ -455,7 +456,7 @@ class ActionsApiController extends Controller
                         $file_extImage = $request->file('image_tools' . $i)->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
 
-                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "-tools." . $file_extImage;
 
                         $resourceImage->move($basepath . $img_path, $img_name);
 
@@ -480,7 +481,7 @@ class ActionsApiController extends Controller
             //     $data_image_tools = $name_image_tools;
             // }
 
-            for ($i = 1; $i <= 2; $i++) {
+            for ($i = 1; $i <= $request->countImageDone; $i++) {
 
                 if ($request->file('image_done' . $i)) {
                     $resourceImageDone = $request->file('image_done' . $i);
@@ -508,15 +509,14 @@ class ActionsApiController extends Controller
             $dataNewAction = array(
                 'status' => $statusAction,
                 // 'image_prework' => $data_image_prework,
-                // 'image_tools' => $data_image_tools,
+                // 'image_tools' => $dataImageNameTool,
                 'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
                 'memo' => $dataForm->memo,
             );
             if ($action->status != 'close' && $dataForm->status != 'close') {
 
-                if ($request->file('image_tools')) {
-                    $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($data_image_tools));
-                    $uploadAction = true;
+                if ($dataImageNameTool && count($dataImageNameTool) > 0) {
+                    $dataNewAction['image_tools'] = str_replace("\/", "/", json_encode($dataImageNameTool));
                 }
 
                 if ($request->file('image_prework')) {
@@ -1589,20 +1589,46 @@ class ActionsApiController extends Controller
 
             $action_staffs = ActionApi::where('id', $action_id)->with('staff')->first();
 
-            $staffs = StaffApi::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
-                ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
-                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
-                ->where('subdapertement_id', $action->subdapertement_id)
-                ->orderBy('work_units.serial_number', 'ASC')
-                ->get();
+            // $staffs = StaffApi::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
+            //     ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+            //     ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+            //     ->where('subdapertement_id', $action->subdapertement_id)
+            //     ->orderBy('work_units.serial_number', 'ASC')
+            //     ->get();
 
-            // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+            // // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+
+            // $action_staff_lists = DB::table('staffs')
+            //     ->join('action_staff', function ($join) {
+            //         $join->on('action_staff.staff_id', '=', 'staffs.id')
+            //             ->where('action_staff.status', '!=', 'close');
+            //     })
+            //     ->get();
 
             $action_staff_lists = DB::table('staffs')
                 ->join('action_staff', function ($join) {
                     $join->on('action_staff.staff_id', '=', 'staffs.id')
                         ->where('action_staff.status', '!=', 'close');
                 })
+                ->join('actions', 'actions.id', '=', 'action_staff.action_id')
+                ->where('actions.id', $action_id)
+                ->get();
+
+            $staffs = StaffApi::selectRaw('
+        staffs.id,staffs.code,
+        staffs.name,
+        staffs.phone,
+        work_units.name as work_unit_name,
+        SUM(CASE WHEN status != "close" THEN 1 ELSE 0 END) AS jumlahtindakan
+        ')
+                ->leftJoin('action_staff', 'staffs.id', '=', 'action_staff.staff_id')
+                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+                ->where('action_staff.status', '!=', null)
+                ->where('subdapertement_id', $action->subdapertement_id)
+                ->orWhere('action_staff.status', '=', null)
+                ->where('subdapertement_id', $action->subdapertement_id)
+                ->groupBy('staffs.id')
+                ->orderBy('work_units.serial_number', 'ASC')
                 ->get();
 
             $data = [

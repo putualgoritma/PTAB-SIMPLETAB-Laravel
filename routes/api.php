@@ -176,7 +176,7 @@ Route::group(['prefix' => 'open/staff', 'as' => 'staff.', 'namespace' => 'Api\V1
     Route::post('code', 'CustomersApiController@scanBarcode');
 });
 
-Route::group(['prefix' => 'close/staff', 'as' => 'staff.', 'namespace' => 'Api\V1\WaterMeter'], function () {
+Route::group(['prefix' => 'close/staff', 'as' => 'staff.', 'namespace' => 'Api\V1\WaterMeter', 'middleware' => 'auth:apiadmin'], function () {
     Route::post('watermeter/actionWmNewImageUpdate',  'actionWmApiController@actionWmNewImageUpdate');
     Route::post('watermeter/actionWmdoneImageUpdate',  'actionWmApiController@actionWmdoneImageUpdate');
     Route::get('watermeter/area/{id}',  'actionWmApiController@area');

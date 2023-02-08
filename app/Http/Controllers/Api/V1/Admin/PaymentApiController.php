@@ -52,6 +52,9 @@ class PaymentApiController extends Controller
             $errors = $messages->all();
             return response()->json([
                 'status' => false,
+
+                'cek' => json_decode($request->form),
+
                 'message' => $errors,
                 'data' => $request->all(),
             ]);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\v1\admin;
+namespace App\Http\Controllers\api\v1\admin1;
 
 use App\Action;
 use App\CustomerApi;
@@ -26,7 +26,7 @@ class TicketsApiController extends Controller
     use TraitModel;
     use WablasTrait;
 
-    public function tickets(Request $request)
+    public function tickets1(Request $request)
     {
         $department = '';
         $subdepartment = 0;
@@ -46,7 +46,9 @@ class TicketsApiController extends Controller
 
             if ($subdepartment == 0) {
                 $ticket = TicketApi::FilterStatus($request->status)
+                    ->FilterSbg($request->search)
                     ->FilterDepartment($department)
+                    ->orderBy(DB::raw("FIELD(tickets.status ,\"pending\", \"active\", \"close\" )"))
                     ->orderBy('id', 'DESC')
                     ->with('department')
                     ->with('customer')
@@ -65,11 +67,13 @@ class TicketsApiController extends Controller
                             ->where('action_staff.staff_id', '=', $staff);
                     })
                     ->FilterStatus($request->status)
+                    ->FilterSbg($request->search)
                     ->with('department')
                     ->with('customer')
                     ->with('category')
                     ->with('ticket_image')
                     ->with('action')
+                    ->orderBy(DB::raw("FIELD(tickets.status ,\"pending\", \"active\", \"close\" )"))
                     ->orderBy('created_at', 'DESC')
                     ->paginate(10, ['*'], 'page', $request->page);
             } else {
@@ -79,12 +83,14 @@ class TicketsApiController extends Controller
                             ->where('actions.subdapertement_id', '=', $subdepartment);
                     })
                     ->FilterStatus($request->status)
+                    ->FilterSbg($request->search)
                     ->with('department')
                     ->with('customer')
                     ->with('category')
                     ->with('ticket_image')
                     ->with('action')
                     ->where('tickets.dapertement_id', $department)
+                    ->orderBy(DB::raw("FIELD(tickets.status ,\"pending\", \"active\", \"close\" )"))
                     ->orderBy('created_at', 'DESC')
                     ->paginate(10, ['*'], 'page', $request->page);
             }
@@ -749,7 +755,7 @@ class TicketsApiController extends Controller
                 'message' => 'success',
                 'data' => $ticket,
                 'fotokeluhan' => !empty($ticket->ticket_image) && count($ticket->ticket_image) > 0 ? json_decode($ticket->ticket_image[0]->image) : null,
-                'fotoalat' => !empty($ticket->action) && count($ticket->action) > 0 ? $ticket->action[$n]->image_tools : null,
+                'fotoalat' => !empty($ticket->action) && count($ticket->action) > 0 ? json_decode($ticket->action[$n]->image_tools) : null,
                 'fotosebelum' => !empty($ticket->action) && count($ticket->action) > 0 ? $ticket->action[$n]->image_prework : null,
                 'fotopengerjaan' => !empty($ticket->action) && count($ticket->action) > 0 ? json_decode($ticket->action[$n]->image) : null,
                 'fotoselesai' => !empty($ticket->action) && count($ticket->action) > 0 ? json_decode($ticket->action[$n]->image_done) : null,

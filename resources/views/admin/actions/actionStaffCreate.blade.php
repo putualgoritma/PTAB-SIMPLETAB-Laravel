@@ -27,6 +27,9 @@
                             {{ trans('global.action_staff.fields.phone') }}
                         </th>
                         <th>
+                            Jumlah Pekerjaan
+                        </th>
+                        <th>
                             &nbsp;
                         </th>
                     </tr>
@@ -49,6 +52,9 @@
                             <td>
                             {{ $staff->phone ?? '' }}
                             </td>
+                            <td>
+                                {{ $staff->jumlahtindakan ?? '' }}
+                                </td>
                             <td>
                                 @can('action_staff_create')
                                     <form action="{{ route('admin.actions.actionStaffStore') }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">

@@ -44,6 +44,17 @@ class actionWmStaff extends Model
         }
         return $query;
     }
+
+    public function scopeFilterJmlhPergantian($query, $jmlhpergantian)
+    {
+        if ($jmlhpergantian == '11') {
+            $query->having('jumlahpergantian', '>', '10');
+        } else if ($jmlhpergantian != '') {
+            $query->having('jumlahpergantian', $jmlhpergantian);
+        }
+        return $query;
+    }
+
     public function scopeFilterDate($query, $from, $to)
     {
         if (!empty(request()->input('from')) != "" && !empty(request()->input('to')) != "") {

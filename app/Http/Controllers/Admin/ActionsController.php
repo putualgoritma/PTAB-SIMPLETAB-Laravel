@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Action;
+use App\ActionStaff;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreActionRequest;
@@ -236,12 +237,12 @@ class ActionsController extends Controller
 
         $action_staffs = Action::where('id', $action_id)->with('staff')->first();
 
-        $staffs = Staff::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
-            ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
-            ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
-            ->where('subdapertement_id', $action->subdapertement_id)
-            ->orderBy('work_units.serial_number', 'ASC')
-            ->get();
+        // $staffs = Staff::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
+        //     ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+        //     ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+        //     ->where('subdapertement_id', $action->subdapertement_id)
+        //     ->orderBy('work_units.serial_number', 'ASC')
+        //     ->get();
 
         // dd($staffs);
 
@@ -252,7 +253,27 @@ class ActionsController extends Controller
                 $join->on('action_staff.staff_id', '=', 'staffs.id')
                     ->where('action_staff.status', '!=', 'close');
             })
+            ->join('actions', 'actions.id', '=', 'action_staff.action_id')
+            ->where('actions.id', $action_id)
             ->get();
+
+        $staffs = Staff::selectRaw('
+        staffs.id,staffs.code,
+        staffs.name,
+        staffs.phone,
+        work_units.name as work_unit_name,
+        SUM(CASE WHEN status != "close" THEN 1 ELSE 0 END) AS jumlahtindakan
+        ')
+            ->leftJoin('action_staff', 'staffs.id', '=', 'action_staff.staff_id')
+            ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+            ->where('action_staff.status', '!=', null)
+            ->where('subdapertement_id', $action->subdapertement_id)
+            ->orWhere('action_staff.status', '=', null)
+            ->where('subdapertement_id', $action->subdapertement_id)
+            ->groupBy('staffs.id')
+            ->orderBy('work_units.serial_number', 'ASC')
+            ->get();
+        // dd($staffs);
 
         return view('admin.actions.actionStaffCreate', compact('action_id', 'staffs', 'action', 'action_staffs', 'action_staffs_list'));
 
@@ -324,7 +345,7 @@ class ActionsController extends Controller
                 $nameImage = strtolower($request->action_id);
                 $file_extImage = $image->extension();
                 $nameImage = str_replace(" ", "-", $nameImage);
-                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "." . $file_extImage;
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "-work." . $file_extImage;
 
                 $resourceImage->move($basepath . $img_path, $img_name);
                 $dataImageName[] = $img_name;
@@ -353,7 +374,7 @@ class ActionsController extends Controller
                 $file_extImage = $resourceImage->extension();
                 $nameImage = str_replace(" ", "-", $nameImage);
 
-                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "." . $file_extImage;
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $key . "-tool." . $file_extImage;
 
                 $resourceImage->move($basepath . $img_path, $img_name);
 
@@ -448,7 +469,12 @@ class ActionsController extends Controller
 
                 // dd($action->staff[0]->pivot->status);
                 $cekAllStatus = false;
-                $statusAction = 'close';
+                if (count($action->staff) > 0) {
+                    $statusAction = 'close';
+                } else {
+                    $statusAction = $action->status;
+                }
+                // $statusAction = 'close';
                 for ($status = 0; $status < count($action->staff); $status++) {
                     // dd($action->staff[$status]->pivot->status);
                     if ($action->staff[$status]->pivot->status == 'pending') {

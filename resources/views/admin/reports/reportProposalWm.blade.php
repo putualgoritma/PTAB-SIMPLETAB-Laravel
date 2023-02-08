@@ -12,14 +12,14 @@
         }
         .kiri {
             margin-left: 30px;
-            width: 16%;
+            width: 30%;
             /* background-color: rgb(5, 0, 69); */
             align-items: left;
             /* text-align: center; */
         }
         .kanan {
             margin-right: 30px;
-            width: 16%;
+            width: 30%;
             /* background-color: rgb(69, 18, 0); */
             margin-left: auto;
             /* text-align: center; */
@@ -50,14 +50,14 @@
             display: flex;
         }
         .kiri {
-            width: 16%;
+            width: 20%;
             /* background-color: rgb(5, 0, 69); */
             align-items: left;
             /* text-align: center; */
        
         }
         .kanan {
-            width: 16%;
+            width: 20%;
             /* background-color: rgb(69, 18, 0); */
             margin-left: auto;
             /* text-align: center; */
@@ -88,6 +88,7 @@
     <section class="sheet padding-10mm">
         {{-- @if ($jum+1 === 1) --}}
         <h2>REKAPITULASI PERGANTIAN WATER METER</h2>
+        <h3>{{ Auth::user()->name }}</h3>
         <h3>{{ $unitName }}</h3>
         {{-- <!-- <h3>BULAN : {{ count($tickets) > 0 ?  date('F Y', strtotime($tickets[0]->created_at)) : 'Tidak ada data kosong' }} </h3> --> --}}
         <h3>Bulan {{$month}} {{date('Y')}}</h3>
@@ -216,14 +217,14 @@
             <div class="jabatan">Ka. {{ $dapertement }}</div>
             <div class="" style="text-align : center; margin-bottom : 70px;"></div>
     <div class="nama"></div>
-    <div class="nip" style = "border-top-style: solid; "></div>
+    <div class="nip" style = "border-top-style: solid; border-top-width: 1px; "></div>
         </div>
     
         <div class="kanan">
             <div class="" style="text-align : center">Tabanan, {{ date('d') }} {{ $month }} {{ date('Y') }}</div>
             <div class="" style="text-align : center">Ka. {{ $sub_dapertement }}</div>
             <div class="jabatan" style="margin-bottom : 70px"></div>
-    <div class="nama" style = "border-bottom-style: solid; "></div>
+    <div class="nama" style = "border-bottom-style: solid; border-top-width: 1px; "></div>
         </div>
     </div>
     <div class="tengah">
@@ -231,7 +232,7 @@
         <div class="" style="text-align : center">Perumda Tirta Amertha Buana</div>
         <div class="jabatan" style="margin-bottom : 70px; text-align : center">{{ $menyetujui }}</div>
     <div class="nama">{{ $director_name }}</div>
-    <div class="nip" style = "border-top-style: solid; "></div>
+    <div class="nip" style = "border-top-style: solid; border-top-width: 1px; "></div>
     </div>
 </div>
 

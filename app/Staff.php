@@ -14,7 +14,8 @@ class Staff extends Model
         'dapertement_id',
         'subdapertement_id',
         'work_unit_id',
-        'pbk'
+        'pbk',
+        'NIK'
     ];
 
     public function dapertement()

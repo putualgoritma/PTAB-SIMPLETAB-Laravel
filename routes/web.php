@@ -340,10 +340,20 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('problematicabsence', 'ProblematicAbsenceController');
     Route::get('leave', 'LeaveController@index')->name('leave.index');
 
-    Route::resource('holiday', 'HolidayController');
+
+    Route::get('holiday/edit', 'holidayController@edit')->name('holiday.edit');
+    Route::get('holiday/check', 'holidayController@check')->name('holiday.check');
+    Route::get('holiday', 'holidayController@index')->name('holiday.index');
+    Route::get('holiday/create', 'holidayController@create')->name('holiday.create');
+    Route::post('holiday/{id}/approve', 'holidayController@approve')->name('holiday.approve');
+    Route::post('holiday/{id}/reject', 'holidayController@reject')->name('holiday.reject');
+    Route::post('holiday/action', 'holidayController@action')->name('holiday.action');
+    // Route::resource('holiday', 'HolidayController');
     Route::resource('shift', 'ShiftController');
 
     Route::get('duty/edit1', 'DutyController@edit1')->name('duty.edit1');
+
+    Route::get('duty/check', 'DutyController@check')->name('duty.check');
     Route::post('duty/{id}/approve', 'DutyController@approve')->name('duty.approve');
     Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');
     Route::post('duty/action', 'DutyController@action')->name('duty.action');

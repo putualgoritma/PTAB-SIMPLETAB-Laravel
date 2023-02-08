@@ -1,4 +1,17 @@
-@extends('layouts.admin')
+{{-- <!DOCTYPE html>
+<html>
+<head>
+    <title>How to Use Fullcalendar in Laravel 8</title>
+    
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+</head>
+<body> --}}
+  
+    @extends('layouts.admin3')
 @section('content')
 {{-- @can('holiday_create') --}}
     <div style="margin-bottom: 10px;" class="row">
@@ -16,139 +29,273 @@
         {{ trans('global.holiday.title_singular') }} {{ trans('global.list') }}
     </div>
     <div class="card-body">
-    <div class="form-group">
-        <div class="col-md-6">
-             <form action="" id="filtersForm">
-                <div class="input-group">
-                    <select id="type" name="type" class="form-control">
-                        <option value="">== Semua Tipe ==</option>
-                        <option value="holiday">Pelanggan</option>
-                        <option value="public">Umum</option>
-                    </select>
-                    <span class="input-group-btn">
-                    &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
-                    </span>
-                </div>                
-             </form>
-             </div> 
-        </div>
-        <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-holiday">
-                <thead>
-                    <tr>
-                        <th width="10">
-
-                        </th>
-                        <th>
-                            No.
-                        </th>
-                        {{-- <th>
-                            {{ trans('global.holiday.fields.id') }}
-                        </th> --}}
-                        <th>
-                            {{ trans('global.holiday.fields.title') }}
-                        </th>
-                        <th>
-                            {{ trans('global.holiday.fields.day') }}
-                        </th>
-                        <th>
-                            {{ trans('global.holiday.fields.date') }}
-                        </th>
-                        <th>
-                            {{ trans('global.holiday.fields.description') }}
-                        </th>
-                   
-                        {{-- <th>
-                            {{ trans('global.holiday.fields.updated_at') }}
-                        </th> --}}
-                        <th>
-                            &nbsp;
-                        </th>
-                    </tr>
-                </thead>
-                
-            </table>
+        <div class="container">
+            <br />
+            <h1 class="text-center text-primary"><u>Hari Libur</u></h1>
+            <br />
+        
+            <div id="calendar"></div>
+        
         </div>
     </div>
 </div>
+@endsection
 @section('scripts')
 @parent
+
+
+
+   
 <script>
-    $(function () {
-        let searchParams = new URLSearchParams(window.location.search)
-        let type = searchParams.get('type')
-        if (type) {
-            $("#type").val(type);
-        }else{
-            $("#type").val('');
+function myFunction(data) {
+    swal.close()
+    if(confirm("Are you sure you want to remove it?"))
+            {
+                $.ajax({
+                    url:'{{ route("admin.holiday.action") }}',
+                    type:"POST",
+                    data:{
+                        id:data,
+                        type:"delete"
+                    },
+                    success:function(response)
+                    {
+                        location.reload();
+                        // calendar.fullCalendar('refetchEvents');
+                        // alert("Event Deleted Successfully");
+                    }
+                })
+            }
+}
+$(document).ready(function () {
+
+    $.ajaxSetup({
+        headers:{
+            'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')
         }
-
-        // console.log('type : ', type);
-
-  let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
-  let deleteButton = {
-    text: deleteButtonTrans,
-    url: "",
-    className: 'btn-danger',
-    action: function (e, dt, node, config) {
-      var ids = $.map(dt.rows({ selected: true }).nodes(), function (entry) {
-          return $(entry).data('entry-id')
-      });
-
-      if (ids.length === 0) {
-        alert('{{ trans('global.datatables.zero_selected') }}')
-
-        return
-      }
-
-      if (confirm('{{ trans('global.areYouSure') }}')) {
-        $.ajax({
-          headers: {'x-csrf-token': _token},
-          method: 'POST',
-          url: config.url,
-          data: { ids: ids, _method: 'DELETE' }})
-          .done(function () { location.reload() })
-      }
-    }
-  }
-  let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-    @can('holiday_delete')
-    dtButtons.push(deleteButton)
-    @endcan
-
-  $('.datatable:not(.ajaxTable)').DataTable({ buttons: dtButtons })
-
-  let dtOverrideGlobals = {
-    buttons: dtButtons,
-    serverSide: true,
-    aaSorting: [],
-    ajax: {
-      url: "{{ route('admin.holiday.index') }}",
-      data: {
-        'type': $("#type").val(),
-      },
-      dataType: "JSON"
-    },
-    columns: [
-        { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
-        { data: 'title', name: 'title' },
-        { data: 'day', name: 'day' },
-        { data: 'date', name: 'date' },
-        { data: 'description', name: 'description' },
-        // { data: 'updated_at', name: 'updated_at' },
-        { data: 'actions', name: '{{ trans('global.actions') }}' }
-    ],
-    pageLength: 100,
-  };
-
-  $('.datatable-holiday').DataTable(dtOverrideGlobals);
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-        $($.fn.dataTable.tables(true)).DataTable()
-            .columns.adjust();
     });
-})
 
+    var calendar = $('#calendar').fullCalendar({
+        editable:false,
+        eventStartEditable: false,
+        disableDragging: true,
+        displayEventTime: false,
+        eventTextColor : '#FFFFFF',
+        header:{
+            left:'prev,next today',
+            center:'title',
+            right:'month'
+        },
+        events:'{{ route("admin.holiday.index") }}',
+        selectable:true,
+        
+        selectHelper: true,
+        select: async function (start, end, allDay) {
+	  const { value: formValues } = await Swal.fire({
+		title: 'Tambah Hari Libur',
+		html:
+        '<div class="form-group>'+
+                '<label for="title">Acara*</label>'+
+                '<input type="text" id="title" name="title" placeholder="Masukan Hari Libur" class="form-control" required>'+
+            '</div>'+
+            '<div class="form-group>'+
+                '<label for="title">Deskripsi*</label>'+
+                '<textarea id="description" class="form-control" placeholder="Masukan Deskripsi"></textarea>'+
+            '</div>'
+		  ,
+		focusConfirm: false,
+		preConfirm: () => {
+		  return [
+			document.getElementById('title').value,
+			document.getElementById('description').value,
+		  ]
+		}
+	  });
+
+            // var title = prompt('Event Title:');
+
+    //   	const { value: formValues } = await Swal.fire({
+	// 	title: 'Add Event',
+	// 	html:
+	// 	  '<input id="swalEvtTitle" class="swal2-input" placeholder="Enter title">' +
+	// 	  '<textarea id="swalEvtDesc" class="swal2-input" placeholder="Enter description"></textarea>' +
+	// 	  '<input id="swalEvtURL" class="swal2-input" placeholder="Enter URL">',
+	// 	focusConfirm: false,
+	// 	preConfirm: () => {
+	// 	  return [
+	// 		document.getElementById('swalEvtTitle').value,
+	// 		document.getElementById('swalEvtDesc').value,
+	// 		document.getElementById('swalEvtURL').value
+	// 	  ]
+	// 	}
+	//   });
+    console.log(""+document.getElementById('title').value)
+            if(formValues)
+            {
+                var start = $.fullCalendar.formatDate(start, 'Y-MM-DD HH:mm:ss');
+
+                var end = $.fullCalendar.formatDate(end, 'Y-MM-DD HH:mm:ss');
+
+                $.ajax({
+                    url:'{{ route("admin.holiday.action") }}',
+                    type:"POST",
+                    data:{
+                        title : document.getElementById('title').value,
+                        description : document.getElementById('description').value,
+                        start: start,
+                        end: end,
+                        type: 'add'
+                    },
+                    success:function(data)
+                    {
+                        console.log(data)
+                        if(data == "fail" ){
+                        alert("Data sudah ada");
+                    }
+                    else{
+                        calendar.fullCalendar('refetchEvents');
+                        alert("Event Created Successfully");
+                    }
+                    }
+                })
+            }
+        },
+        editable:true,
+        eventResize: function(event, delta)
+        {
+            var start = $.fullCalendar.formatDate(event.start, 'Y-MM-DD HH:mm:ss');
+            var end = $.fullCalendar.formatDate(event.end, 'Y-MM-DD HH:mm:ss');
+            var title = event.title;
+            var id = event.id;
+            $.ajax({
+                url:'{{ route("admin.holiday.action") }}',
+                type:"POST",
+                data:{
+                    title: title,
+                    start: start,
+                    end: end,
+                    id: id,
+                    type: 'update'
+                },
+                success:function(response)
+                {
+                    calendar.fullCalendar('refetchEvents');
+                    alert("Event Updated Successfully");
+                }
+            })
+        },
+        eventDrop: function(event, delta)
+        {
+            var start = $.fullCalendar.formatDate(event.start, 'Y-MM-DD HH:mm:ss');
+            var end = $.fullCalendar.formatDate(event.end, 'Y-MM-DD HH:mm:ss');
+            var title = event.title;
+            var id = event.id;
+            $.ajax({
+                url:'{{ route("admin.holiday.action") }}',
+                type:"POST",
+                data:{
+                    title: title,
+                    start: start,
+                    end: end,
+                    id: id,
+                    type: 'update'
+                },
+                success:function(response)
+                {
+                    calendar.fullCalendar('refetchEvents');
+                    alert("Event Updated Successfully");
+                }
+            })
+        },
+
+        eventClick:function(details)
+        {
+            var id = details.id;
+            var t = 3;
+            console.log(details)
+          
+            $.ajax({
+                    url:'{{ route("admin.holiday.edit") }}',
+                    type:"GET",
+                    data:{
+                        id: id,
+                    },
+                    success:function(data)
+                    {
+                        t = String(data.id);
+                        console.log(data)
+                        Swal.fire({
+		title: 'Add Event',
+		html:
+          '<div class="form-group>'+
+                '<label for="title">Acara*</label>'+
+                '<input type="text" id="title" name="title" placeholder="Masukan Hari Libur" value ="'+
+                data.title+
+                '" class="form-control" required>'+
+            '</div>'+
+            '<div class="form-group>'+
+                '<label for="title">Deskripsi*</label>'+
+                '<textarea id="description" class="form-control" placeholder="Masukan Deskripsi">'+
+                    data.description+
+                    '</textarea>'+
+            '</div>'+
+            '<button onclick="myFunction('+id+')">Click me</button>'
+            ,
+		focusConfirm: false,
+		preConfirm: () => {
+            alert(t)
+            $.ajax({
+                    url:'{{ route("admin.holiday.action") }}',
+                    type:"POST",
+                    data:{
+                        id : id,
+                        title : document.getElementById('title').value,
+                        description : document.getElementById('description').value,
+                        type: 'update'
+                    },
+                    success:function(data)
+                    {
+                        console.log(data)
+                        if(data == "fail" ){
+                        alert("Data sudah ada");
+                    }
+                    else{
+                        calendar.fullCalendar('refetchEvents');
+                        alert("Event Created Successfully");
+                    }
+                    }
+                })
+		}
+	  });
+                    }
+                })
+                
+   
+            // if(confirm("Are you sure you want to remove it?"))
+            // {
+            //     var id = event.id;
+            //     $.ajax({
+            //         url:'{{ route("admin.holiday.action") }}',
+            //         type:"POST",
+            //         data:{
+            //             id:id,
+            //             type:"delete"
+            //         },
+            //         success:function(response)
+            //         {
+            //             calendar.fullCalendar('refetchEvents');
+            //             alert("Event Deleted Successfully");
+            //         }
+            //     })
+            // }
+        }
+    });
+
+});
+  
 </script>
 @endsection
-@endsection
+
+  
+{{-- </body>
+</html> --}}
