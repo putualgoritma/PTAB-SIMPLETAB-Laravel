@@ -13,6 +13,7 @@ use App\proposalWms;
 use App\Staff;
 use App\StaffApi;
 use App\Subdapertement;
+use App\Traits\TraitModel;
 use App\User;
 use App\wa_history;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ use App\Traits\WablasTrait;
 
 class actionWmApiController extends Controller
 {
+    use TraitModel;
     use WablasTrait;
     // index untuk data water meter
     public function index($id, Request $request)
