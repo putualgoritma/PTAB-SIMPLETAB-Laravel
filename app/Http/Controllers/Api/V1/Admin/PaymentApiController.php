@@ -81,7 +81,7 @@ class PaymentApiController extends Controller
                 'status' => true,
                 'message' => 'Data Pembayaran Update Success',
                 'data' => $result,
-                'failed' => $arrQry
+                //'failed' => $arrQry
             ]);
         } catch (QueryException $e) {
             return response()->json([

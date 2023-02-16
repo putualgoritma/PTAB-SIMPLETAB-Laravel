@@ -178,6 +178,16 @@
                         </a>
                     </li>
                     @endcan
+
+                    @can('proposalWm_report')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.report.reportPWM') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-file"></i>
+                       Rekap Usulan Wm
+                        </a>
+                    </li>
+                    @endcan
  
                     @can('proposalWm_report')
                     <li class="nav-item">
@@ -187,7 +197,7 @@
                        Rekap Pergantian Wm
                         </a>
                     </li>
-                    @endcan
+                    @endcan                    
 
                     @can('proposalWm_report')
                     <li class="nav-item">

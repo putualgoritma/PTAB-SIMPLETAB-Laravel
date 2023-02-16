@@ -138,6 +138,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('reports/reportProposalWm', 'ReportsController@reportProposalWm')->name('report.reportProposalWm');
 
     Route::post('reports/reportProposalWm/proses', 'ReportsController@reportProposalWmProses')->name('report.reportProposalWmproses');
+
+    Route::get('reports/report-pwm', 'ReportsController@reportPWM')->name('report.reportPWM');
+
+    Route::post('reports/report-pwm/process', 'ReportsController@reportPWMProcess')->name('report.reportPWMProcess');
     // baru
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');

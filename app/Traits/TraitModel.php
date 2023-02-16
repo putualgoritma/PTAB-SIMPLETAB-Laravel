@@ -830,7 +830,7 @@ trait TraitModel
         $surat = '/' . $s . '/' . date('n') . '/' . date('Y');
 
         if ($type == "proposal_wm") {
-            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->where('status', 'close')->orderBy('id', 'desc')
+            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->where('status', 'close')->orderBy('close_queue', 'desc')
                 ->first();
             // dd($proposal_wm);
             if ($proposal_wm && (strlen($proposal_wm->close_queue) >= 1)) {

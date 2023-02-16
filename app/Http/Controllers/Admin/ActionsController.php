@@ -401,22 +401,28 @@ class ActionsController extends Controller
 
         $action = Action::where('id', $request->action_id)->with('ticket')->with('staff')->first();
         $cekAllStatus = false;
-        $statusAction = $request->status;
+        $statusAction = $request->status;        
 
         $dateNow = date('Y-m-d H:i:s');
+
+        //check if current status is close
+        $date_end = $dateNow;
+        if($action->status == 'close'){
+            $date_end = $action->end;
+        }
 
         if ($request->file('image')) {
             $dataNewAction = array(
                 'status' => $statusAction,
                 'image' => str_replace("\/", "/", json_encode($dataImageName)),
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $date_end,
                 'memo' => $request->memo,
                 'todo' => $request->todo,
             );
         } else {
             $dataNewAction = array(
                 'status' => $statusAction,
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $date_end,
                 'memo' => $request->memo,
                 'todo' => $request->todo,
             );

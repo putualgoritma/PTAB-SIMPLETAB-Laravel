@@ -512,13 +512,13 @@ class actionWmApiController extends Controller
             }
 
 
-            $last_code = $this->get_last_codeS('proposal_wm', $gU);
+            $last_code = $this->get_last_codeC('proposal_wm', $gU);
             // membuat nomor surat end
 
             $proposal_wms = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
             $proposalWm = $proposal_wms;
-            $proposal->close_queue = $last_code;
-            $proposal->code = '/' . $s . '/' . date('n') . '/' . date('Y');
+            $proposal_wms->close_queue = $last_code;
+            $proposal_wms->code = '/' . $s . '/' . date('n') . '/' . date('Y');
             $customer_id =  $proposal_wms->customer_id;
             $proposal_wms->where('id', $proposal_wms->proposal_wm_id);
             // $proposal_wms->status = $dataForm->status;
