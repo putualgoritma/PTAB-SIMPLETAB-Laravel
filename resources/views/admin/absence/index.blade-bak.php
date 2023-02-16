@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 @section('content')
-{{-- @can('permit_create') --}}
+{{-- @can('absence_create') --}}
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-3">
-            <a class="btn btn-success" href="{{ route('admin.permit.create',['type'=>'permitIn']) }}">
-                {{ trans('global.add') }} {{ trans('global.permit.title_singular') }}
+        <div class="col-lg-12">
+            <a class="btn btn-success" href="{{ route('admin.absence.create') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}
             </a>
         </div>
     </div>
@@ -13,7 +13,7 @@
 <div class="card">
 
     <div class="card-header">
-        {{ trans('global.permit.title_singular') }} {{ trans('global.list') }}
+        {{ trans('global.absence.title_singular') }} {{ trans('global.list') }}
     </div>
     <div class="card-body">
     <div class="form-group">
@@ -22,7 +22,7 @@
                 <div class="input-group">
                     <select id="type" name="type" class="form-control">
                         <option value="">== Semua Tipe ==</option>
-                        <option value="permit">Pelanggan</option>
+                        <option value="absence">Pelanggan</option>
                         <option value="public">Umum</option>
                     </select>
                     <span class="input-group-btn">
@@ -33,7 +33,7 @@
              </div> 
         </div>
         <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-permit">
+            <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-absence">
                 <thead>
                     <tr>
                         <th width="10">
@@ -43,31 +43,38 @@
                             No.
                         </th>
                         {{-- <th>
-                            {{ trans('global.permit.fields.id') }}
+                            {{ trans('global.absence.fields.id') }}
                         </th> --}}
                         <th>
-                            {{ trans('global.permit.fields.user_name') }}
+                            {{ trans('global.absence.fields.day') }}
                         </th>
                         <th>
-                            {{ trans('global.permit.fields.category') }}
+                            {{ trans('global.absence.fields.user') }}
                         </th>
                         <th>
-                            {{ trans('global.permit.fields.type') }}
+                            {{ trans('global.absence.fields.lat') }}
                         </th>
                         <th>
-                            {{ trans('global.permit.fields.date') }}
-                        </th>
-
-                        <th>
-                            {{ trans('global.permit.fields.description') }}
+                            {{ trans('global.absence.fields.lng') }}
                         </th>
                         <th>
-                            {{ trans('global.permit.fields.status') }}
+                            {{ trans('global.absence.fields.register') }}
                         </th>
-                   
-                        {{-- <th>
-                            {{ trans('global.permit.fields.updated_at') }}
-                        </th> --}}
+                        <th>
+                            {{ trans('global.absence.fields.absence_category') }}
+                        </th>
+                        <th>
+                            {{ trans('global.absence.fields.value') }}
+                        </th>
+                        <th>
+                            {{ trans('global.absence.fields.late') }}
+                        </th>
+                        <th>
+                            {{ trans('global.absence.fields.image') }}
+                        </th>
+                        <th>
+                            {{ trans('global.absence.fields.user_image') }}
+                        </th>
                         <th>
                             &nbsp;
                         </th>
@@ -119,7 +126,7 @@
     }
   }
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-    @can('permit_delete')
+    @can('absence_delete')
     dtButtons.push(deleteButton)
     @endcan
 
@@ -130,7 +137,7 @@
     serverSide: true,
     aaSorting: [],
     ajax: {
-      url: "{{ route('admin.permit.index') }}",
+      url: "{{ route('admin.absence.index') }}",
       data: {
         'type': $("#type").val(),
       },
@@ -139,19 +146,27 @@
     columns: [
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no' },
-        { data: 'user_name', name: 'user_name' },
-        { data: 'category', name: 'category' },
-        { data: 'type', name: 'type' },
-        { data: 'date', name: 'date' },
-        { data: 'description', name: 'description' },
-        { data: 'status', name: 'status' },
+        { data: 'day', name: 'day' },
+        { data: 'user', name: 'user' },
+        { data: 'lat', name: 'lat' },
+        { data: 'lng', name: 'lng' },
+        { data: 'register', name: 'register' },
+        { data: 'absence_category', name: 'absence_category' },
+        { data: 'value', name: 'value' },
+        { data: 'late', name: 'late' },
+        { data: 'image', name: 'image' ,  render: function( data, type, full, meta ) {
+                        return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
+                    }},
+        { data: 'user_image', name: 'user_image' ,  render: function( data, type, full, meta ) {
+                        return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
+                    }},
         // { data: 'updated_at', name: 'updated_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,
   };
 
-  $('.datatable-permit').DataTable(dtOverrideGlobals);
+  $('.datatable-absence').DataTable(dtOverrideGlobals);
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         $($.fn.dataTable.tables(true)).DataTable()
             .columns.adjust();

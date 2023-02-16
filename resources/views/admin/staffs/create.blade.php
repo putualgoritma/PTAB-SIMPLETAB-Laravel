@@ -105,6 +105,34 @@
                 @endif
             </div>
 
+            <div class="form-group {{ $errors->has('work_type_id') ? 'has-error' : '' }}">
+                <label for="work_type_id">{{ trans('global.staff.fields.work_type') }}*</label>
+                <select id="work_type_id" name="work_type_id" class="form-control" value="{{ old('work_type_id', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih work_type--</option>
+                    @foreach ($work_types as $key=>$work_type )
+                        <option value="{{$work_type->id}}">{{$work_type->title}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('work_type_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('work_type_id') }}
+                    </em>
+                @endif
+            </div>
+            <div class="form-group {{ $errors->has('job_id') ? 'has-error' : '' }}">
+                <label for="job_id">{{ trans('global.staff.fields.job') }}*</label>
+                <select id="job_id" name="job_id" class="form-control" value="{{ old('job_id', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih job--</option>
+                    @foreach ($jobs as $key=>$job )
+                        <option value="{{$job->id}}">{{$job->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('job_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('job_id') }}
+                    </em>
+                @endif
+            </div>
 
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>

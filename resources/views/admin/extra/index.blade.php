@@ -139,10 +139,10 @@
     columns: [
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no' },
-        { data: 'user_name', name: 'user_name' },
+        { data: 'staff_name', name: 'staff_name' },
         { data: 'category', name: 'category' },
         { data: 'type', name: 'type' },
-        { data: 'date', name: 'date' },
+        { data: 'start', name: 'start' },
         { data: 'description', name: 'description' },
         { data: 'status', name: 'status' },
         // { data: 'updated_at', name: 'updated_at' },

@@ -4,443 +4,566 @@ namespace App\Http\Controllers\Api\V1\Absence;
 
 use App\Absence;
 use App\Absence_categories;
+use App\AbsenceLog;
+use App\AbsenceRequest;
 use App\Holiday;
 use App\Http\Controllers\Controller;
 use App\Requests;
 use App\Shift;
+use App\ShiftGroups;
 use App\ShiftPlannerStaff;
+use App\ShiftPlannerStaffs;
 use App\ShiftStaff;
+use App\WorkTypeDays;
+use App\WorkUnit;
 use Illuminate\Http\Request;
 
 class AbsenceApiController extends Controller
 {
 
+    // ketika sudah dibuatkan absence oleh sistem
     public function index(Request $request)
     {
+        // untuk menampung data menu
+        $reguler = "";
+        $holiday = "";
+        $break = "";
+        $duty = "";
+        $finish = "";
+        $excuse_id = "";
+        $absenceOut = [];
 
+        // mematikan menu
+        $menuReguler = "OFF";
+        $menuHoliday = "OFF";
+        $menuBreak = "OFF";
+        $menuExcuse = "OFF";
+        $menuDuty = "OFF";
+        $menuFinish = "OFF";
+
+        // mematikan batas radius di absence
+        $geofence_off = "OFF";
+
+        $coordinat = WorkUnit::join('staffs', 'staffs.work_unit_id', '=', 'work_units.id')
+            ->join('work_types', 'staffs.work_type_id', '=', 'work_types.id')
+            ->where('staffs.id', '404')->first();
         $menu = "";
-        $data = [];
-        $next = [];
-        // $duty = Requests::where('category', 'duty')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->first();
-        // $absence_out = Requests::where('category', 'absence_out')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->first();
-        // $shift = ShiftStaff::join('shifts', 'shifts.id', '=', 'shift_staff.shift_id')
-        //     ->where('date', date('Y-m-d'))
-        //     ->where('staff_id', $request->user_id)
-        //     ->first();
-        // $requests = Requests::where('date', '<=', date('Y-m-d'))
-        //     ->where('end', '>=', date('Y-m-d'))
-        //     ->where('user_id', '=', $request->user_id)
-        //     ->where('status', '=', 'approve')
-        //     ->where('category', 'cuti')
-        //     ->first();
+        $leave = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'leave')->first();
+        $permission = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'permission')->first();
+        $duty = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'duty')->first();
 
-        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d'))->whereDate('end', '>=', date('Y-m-d'))->first();
-        // cek cuti
-        // if ($requests) {
-        //     $menu = 'OFF';
-        //     return response()->json([
-        //         'message' => 'Success',
-        //         'menu' => $menu,
-        //         'date' => date('Y-m-d h:i:s')
-        //     ]);
-        // }
+        // return response()->json([
+        //     'message' => 'Success',
+        //     'leave' => $leave,
+        //     'permission' => $permission,
+        //     'duty' => $duty,
+        //     'date' => date('Y-m-d h:i:s')
+        // ]);
 
-        // cek shift
-        // else if ($shift) {
-        //     $data1 = date('H:i:s', strtotime($shift->start_in));
-        //     $data2 = date('H:i:s', strtotime($shift->end_in));
-
-        //     $data3 = date('H:i:s', strtotime($shift->start_breakin));
-        //     $data4 = date('H:i:s', strtotime($shift->end_breakin));
-
-        //     $data5 = date('H:i:s', strtotime($shift->start_breakout));
-        //     $data6 = date('H:i:s', strtotime($shift->end_breakout));
-
-        //     $data7 = date('H:i:s', strtotime($shift->start_out));
-        //     $data8 = date('H:i:s', strtotime($shift->end_out));
-        //     // $r[] = $data1;
-
-
-
-        //     // Next
-        //     if ($data2 < date('H:i:s') && $data3 > date('H:i:s')) {
-        //         $menu = "";
-        //         $nextN = "Istirahat Mulai";
-        //         $nextS = $data3;
-        //         $nextE = $data4;
-        //     } else if ($data4 < date('H:i:s') && $data5 > date('H:i:s')) {
-        //         $menu = "";
-        //         $nextN = "Istirahat Selesai";
-        //         $nextS = $data5;
-        //         $nextE = $data6;
-        //     } else if ($data6 < date('H:i:s') && $data7 > date('H:i:s')) {
-        //         $menu = "";
-        //         $nextN = "Pulang";
-        //         $nextS = $data7;
-        //         $nextE = $data8;
-        //     } else {
-        //         $menu = "close";
-        //         $nextN = "";
-        //         $nextS = "";
-        //         $nextE = "";
-        //     }
-
-
-        //     if ($data1 < date('H:i:s') && $data2 > date('H:i:s')) {
-        //         $menu = "IS";
-        //         $nextN = "Istirahat Mulai";
-        //         $nextS = $data3;
-        //         $nextE = $data4;
-        //         $d = Absence::where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->first();
-        //         if ($d) {
-        //             $menu = "";
-        //         }
-        //     }
-        //     if ($data3 < date('H:i:s') && $data4 > date('H:i:s')) {
-        //         $menu = "BIS";
-        //         $nextN = "Istirahat Selesai";
-        //         $nextS = $data5;
-        //         $nextE = $data6;
-        //         $d = Absence::where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->first();
-        //         if ($d) {
-        //             $menu = "";
-        //         }
-        //     }
-        //     if ($data5 < date('H:i:s') && $data6 > date('H:i:s')) {
-        //         $menu = "BOS";
-        //         $nextN = "Pulang";
-        //         $nextS = $data7;
-        //         $nextE = $data8;
-        //         $d = Absence::where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->first();
-        //         if ($d) {
-        //             $menu = "";
-        //         }
-        //     }
-        //     if ($data7 < date('H:i:s') && $data8 > date('H:i:s')) {
-        //         $menu = "IO";
-        //         $nextN = "";
-        //         $nextS = "";
-        //         $nextE = "";
-        //         $d = Absence::where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->first();
-        //         if ($d) {
-        //             $menu = "";
-        //         }
-        //     }
-
-        //     if ($menu == "") {
-        //         $data = Absence::where('user_id', $request->user_id)->whereDate('register', '=', $request->register)->get();
-        //         $menu == "wait";
-        //     }
-
-        //     return response()->json([
-        //         'message' => 'Success',
-        //         'menu' => $menu,
-        //         'data' => $data,
-        //         'shift_id' => $shift->id,
-        //         // 'nextN' => $nextN,
-        //         // 'nextS' => $nextS,
-        //         // 'nextE' => $nextE,
-        //         // 'data1' => $data1,
-        //         // 'data2' => $data2,
-        //         // 'data3' => $data3,
-        //         // 'data4' => $data4,
-        //         // 'data5' => $data5,
-        //         // 'data6' => $data6,
-        //         // 'data7' => $data7,
-        //         // 'data8' => $data8,
-        //         'date' => date('Y-m-d h:i:s')
-        //     ]);
-        // }
         // cek hari libur
-        if ($holiday) {
+        if ($leave) {
             $menu = 'OFF';
             return response()->json([
                 'message' => 'Success',
-                'menu' => $menu,
+                'menu' => [
+                    'menuReguler' => $menuReguler,
+                    'menuHoliday' => $menuHoliday,
+                    'menuBreak' => $menuBreak,
+                    'menuExcuse' => $menuExcuse,
+                    'menuDuty' => $menuDuty,
+                    '$menuFinish' =>  $menuFinish
+                ],
+                'date' => date('Y-m-d h:i:s')
+            ]);
+        } else if ($permission) {
+            $menu = 'OFF';
+            return response()->json([
+                'message' => 'Success',
+                'menu' => [
+                    'menuReguler' => $menuReguler,
+                    'menuHoliday' => $menuHoliday,
+                    'menuBreak' => $menuBreak,
+                    'menuExcuse' => $menuExcuse,
+                    'menuDuty' => $menuDuty,
+                    '$menuFinish' =>  $menuFinish
+                ],
+                'date' => date('Y-m-d h:i:s')
+            ]);
+        } else if ($duty) {
+            $menu = 'OFF';
+            return response()->json([
+                'message' => 'Success',
+                'menu' => [
+                    'menuReguler' => $menuReguler,
+                    'menuHoliday' => $menuHoliday,
+                    'menuBreak' => $menuBreak,
+                    'menuExcuse' => $menuExcuse,
+                    'menuDuty' => $menuDuty,
+                    '$menuFinish' =>  $menuFinish
+                ],
                 'date' => date('Y-m-d h:i:s')
             ]);
         }
-        // cek jadwal biasa
+        // cek jadwal kerja
         else {
+
+            // cek absen masuk saat ini
+            $absenceBreak = AbsenceLog::selectRaw('absence_id, absence_logs.status, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id')
+                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('staff_id', '323')
+                ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+                ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                ->where('absence_logs.status', '=', 0)
+                ->where('absence_logs.absence_category_id', '=', 1)
+                ->orderBy('absence_logs.id', 'DESC')
+                ->first();
+
+
+            $braeakCheck = null;
+            // cek apa sudah melakukan absen masuk
+            if ($absenceBreak) {
+                // cek apa ada permisi di tanggal ini
+                $absence_excuse = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
+                    ->where('end', '>=', date('Y-m-d H:i:s'))
+                    ->where('category', 'excuse')->first();
+                if ($absence_excuse) {
+                    $excuse = AbsenceLog::selectRaw('absence_logs.status, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
+                        ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                        ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                        ->where('staff_id', '323')
+                        ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                        ->where('absence_logs.status', '=', 1)
+                        ->where('absence_categories.type', '=', 'excuse')
+                        ->where('absence_categories.queue', '=', '2')
+                        ->orderBy('absence_logs.id', 'DESC')
+                        ->first();
+                    if ($excuse) {
+                        $excuse_id = $excuse->id;
+                    }
+                    $menuExcuse = "ON";
+                }
+
+                // cek apa ada data absen istirahat dengan expired_date waktu saat ini
+                $break = AbsenceLog::selectRaw('absence_logs.status, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.absence_id as absence_id, absence_logs.id as id')
+                    ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                    ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('staff_id', '323')
+                    ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+                    ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                    ->where('absence_categories.type', '=', 'break')
+                    ->where('absence_logs.status', '=', '1')
+                    ->orderBy('absence_logs.id', 'ASC')
+                    ->first();
+                if ($break) {
+                    $menuBreak = "ON";
+                }
+                // cari absen out expired hari ini untuk mengambil expired date
+                $absenceOut = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id')
+                    ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                    ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('staff_id', '323')
+                    // ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+                    ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                    ->where('absence_logs.status', '=', 1)
+                    ->where('absence_logs.absence_id', $absenceBreak->absence_id)
+                    ->where('absence_categories.id', '=', '2')
+                    ->where('absence_categories.type', '!=', 'break')
+                    ->orderBy('absence_logs.start_date', 'ASC')
+                    ->first();
+                // jika belum ada absen istirahat
+
+
+            }
+            // cek end
+
             if (date('w') == '0') {
                 $day = '7';
             } else {
                 $day = date('w');
             }
-            $absence = Absence::selectRaw('queue, status_active')
-                ->rightJoin('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+
+            // cek absen, apa ada absen hari ini
+            $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
+                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
                 ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
                 ->where('staff_id', '323')
-                ->where('day_id', '3')
-                ->where('created_by_staff_id', null)
-                ->orderBy('absence_logs.id', 'ASC')
+                ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+                ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                ->where('absence_logs.status', '=', 1)
+                ->where('absence_categories.type', '!=', 'break')
+                ->orderBy('absence_logs.start_date', 'ASC')
                 ->first();
+            $a1 = "1";
+
+            // jika ada absen hari ini
             if ($absence) {
-                $absen = Absence_categories::selectRaw('absence_categories.*, work_type_day.start, work_type_day.end')
-                    ->join('work_type_day', 'work_type_day.absence_category_id', '=', 'absence_categories.id')
-                    ->join('work_types', 'work_type_day.work_type_id', '=', 'work_types.id')
-                    ->where('work_types.id', '1')
-                    ->where('absence_categories.type', $absence->status_active)
-                    ->where('queue', $absence->queue)
-                    ->first();
-                if ($absen == null) {
-                    $absen = "Absen Hari Ini Sudah Selesai";
-                }
-            } else {
-                $shift = ShiftPlannerStaff::get();
-                if ($shift) {
-                } else {
-                    $absen = Absence_categories::selectRaw('absence_categories.*, work_type_day.start, work_type_day.end')
-                        ->join('work_type_day', 'work_type_day.absence_category_id', '=', 'absence_categories.id')
-                        ->join('work_types', 'work_type_day.work_type_id', '=', 'work_types.id')
+                if ($absence->shift_planner_id === 0) {
+                    $absen = AbsenceLog::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
+                        ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+                        ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
                         ->where('work_types.id', '1')
-                        // ->where('absence_categories.type', $absence->type)
-                        ->where('queue', $absence->queue)
+                        ->where('absence_logs.id', $absence->id)
+                        ->where('absence_categories.type', '!=', 'break')
+                        ->where('absence_logs.status', '=', 1)
                         ->first();
+                    $a1 = "2";
+                } else {
+                    $absen = AbsenceLog::selectRaw('absence_logs.*, shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                        ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
+                        ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
+                        ->where('absence_logs.status', '=', 1)
+                        ->where('absence_logs.id', $absence->id)
+                        ->where('absence_categories.type', '!=', 'break')
+                        ->orderBy('absence_logs.id', 'DESC')
+                        ->first();
+
+                    $a1 = "2";
+                }
+                // $open = "Close";
+                // if ($absen) {
+                //     if ($absen->start_date <= date('Y-m-d H:i:s')) {
+                //         $open = "Open";
+                //     } else {
+                //         $open = "Close";
+                //     }
+                // }
+            }
+            // ketika tidak ada absen di tanggal tersebut
+            else {
+                // cek apa ada shift di tanggal ini
+                if ($coordinat->type == "shift") {
+                    $a1 = "3";
+                    // buat baru start
+                    // cek apa sudah ada group absen di tanggal ini
+                    $c = ShiftPlannerStaffs::selectRaw('shift_planner_staffs.id as shift_planner_id, shift_planner_staffs.shift_group_id')
+                        ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+                        ->leftJoin('absence_logs', 'shift_planner_staffs.id', '=', 'absence_logs.shift_planner_id')
+                        ->where('shift_planner_staffs.staff_id', '=', '323')
+                        ->whereDate('shift_planner_staffs.start', '=', date('Y-m-d'))
+                        ->where('absence_logs.id', '=', null)
+                        ->orderBy('shift_groups.queue', 'ASC')
+                        ->get();
+
+
+                    if (count($c) > 0) {
+                        foreach ($c as $item) {
+
+                            $data = [
+                                'day_id' => $day,
+                                'shift_group_id' => $item->shift_group_id,
+                                'staff_id' => '323',
+                                'created_at' => date('Y-m-d')
+                            ];
+                            $absence = Absence::create($data);
+                            $list_absence = ShiftGroups::join('shift_group_timesheets', 'shift_group_timesheets.shift_group_id', '=', 'shift_groups.id')
+                                ->join('absence_categories', 'shift_group_timesheets.absence_category_id', '=', 'absence_categories.id')
+                                ->where('shift_groups.id', $item->shift_group_id)
+                                ->where('absence_categories.type', '!=', "break")
+                                ->orderBy('absence_categories.queue', 'ASC')
+                                ->get();
+
+                            // return response()->json([
+                            //     'lat' =>  $list_absence,
+                            //     'c' => $c
+                            // ]);
+
+                            $expired_date = date('Y-m-d H:i:s');
+                            try {
+                                for ($n = 0; $n < count($list_absence); $n++) {
+                                    $expired_date = date("Y-m-d H:i:s", strtotime('+' . $list_absence[$n]->duration . ' hours', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                    $status = 0;
+                                    if ($n === (count($list_absence) - 1)) {
+                                        $status =  1;
+                                    } else if ($n === 2 && $list_absence[$n]->type == "break") {
+                                        $status =  1;
+                                    } else {
+                                        $status =  0;
+                                    }
+
+                                    if ($list_absence[$n]->start == "0000-00-00") {
+                                        $start_date =  null;
+                                    } else {
+                                        $start_date = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[$n]->start)));
+                                    }
+
+                                    $upload_image = new AbsenceLog;
+                                    // sementara start
+                                    $upload_image->absence_id = $absence->id;
+                                    $upload_image->shift_planner_id = $item->shift_planner_id;
+
+                                    $upload_image->start_date = $start_date;
+                                    $upload_image->expired_date = $expired_date;
+                                    // sementara end
+                                    $upload_image->created_at = date('Y-m-d H:i:s');
+                                    $upload_image->updated_at = date('Y-m-d H:i:s');
+                                    $upload_image->status = 1;
+                                    $upload_image->absence_category_id =  $list_absence[$n]->absence_category_id;
+                                    // $upload_image->shift_id = $request->shift_id;
+
+                                    $upload_image->save();
+                                }
+                            } catch (QueryException $ex) {
+                                return response()->json([
+                                    'message' => 'gagal',
+                                ]);
+                            }
+                        }
+                        // test start
+                        if (date('w') == '0') {
+                            $day = '7';
+                        } else {
+                            $day = date('w');
+                        }
+
+                        // cek absen, apa ada absen hari ini
+                        $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
+                            ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                            ->where('staff_id', '323')
+                            ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+                            ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+                            ->where('absence_logs.status', '=', 1)
+                            ->where('absence_categories.type', '!=', 'break')
+                            ->orderBy('absence_logs.start_date', 'ASC')
+                            ->first();
+                        $a1 = "1";
+                        $absen = "";
+                        // jika ada absen hari ini
+                        if ($absence) {
+                            if ($absence->shift_planner_id === 0) {
+                                $absen = AbsenceLog::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
+                                    ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+                                    ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
+                                    ->where('work_types.id', '1')
+                                    ->where('absence_logs.id', $absence->id)
+                                    ->where('absence_categories.type', '!=', 'break')
+                                    ->where('absence_logs.status', '=', 1)
+                                    ->first();
+                                $a1 = "2";
+                            } else {
+                                $absen = AbsenceLog::selectRaw('absence_logs.*, shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                                    ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
+                                    ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
+                                    ->where('absence_logs.status', '=', 1)
+                                    ->where('absence_logs.id', $absence->id)
+                                    ->where('absence_categories.type', '!=', 'break')
+                                    ->orderBy('absence_logs.id', 'DESC')
+                                    ->first();
+
+                                $a1 = "2";
+                            }
+                            return response()->json([
+                                'lat' => $coordinat->lat,
+                                'lng' => $coordinat->lng,
+                                'work_type' => $coordinat->work_type_id,
+                                'menu' => [
+                                    'menuReguler' => $menuReguler,
+                                    'menuHoliday' => $menuHoliday,
+                                    'menuBreak' => $menuBreak,
+                                    'menuExcuse' => $menuExcuse,
+                                    'menuDuty' => $menuDuty,
+                                    '$menuFinish' =>  $menuFinish
+                                ],
+                                'break' => $break,
+                                'date' => $coordinat->type,
+                                'absence' => $absence,
+                                'tesss' => $absen,
+                                'a1' => $a1,
+                            ]);
+                        }
+
+                        // test end
+                    } else {
+
+
+                        if (!$absenceOut) {
+                            return response()->json([
+                                'message' => 'Absen Terkirim',
+                                'message' => 'sudah pulang',
+                                'data' =>   $c,
+                                'break' => $break,
+                                'menu' => [
+                                    'menuBreak' => $menuBreak,
+                                    'menuExcuse' => $menuExcuse,
+                                    'menuReguler' => $menuReguler,
+                                    'menuHoliday' => $menuHoliday,
+                                    'menuDuty' => $menuDuty,
+                                    'menuFinish' => $menuFinish,
+                                ],
+                            ]);
+                        } else {
+                            return response()->json([
+                                'message' => 'Absen Terkirim',
+                                'message' => 'ssssssa',
+                                'data' =>   $c,
+                                'break' => $break,
+                                'menu' => [
+                                    'menuBreak' => $menuBreak,
+                                    'menuExcuse' => $menuExcuse,
+                                    'menuReguler' => $menuReguler,
+                                    'menuHoliday' => $menuHoliday,
+                                    'menuDuty' => $menuDuty,
+                                    'menuFinish' => $menuFinish,
+                                ],
+                            ]);
+                        }
+                    }
+
+                    // buat baru end
+                }
+                // jika tidak ada shift, dinas keluar kota, libur ataupun cuti, izin, atau sakit(mungkin dipisah untuk pengecekan)
+                else {
+
+                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d'))->whereDate('end', '>=', date('Y-m-d'))->first();
+                    // cek hari libur
+                    if ($holiday) {
+                        $menu = 'OFF';
+                        return response()->json([
+                            'message' => 'Success',
+                            'menu' => [
+                                'menuReguler' => $menuReguler,
+                                'menuHoliday' => $menuHoliday,
+                                'menuBreak' => $menuBreak,
+                                'menuExcuse' => $menuExcuse,
+                                'menuDuty' => $menuDuty,
+                                '$menuFinish' =>  $menuFinish
+                            ],
+                            'date' => date('Y-m-d h:i:s')
+                        ]);
+                    } else {
+                        $absen = Absence_categories::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
+                            ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+                            ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
+                            ->where('work_types.id', '1')
+                            ->where('day_id', '4')
+                            ->first();
+
+                        // buat baru start
+                        // cek apa sudah ada group absen di tanggal ini
+                        $c = Absence::whereDate('created_at', '=', date('Y-m-d'))->first();
+                        if (!$c) {
+                            $data = [
+                                'day_id' => $day,
+                                'shift_group_id' => $request->shift_group_id,
+                                'staff_id' => '323',
+                                'created_at' => date('Y-m-d')
+                            ];
+                            $absence = Absence::create($data);
+                            $list_absence = WorkTypeDays::join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+                                ->where('work_type_id', $coordinat->work_type_id)
+                                ->where('day_id', $day)
+                                ->orderBy('queue', 'DESC')
+                                ->get();
+                            $expired_date = date('Y-m-d H:i:s');
+                            try {
+                                for ($n = 0; $n < count($list_absence); $n++) {
+                                    $expired_date = date("Y-m-d H:i:s", strtotime('+' . $list_absence[$n]->duration . ' hours', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                    $status = 0;
+                                    if ($n === (count($list_absence) - 1)) {
+                                        $status =  1;
+                                    } else if ($n === 2 && $list_absence[$n]->type == "break") {
+                                        $status =  1;
+                                    } else {
+                                        $status =  0;
+                                    }
+                                    $upload_image = new AbsenceLog;
+                                    // sementara start
+                                    $upload_image->absence_id = $absence->id;
+
+                                    $upload_image->expired_date = $expired_date;
+                                    // sementara end
+                                    $upload_image->created_at = date('Y-m-d H:i:s');
+                                    $upload_image->updated_at = date('Y-m-d H:i:s');
+                                    $upload_image->status = $status;
+                                    $upload_image->absence_category_id =  $list_absence[$n]->absence_category_id;
+                                    // $upload_image->shift_id = $request->shift_id;
+                                    $upload_image->save();
+                                }
+
+                                // jika ada absen hari ini
+                                if ($absence) {
+                                    if ($absence->shift_planner_id === 0) {
+                                        $absen = AbsenceLog::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
+                                            ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+                                            ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
+                                            ->where('work_types.id', '1')
+                                            ->where('absence_logs.id', $absence->id)
+                                            ->where('absence_categories.type', '!=', 'break')
+                                            ->where('absence_logs.status', '=', 1)
+                                            ->first();
+                                        $a1 = "2";
+                                    } else {
+                                        $absen = AbsenceLog::selectRaw('absence_logs.*, shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                                            ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
+                                            ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
+                                            ->where('absence_logs.status', '=', 1)
+                                            ->where('absence_logs.id', $absence->id)
+                                            ->where('absence_categories.type', '!=', 'break')
+                                            ->orderBy('absence_logs.id', 'DESC')
+                                            ->first();
+
+                                        $a1 = "2";
+                                    }
+                                    return response()->json([
+                                        'lat' => $coordinat->lat,
+                                        'lng' => $coordinat->lng,
+                                        'work_type' => $coordinat->work_type_id,
+                                        'menu' => [
+                                            'menuReguler' => $menuReguler,
+                                            'menuHoliday' => $menuHoliday,
+                                            'menuBreak' => $menuBreak,
+                                            'menuExcuse' => $menuExcuse,
+                                            'menuDuty' => $menuDuty,
+                                            '$menuFinish' =>  $menuFinish
+                                        ],
+                                        'break' => $break,
+                                        'date' => $coordinat->type,
+                                        'absence' => $absence,
+                                        'tesss' => $absen,
+                                        'a1' => $a1,
+                                    ]);
+                                }
+
+                                // test end
+                            } catch (QueryException $ex) {
+                                return response()->json([
+                                    'message' => 'gagal',
+                                ]);
+                            }
+                        }
+                        // buat baru end
+                        $a1 = "4";
+                    }
                 }
             }
 
-
-            $nextN = "";
-            $nextS = "";
-            $nextE = "";
-
-            // for ($i = 0; $i < count($absen); $i++) {
-
-            //     $data1 = date('H:i:s', strtotime($absen[$i]['start']));
-            //     $data2 = date('H:i:s', strtotime($absen[$i]['end']));
-
-            //     // $r[] = $data1;
-
-
-
-            //     if (($i + 1) < count($absen)) {
-            //         if ($absen[$i + 1]['start'] > date('H:i:s') && $absen[$i]['end'] < date('H:i:s')) {
-            //             $nextN = $absen[$i + 1]['title'];
-            //             $nextS = $absen[$i + 1]['start'];
-            //             $nextE = $absen[$i + 1]['end'];
-            //         }
-            //     }
-
-            //     // if ($data1 < date('H:i:s') && $data2 > date('H:i:s')) {
-            //     //     $d = "";
-            //     //     // Absence::selectRaw('absences.*, absence_categories.title as title')
-            //     //     //     ->join('absence_categories', 'absences.absence_category_id', '=', 'absence_categories.id')
-            //     //     //     ->where('absences.user_id', $request->user_id)->whereDate('absences.register', '=', date('Y-m-d'))
-            //     //     //     ->where('absence_categories.day_id', '!=', '')->where('absence_categories.day_id', '!=', null)
-            //     //     //     ->where('absence_category_id', $absen[$i]['id'])
-            //     //     //     ->orderBy('queue', 'DESC')
-            //     //     //     ->first();
-            //     //     $absence_category_id = $absen[$i]['id'];
-            //     //     $menu = $absen[$i]['title'];
-
-            //     //     if ($d) {
-            //     //         $menu = "";
-            //     //         $nextN = $absen[$i + 1]['title'];
-            //     //         $nextS = $absen[$i + 1]['start'];
-            //     //         $nextE = $absen[$i + 1]['end'];
-            //     //         $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->get();
-            //     //     }
-            //     // } else if (date('H:i:s', strtotime($absen[0]['start'])) < date('H:i:s') && date('H:i:s', strtotime($absen[count($absen) - 1]['start'])) > date('H:i:s')) {
-            //     //     $d = "";
-            //     //     // Absence::selectRaw('absences.*, absence_categories.title as title')
-            //     //     //     ->join('absence_categories', 'absences.absence_category_id', '=', 'absence_categories.id')
-            //     //     //     ->where('absences.user_id', $request->user_id)->whereDate('absences.register', '=', date('Y-m-d'))
-            //     //     //     ->where('absence_categories.day_id', '!=', '')->where('absence_categories.day_id', '!=', null)
-            //     //     //     ->where('absence_category_id', $absen[$i]['id'])
-            //     //     //     ->orderBy('queue', 'DESC')
-            //     //     //     ->first();
-            //     //     $absence_category_id = $absen[$i]['id'];
-            //     //     $menu = $absen[$i]['title'];
-
-            //     //     if ($d) {
-            //     //         $menu = "";
-            //     //         $nextN = $absen[$i + 1]['title'];
-            //     //         $nextS = $absen[$i + 1]['start'];
-            //     //         $nextE = $absen[$i + 1]['end'];
-            //     //         $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->get();
-            //     //     }
-            //     // }
-            //     // // kondisi pulang start
-            //     // else if (date('H:i:s', strtotime($absen[count($absen) - 1]['end'])) < date('H:i:s') && date('H:i:s', strtotime('23:59:59')) > date('H:i:s')) {
-            //     //     $d = "";
-            //     //     // Absence::selectRaw('absences.*, absence_categories.title as title')
-            //     //     //     ->join('absence_categories', 'absences.absence_category_id', '=', 'absence_categories.id')
-            //     //     //     ->where('absences.user_id', $request->user_id)->whereDate('absences.register', '=', date('Y-m-d'))
-            //     //     //     ->where('absence_categories.day_id', '!=', '')->where('absence_categories.day_id', '!=', null)
-            //     //     //     ->where('absence_category_id', $absen[$i]['id'])
-            //     //     //     ->orderBy('queue', 'DESC')
-            //     //     //     ->first();
-            //     //     $absence_category_id = $absen[$i]['id'];
-            //     //     $menu = "C1";
-
-            //     //     if ($d) {
-            //     //         $menu = "C1";
-            //     //         $nextN = $absen[$i + 1]['title'];
-            //     //         $nextS = $absen[$i + 1]['start'];
-            //     //         $nextE = $absen[$i + 1]['end'];
-            //     //         $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->get();
-            //     //     }
-            //     // } else if (date('H:i:s', strtotime('00:00:00')) < date('H:i:s') && date('H:i:s',  strtotime($absen[0]['start'])) > date('H:i:s')) {
-            //     //     $d = "";
-            //     //     // Absence::selectRaw('absences.*, absence_categories.title as title')
-            //     //     //     ->join('absence_categories', 'absences.absence_category_id', '=', 'absence_categories.id')
-            //     //     //     ->where('absences.user_id', $request->user_id)->whereDate('absences.register', '=', date('Y-m-d'))
-            //     //     //     ->where('absence_categories.day_id', '!=', '')->where('absence_categories.day_id', '!=', null)
-            //     //     //     ->where('absence_category_id', $absen[$i]['id'])
-            //     //     //     ->orderBy('queue', 'DESC')
-            //     //     //     ->first();
-            //     //     $absence_category_id = $absen[$i]['id'];
-            //     //     $menu = "C2";
-
-            //     //     if ($d) {
-            //     //         $menu = "C2";
-            //     //         $nextN = $absen[$i + 1]['title'];
-            //     //         $nextS = $absen[$i + 1]['start'];
-            //     //         $nextE = $absen[$i + 1]['end'];
-            //     //         $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->get();
-            //     //     }
-            //     // }
-            //     // kondisi pulang end
-
-
-
-
-            //     // if (date('Y-m-d H:i:s', strtotime(date('Y-m-d', strtotime('0 day', strtotime(date('Y-m-d')))) . " " . $absen[count($absen) - 1]['end'])) <  date('Y-m-d H:i:s') && date('Y-m-d H:i:s', strtotime(date('Y-m-d', strtotime('+1 day', strtotime(date('Y-m-d')))) . " " . $absen[0]['start'])) > date('Y-m-d H:i:s')) {
-            //     //     $menu = "close";
-            //     //     $nextN = "2";
-            //     //     $nextS = "2";
-            //     //     $nextE = "2";
-            //     // }
-            // }
-
-
-            // if (count($absen) <= 0) {
-            //     // $next = Absence_categories::where('queue', count($data))->where('day_id', $day)->first();
-
-
-            //     $menu == "OFF";
-            //     return response()->json([
-            //         'message' => 'Success',
-            //         'menu' => "OFF",
-            //         'date' => date('Y-m-d h:i:s')
-            //     ]);
-            // } else if ($menu == "") {
-            //     $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->where('absence_categories.day_id', '!=', '')->where('absence_categories.day_id', '!=', null)->get();
-            //     // $next = Absence_categories::where('queue', count($data))->where('day_id', $day)->first();
-
-
-            //     $menu == "wait";
-            //     return response()->json([
-            //         'message' => 'Success',
-            //         'absence_out' => $absence_out,
-            //         'duty' => $duty,
-            //         'menu' => "wait",
-            //         'data' => $data,
-            //         'nextN' => $nextN,
-            //         'nextS' => $nextS,
-            //         'nextE' => $nextE,
-            //         'date' => date('Y-m-d h:i:s')
-            //     ]);
-            // } else if ($menu == "close") {
-            //     $data = Absence::join('absence_categories', 'absence_categories.id', '=', 'absences.absence_category_id')->where('user_id', $request->user_id)->whereDate('register', '=', date('Y-m-d'))->get();
-            //     // $next = Absence_categories::where('queue', count($data))->where('day_id', $day)->first();
-
-
-            //     $menu == "close";
-            //     return response()->json([
-            //         'message' => 'Success',
-            //         'absence_out' => $absence_out,
-            //         'duty' => $duty,
-            //         'menu' => "close",
-            //         'data' => $data,
-            //         'nextN' => $nextN,
-            //         'nextS' => $nextS,
-            //         'nextE' => $nextE,
-            //         'date' => date('Y-m-d h:i:s')
-            //     ]);
-            // } else {
-            // $mulai  = date_create(date('H:i:s', strtotime($absen[count($absen) - 1]['end'])));
-            // $selesai = date_create(date('H:i:s'));
-            // $hasil  = date_diff($mulai, $selesai);
-
-            // if ($hasil) {
-            // } else {
-            // }
-
-
             return response()->json([
-                // 'message' => $d,
-                // 'absence_out' => $absence_out,
-                // 'duty' => $duty,
-                // 'absence_category_id' => $absence_category_id,
-                'menu' => $menu,
-                'date' => date('Y-m-d h:i:s'),
-                // 'jam1' =>  date('H:i:s', strtotime($absen[count($absen) - 1]['end'])),
-                // 'jam2' => date('H:i:s'),
+                'lat' => $coordinat->lat,
+                'lng' => $coordinat->lng,
+                'work_type' => $coordinat->work_type_id,
+                'menu' => [
+                    'menuReguler' => $menuReguler,
+                    'menuHoliday' => $menuHoliday,
+                    'menuBreak' => $menuBreak,
+                    'menuExcuse' => $menuExcuse,
+                    'menuDuty' => $menuDuty,
+                    '$menuFinish' =>  $menuFinish
+                ],
+                'break' => $break,
+                'date' => $coordinat->type,
                 'absence' => $absence,
-                'tesss' => $absen
-            ]);
-            // }
-        }
-    }
-
-    function distance($lat1, $lon1, $lat2, $lon2, $unit)
-    {
-        if (($lat1 == $lat2) && ($lon1 == $lon2)) {
-            return 0;
-        } else {
-            $theta = $lon1 - $lon2;
-            $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-            $dist = acos($dist);
-            $dist = rad2deg($dist);
-            $miles = $dist * 60 * 1.1515;
-            $unit = strtoupper($unit);
-
-            if ($unit == "K") {
-                return ($miles * 1.609344);
-            } else if ($unit == "N") {
-                return ($miles * 0.8684);
-            } else {
-                return $miles;
-            }
-        }
-    }
-
-
-
-    public function cekradius(Request $request)
-    {
-        // dd($this->getRadius([[-8.5372862, 115.132938]], [-8.459556, 115.046600], 10000));
-        // dd($this->getRadius([[-8.6556162, 115.2316827]], [-8.5392225, 115.1339101], 1000));
-        // dd($this->getRadius([[-6.1421489, 106.8109178, 15]], [-8.5392225, 115.1339101], 1000));
-
-        // if ($this->distance(-8.5357391, 115.131616, -8.5357967, 115.1323389, "K") < 10) {
-        //     echo "True";
-        // } else {
-        //     echo "False";
-        // }
-
-        $lng = $request->lng;
-        $lat = $request->lat;
-        $posisi = $this->distance(-8.5852182, 115.1296247, -8.5852182, 115.1296247, "K");
-        if ($posisi < 1) {
-            return response()->json([
-                'message' => 'Success',
-                'posisi' => $posisi,
-                'lng' =>  $lng,
-                'lat' => $lat,
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'Anda Diluar Wilayah',
-                'posisi' => $posisi,
-                'lng' =>  $lng,
-                'lat' => $lat,
+                'tesss' => $absen,
+                'a1' => $a1,
             ]);
         }
     }
-
 
     public function store(Request $request)
     {
@@ -458,6 +581,44 @@ class AbsenceApiController extends Controller
         } else {
             $day = date('w');
         }
+        // untuk update otomatis jam register(jika lupa absen) start
+        if ($request->queue == "1") {
+            $uAbsence = AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', $request->type)
+                ->get();
+            $out = AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', 'presence')
+                ->orderBy('queue',)
+                ->get();
+            foreach ($uAbsence as $item) {
+                AbsenceLog::where('id', $item->id)->update(['register' => date('Y-m-d H:i:s')]);
+            }
+            AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s')]);
+        } else {
+        }
+        // untuk update otomatis jam register(jika lupa absen) end
+
+
+        // untuk update otomatis jam register(jika lupa absen) start
+        if ($request->queue == "1") {
+            $uAbsence = AbsenceLog::select('absence_logs.id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', $request->type)
+                ->get();
+            $out = AbsenceLog::select('absence_logs.id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', 'presence')
+                ->orderBy('queue', 'DESC')
+                ->first();
+            foreach ($uAbsence as $item) {
+                AbsenceLog::where('id', $item->id)->update(['register' => date('Y-m-d H:i:s')]);
+            }
+            AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s')]);
+        } else {
+        }
+        // untuk update otomatis jam register(jika lupa absen) end
 
         if ($request->file('image')) {
             $resource_image = $request->file('image');
@@ -478,47 +639,48 @@ class AbsenceApiController extends Controller
             ]);
         }
 
-        $absen = Absence_categories::selectRaw('absence_categories.*, work_type_day.start, work_type_day.time, work_type_day.end')
-            ->join('work_type_day', 'work_type_day.absence_category_id', '=', 'absence_categories.id')
-            ->join('work_types', 'work_type_day.work_type_id', '=', 'work_types.id')
-            ->where('day_id', $day)
-            ->get();
-
-        if (date('H:i:s') <= date('H:i:s', strtotime($absen->time))) {
-            $late = 0;
-        } else {
-            $late = 1;
-        }
-        $absence_category = $request->absence_category_id;
-
-
-
-
         try {
-            $upload_image = new Absence;
+            $upload_image = AbsenceLog::where('id', $request->id)->first();
             $upload_image->image = $data_image;
-            // $upload_image->user_id = $dataForm->user_id;
-            // $upload_image->register = $dataForm->register;
-            // $upload_image->late = $dataForm->late;
-            // $upload_image->onesignal_id = $dataForm->onesignal_id;
-            // $upload_image->value = $dataForm->value;
-
             // sementara start
-            $upload_image->user_id = $request->user_id;
+            $upload_image->created_by_staff_id = $request->user_id;
+            $upload_image->updated_by_staff_id = $request->user_id;
             $upload_image->register = date('Y-m-d H:i:s');
             $upload_image->late = $late;
-            $upload_image->onesignal_id = "dddddwdwdww";
-            $upload_image->value = isset($absen) ? $absen->value : $val;
+            $upload_image->early = $early;
+            $upload_image->duration = $duration;
             // sementara end
             $upload_image->created_at = date('Y-m-d H:i:s');
             $upload_image->updated_at = date('Y-m-d H:i:s');
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;
-            $upload_image->absence_category_id =  $absence_category;
+            $upload_image->status =  0;
             $upload_image->shift_id = $request->shift_id;
-            $upload_image->day_id = $day;
 
             $upload_image->save();
+
+            if ($request->queue == "1" && $request->type == "presence") {
+                // buat absen istirahat
+                AbsenceLog::create([
+
+                    'absence_id' => $out->absence_id,
+                    'absence_category_id' => 3,
+                    'status' => '1',
+                    'expired_date' => $out->expired_date,
+                    'start_date' => date('Y-m-d H:i:10'),
+
+                ]);
+                AbsenceLog::create([
+
+                    'absence_id' => $out->absence_id,
+                    'absence_category_id' => 4,
+                    'status' => '1',
+                    'expired_date' => $out->expired_date,
+                    'start_date' => date('Y-m-d H:i:11'),
+
+                ]);
+                // buat absen istirahat end
+            }
 
 
             return response()->json([
@@ -638,4 +800,62 @@ class AbsenceApiController extends Controller
             'data' => $data,
         ]);
     }
+
+    // function checkAbsence()
+    // {
+    //     if (date('w') == '0') {
+    //         $day = '7';
+    //     } else {
+    //         $day = date('w');
+    //     }
+
+    //     // cek absen, apa ada absen hari ini
+    //     $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
+    //         ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+    //         ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+    //         ->where('staff_id', '323')
+    //         ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
+    //         ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
+    //         ->where('absence_logs.status', '=', 1)
+    //         ->where('absence_categories.type', '!=', 'break')
+    //         ->orderBy('absence_logs.start_date', 'ASC')
+    //         ->first();
+    //     $a1 = "1";
+
+    //     // jika ada absen hari ini
+    //     if ($absence) {
+    //         if ($absence->shift_planner_id === 0) {
+    //             $absen = AbsenceLog::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
+    //                 ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+    //                 ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
+    //                 ->where('work_types.id', '1')
+    //                 ->where('absence_logs.id', $absence->id)
+    //                 ->where('absence_categories.type', '!=', 'break')
+    //                 ->where('absence_logs.status', '=', 1)
+    //                 ->first();
+    //             $a1 = "2";
+    //         } else {
+    //             $absen = AbsenceLog::selectRaw('absence_logs.*, shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
+    //                 ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
+    //                 ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
+    //                 ->where('absence_logs.status', '=', 1)
+    //                 ->where('absence_logs.id', $absence->id)
+    //                 ->where('absence_categories.type', '!=', 'break')
+    //                 ->orderBy('absence_logs.id', 'DESC')
+    //                 ->first();
+
+    //             $a1 = "2";
+    //         }
+    //         return response()->json([
+    //             'lat' => $coordinat->lat,
+    //             'lng' => $coordinat->lng,
+    //             'work_type' => $coordinat->work_type_id,
+    //             'break' => $break,
+    //             'date' => $coordinat->type,
+    //             'absence' => $absence,
+    //             'tesss' => $absen,
+    //             'a1' => $a1,
+    //         ]);
+    //     }
+    // }
 }

@@ -352,8 +352,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('holiday/{id}/approve', 'holidayController@approve')->name('holiday.approve');
     Route::post('holiday/{id}/reject', 'holidayController@reject')->name('holiday.reject');
     Route::post('holiday/action', 'holidayController@action')->name('holiday.action');
+
+
+    Route::get('shift_planner_staff/edit', 'shiftPlannerStaffController@edit')->name('shift_planner_staff.edit');
+    Route::get('shift_planner_staff/check', 'shiftPlannerStaffController@check')->name('shift_planner_staff.check');
+    Route::get('shift_planner_staff', 'shiftPlannerStaffController@index')->name('shift_planner_staff.index');
+    Route::get('shift_planner_staff/create', 'shiftPlannerStaffController@create')->name('shift_planner_staff.create');
+    Route::post('shift_planner_staff/{id}/approve', 'shiftPlannerStaffController@approve')->name('shift_planner_staff.approve');
+    Route::post('shift_planner_staff/{id}/reject', 'shiftPlannerStaffController@reject')->name('shift_planner_staff.reject');
+    Route::post('shift_planner_staff/action', 'shiftPlannerStaffController@action')->name('shift_planner_staff.action');
+    Route::get('shift_planner_staff/index', 'shiftPlannerStaffController@index')->name('shift_planner_staff.index');
     // Route::resource('holiday', 'HolidayController');
-    Route::resource('shift', 'ShiftController');
+    // Route::resource('shift_planner_staff', 'shiftPlannerStaffController');
 
     Route::get('duty/edit1', 'DutyController@edit1')->name('duty.edit1');
 
@@ -362,6 +372,19 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');
     Route::post('duty/action', 'DutyController@action')->name('duty.action');
     Route::resource('duty', 'DutyController');
+
+    // Route::get('job', 'JobController@index')->name('job.index');
+    Route::delete('job/destroy', 'JobController@massDestroy')->name('job.massDestroy');
+    Route::resource('job', 'JobController');
+
+    Route::delete('work_type/destroy', 'WorkTypeController@massDestroy')->name('work_type.massDestroy');
+    Route::resource('work_type', 'WorkTypeController');
+
+    Route::put('shift_group/{id}/scheduleUpdate', 'ShiftGroupController@scheduleUpdate')->name('shift_group.scheduleUpdate');
+    Route::get('shift_group/{id}/scheduleEdit', 'ShiftGroupController@scheduleEdit')->name('shift_group.scheduleEdit');
+    Route::get('shift_group/{id}/schedule', 'ShiftGroupController@schedule')->name('shift_group.schedule');
+    Route::delete('shift_group/destroy', 'ShiftGroupController@massDestroy')->name('shift_group.massDestroy');
+    Route::resource('shift_group', 'ShiftGroupController');
 
 
 
@@ -377,9 +400,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('extra/{id}/reject', 'ExtraController@reject')->name('extra.reject');
     Route::resource('extra', 'ExtraController');
 
-    Route::post('permit/{id}/approve', 'PermitController@approve')->name('permit.approve');
-    Route::post('permit/{id}/reject', 'PermitController@reject')->name('permit.reject');
-    Route::resource('permit', 'PermitController');
+    Route::post('excuse/{id}/approve', 'ExcuseController@approve')->name('excuse.approve');
+    Route::post('excuse/{id}/reject', 'ExcuseController@reject')->name('excuse.reject');
+    Route::resource('excuse', 'ExcuseController');
+
+    Route::post('geolocation_off/{id}/approve', 'GeolocationOffController@approve')->name('geolocation_off.approve');
+    Route::post('geolocation_off/{id}/reject', 'GeolocationOffController@reject')->name('geolocation_off.reject');
+    Route::resource('geolocation_off', 'GeolocationOffController');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

@@ -81,6 +81,7 @@ $(document).ready(function () {
         disableDragging: true,
         displayEventTime: false,
         eventTextColor : '#FFFFFF',
+        eventColor : '#ff0000',
         header:{
             left:'prev,next today',
             center:'title',

@@ -46,13 +46,13 @@
                             {{ trans('global.leave.fields.id') }}
                         </th> --}}
                         <th>
-                            {{ trans('global.leave.fields.user_name') }}
+                            {{ trans('global.leave.fields.staff_name') }}
                         </th>
                         <th>
                             {{ trans('global.leave.fields.category') }}
                         </th>
                         <th>
-                            {{ trans('global.leave.fields.date') }}
+                            {{ trans('global.leave.fields.start') }}
                         </th>
 
                         <th>
@@ -67,7 +67,7 @@
                         </th>
                    
                         {{-- <th>
-                            {{ trans('global.leave.fields.updated_at') }}
+                            {{ trans('global.leave.fields.upstartd_at') }}
                         </th> --}}
                         <th>
                             &nbsp;
@@ -140,13 +140,13 @@
     columns: [
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no' },
-        { data: 'user_name', name: 'user_name' },
+        { data: 'staff_name', name: 'staff_name' },
         { data: 'category', name: 'category' },
-        { data: 'date', name: 'date' },
+        { data: 'start', name: 'start' },
         { data: 'end', name: 'end' },
         { data: 'description', name: 'description' },
         { data: 'status', name: 'status' },
-        // { data: 'updated_at', name: 'updated_at' },
+        // { data: 'upstartd_at', name: 'upstartd_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,

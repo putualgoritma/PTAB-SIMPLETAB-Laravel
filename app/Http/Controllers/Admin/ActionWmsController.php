@@ -181,7 +181,7 @@ class ActionWmsController extends Controller
             }
 
 
-            $last_code = $this->get_last_codeS('proposal_wm', $gU);
+            $last_code = $this->get_last_codeC('proposal_wm', $gU);
 
             $proposal = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
             $proposal->status = $request->status;

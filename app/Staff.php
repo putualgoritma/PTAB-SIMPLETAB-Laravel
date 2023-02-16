@@ -15,6 +15,8 @@ class Staff extends Model
         'subdapertement_id',
         'work_unit_id',
         'pbk',
+        'work_type_id',
+        'job_id',
         'NIK'
     ];
 

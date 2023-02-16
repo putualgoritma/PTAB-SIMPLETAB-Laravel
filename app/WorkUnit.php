@@ -13,5 +13,8 @@ class WorkUnit extends Model
         'code',
         'name',
         'serial_number',
+        'lat',
+        'lng',
+        'radius',
     ];
 }

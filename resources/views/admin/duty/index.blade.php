@@ -34,7 +34,7 @@ function myFunction(data) {
     if(confirm("Are you sure you want to remove it?"))
             {
                 $.ajax({
-                    url:'{{ route("admin.duty.action") }}',
+                    url:'{{ route("admin.shift_planner_staff.action") }}',
                     type:"POST",
                     data:{
                         id:data,
@@ -59,15 +59,15 @@ $(document).ready(function () {
 
     var calendar = $('#calendar').fullCalendar({
         editable:false,
-        eventStartEditable: false,
-        disableDragging: true,
+        // eventStartEditable: false,
+        // disableDragging: true,
         displayEventTime: false,
         header:{
             left:'prev,next today',
             center:'title',
             right:'month'
         },
-        events:'{{ route("admin.duty.index") }}',
+        events:'{{ route("admin.shift_planner_staff.index") }}',
         selectable:true,
         
         selectHelper: true,
@@ -75,22 +75,23 @@ $(document).ready(function () {
 	  const { value: formValues } = await Swal.fire({
 		title: 'Add Event',
 		html:
-		  '<input id="swalEvtTitle" class="swal2-input" placeholder="Enter title">' +
-		  '<textarea id="swalEvtDesc" class="swal2-input" placeholder="Enter description"></textarea>' +
-		  '<input id="title" class="swal2-input" placeholder="Enter URL">'+
-          '<select id="staff" class="swal2-input" placeholder="Enter URL">'+
+          '<select id="staff_id" class="swal2-input" placeholder="Enter URL">'+
             '@foreach ($pgw as $data)'+
             '<option value="{{$data->id}}"> {{$data->name}} </option>'+  
            '@endforeach'+
             
+            '</select>'+ '<select id="shift_group_id" class="swal2-input" placeholder="Enter URL">'+
+            '@foreach ($sg as $data)'+
+            '<option value="{{$data->id}}"> {{$data->title}} </option>'+  
+           '@endforeach'+
+            
             '</select>',
+
 		focusConfirm: false,
 		preConfirm: () => {
 		  return [
-			document.getElementById('swalEvtTitle').value,
-			document.getElementById('swalEvtDesc').value,
-			document.getElementById('title').value,
-            document.getElementById('staff').value,
+            document.getElementById('staff_id').value,
+            document.getElementById('shift_group_id').value,
 		  ]
 		}
 	  });
@@ -112,21 +113,22 @@ $(document).ready(function () {
 	// 	  ]
 	// 	}
 	//   });
-    console.log(""+document.getElementById('staff').value)
+    // console.log(""+document.getElementById('staff').value)
             if(formValues)
             {
+             
                 var start = $.fullCalendar.formatDate(start, 'Y-MM-DD HH:mm:ss');
 
-                var end = $.fullCalendar.formatDate(end, 'Y-MM-DD HH:mm:ss');
+                // var end = $.fullCalendar.formatDate(end, 'Y-MM-DD HH:mm:ss');
 
                 $.ajax({
-                    url:'{{ route("admin.duty.action") }}',
+                    url:'{{ route("admin.shift_planner_staff.action") }}',
                     type:"POST",
                     data:{
-                        staff_id : document.getElementById('staff').value,
-                        title: "tesss",
+                        staff_id : document.getElementById('staff_id').value,
+                        shift_group_id : document.getElementById('shift_group_id').value,
                         start: start,
-                        end: end,
+                        end: start,
                         type: 'add'
                     },
                     success:function(data)
@@ -151,7 +153,7 @@ $(document).ready(function () {
             var title = event.title;
             var id = event.id;
             $.ajax({
-                url:'{{ route("admin.duty.action") }}',
+                url:'{{ route("admin.shift_planner_staff.action") }}',
                 type:"POST",
                 data:{
                     title: title,
@@ -169,19 +171,19 @@ $(document).ready(function () {
         },
         eventDrop: function(event, delta)
         {
-            var start = $.fullCalendar.formatDate(event.start, 'Y-MM-DD HH:mm:ss');
-            var end = $.fullCalendar.formatDate(event.end, 'Y-MM-DD HH:mm:ss');
-            var title = event.title;
+            alert("2")
+            var start = $.fullCalendar.formatDate(event.start, 'Y-MM-DD HH:mm:ss')
+            var end = "";
             var id = event.id;
+            alert(id,end)
             $.ajax({
-                url:'{{ route("admin.duty.action") }}',
+                url:'{{ route("admin.shift_planner_staff.action") }}',
                 type:"POST",
                 data:{
-                    title: title,
                     start: start,
-                    end: end,
+                    end: start,
                     id: id,
-                    type: 'update'
+                    type: 'updateD'
                 },
                 success:function(response)
                 {
@@ -197,7 +199,7 @@ $(document).ready(function () {
             var t = 3;
             console.log(details)
             $.ajax({
-                    url:'{{ route("admin.duty.edit1") }}',
+                    url:'{{ route("admin.shift_planner_staff.edit") }}',
                     type:"GET",
                     data:{
                         id: id,
@@ -209,9 +211,8 @@ $(document).ready(function () {
 		title: 'Add Event',
 		html:
 		  data[1].title +data[1].user_id+t+
-		  '<textarea id="swalEvtDesc" class="swal2-input" placeholder="Enter description">'+parseInt(t)+'</textarea>' +
-		  '<input id="title" class="swal2-input" placeholder="Enter URL">'+
-          '<select id="staff" class="swal2-input" placeholder="Enter URL">'+
+
+          '<select id="staff_id" class="swal2-input" placeholder="Enter URL">'+
         //     '@foreach ($pgw as $data)'+
         //     '<option @if($data->id=='++') selected @endif value="{{$data->id}}"> {{$data->id}} </option>'+  
         //    '@endforeach'+
@@ -222,12 +223,28 @@ $(document).ready(function () {
             ,
 		focusConfirm: false,
 		preConfirm: () => {
-		  return [
-			document.getElementById('swalEvtTitle').value,
-			document.getElementById('swalEvtDesc').value,
-			document.getElementById('title').value,
-            document.getElementById('staff').value,
-		  ]
+            alert(id)
+            $.ajax({
+                    url:'{{ route("admin.shift_planner_staff.action") }}',
+                    type:"POST",
+                    data:{
+                        id : id,
+                        staff_id :  document.getElementById('staff_id').value,
+                        type: 'update'
+                    },
+                    success:function(data)
+                    {
+                        console.log(data)
+                        if(data == "fail" ){
+                        alert("Data sudah ada");
+                    }
+                    else{
+                        calendar.fullCalendar('refetchEvents');
+                        alert("Event Created Successfully");
+                    }
+                    }
+                })
+           
 		}
 	  });
                     }
@@ -238,7 +255,7 @@ $(document).ready(function () {
             // {
             //     var id = event.id;
             //     $.ajax({
-            //         url:'{{ route("admin.duty.action") }}',
+            //         url:'{{ route("admin.shift_planner_staff.action") }}',
             //         type:"POST",
             //         data:{
             //             id:id,

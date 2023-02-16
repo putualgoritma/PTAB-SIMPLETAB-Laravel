@@ -243,7 +243,7 @@
                     </li>
                     @endcan
 
-                    @can('shift_access')
+                    {{-- @can('shift_access')
                     <li class="nav-item">
                         <a href="{{ route('admin.shift.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -251,7 +251,7 @@
                         Shift
                         </a>
                     </li>
-                    @endcan
+                    @endcan --}}
 
 
                     <li class="nav-item nav-dropdown">
@@ -282,9 +282,9 @@
                             </li>
                             @endcan
         
-                            @can('permit_access')
+                            @can('excuse_access')
                             <li class="nav-item">
-                                <a href="{{ route('admin.permit.index') }}" class="nav-link">
+                                <a href="{{ route('admin.excuse.index') }}" class="nav-link">
                                 <!-- <i class="nav-icon fas fa-landmark"></i> -->
                                 <i class="nav-icon fas fa-motorcycle"></i>
                                Permisi
