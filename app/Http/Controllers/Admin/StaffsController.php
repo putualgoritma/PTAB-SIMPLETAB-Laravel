@@ -9,9 +9,11 @@ use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use App\Staff;
 use App\CtmWilayah;
+use App\Job;
 use App\Subdapertement;
 use App\Traits\TraitModel;
 use App\User;
+use App\WorkTypes;
 use App\WorkUnit;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -149,8 +151,10 @@ class StaffsController extends Controller
         } else {
             $dapertements = Dapertement::all();
         }
+        $work_types = WorkTypes::get();
+        $jobs = Job::get();
 
-        return view('admin.staffs.create', compact('dapertements', 'code', 'area', 'work_units', 'pbks'));
+        return view('admin.staffs.create', compact('dapertements', 'jobs', 'code', 'area', 'work_types', 'work_units', 'pbks'));
     }
 
     public function store(StoreStaffRequest $request)
@@ -196,8 +200,11 @@ class StaffsController extends Controller
             $dapertements = Dapertement::all();
         }
 
+        $work_types = WorkTypes::get();
+        $jobs = Job::get();
+
         $subdapertements = Subdapertement::where('dapertement_id', $staff->dapertement_id)->get();
-        return view('admin.staffs.edit', compact('staff', 'dapertements', 'subdapertements', 'area', 'work_units', 'pbks'));
+        return view('admin.staffs.edit', compact('staff', 'jobs', 'work_types', 'dapertements', 'subdapertements', 'area', 'work_units', 'pbks'));
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)

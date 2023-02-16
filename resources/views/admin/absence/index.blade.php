@@ -1,178 +1,99 @@
-@extends('layouts.admin')
-@section('content')
-{{-- @can('absence_create') --}}
-    <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route('admin.absence.create') }}">
-                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}
-            </a>
-        </div>
-    </div>
-    
-{{-- @endcan --}}
-<div class="card">
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Event Click LatLng</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <!-- jsFiddle will insert css and js -->
 
-    <div class="card-header">
-        {{ trans('global.absence.title_singular') }} {{ trans('global.list') }}
-    </div>
-    <div class="card-body">
-    <div class="form-group">
-        <div class="col-md-6">
-             <form action="" id="filtersForm">
-                <div class="input-group">
-                    <select id="type" name="type" class="form-control">
-                        <option value="">== Semua Tipe ==</option>
-                        <option value="absence">Pelanggan</option>
-                        <option value="public">Umum</option>
-                    </select>
-                    <span class="input-group-btn">
-                    &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
-                    </span>
-                </div>                
-             </form>
-             </div> 
-        </div>
-        <div class="table-responsive">
-            <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-absence">
-                <thead>
-                    <tr>
-                        <th width="10">
+    <script type="text/javascript">
 
-                        </th>
-                        <th>
-                            No.
-                        </th>
-                        {{-- <th>
-                            {{ trans('global.absence.fields.id') }}
-                        </th> --}}
-                        <th>
-                            {{ trans('global.absence.fields.day') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.user') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.lat') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.lng') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.register') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.absence_category') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.value') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.late') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.image') }}
-                        </th>
-                        <th>
-                            {{ trans('global.absence.fields.user_image') }}
-                        </th>
-                        <th>
-                            &nbsp;
-                        </th>
-                    </tr>
-                </thead>
-                
-            </table>
-        </div>
-    </div>
-</div>
-@section('scripts')
-@parent
-<script>
-    $(function () {
-        let searchParams = new URLSearchParams(window.location.search)
-        let type = searchParams.get('type')
-        if (type) {
-            $("#type").val(type);
-        }else{
-            $("#type").val('');
-        }
+function initMap() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  
+  } else {
+    x.innerHTML = "Geolocation is not supported by this browser.";
+    const myLatlng = { lat: -8.459556, lng: 115.046600 };
 
-        // console.log('type : ', type);
-
-  let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
-  let deleteButton = {
-    text: deleteButtonTrans,
-    url: "",
-    className: 'btn-danger',
-    action: function (e, dt, node, config) {
-      var ids = $.map(dt.rows({ selected: true }).nodes(), function (entry) {
-          return $(entry).data('entry-id')
-      });
-
-      if (ids.length === 0) {
-        alert('{{ trans('global.datatables.zero_selected') }}')
-
-        return
-      }
-
-      if (confirm('{{ trans('global.areYouSure') }}')) {
-        $.ajax({
-          headers: {'x-csrf-token': _token},
-          method: 'POST',
-          url: config.url,
-          data: { ids: ids, _method: 'DELETE' }})
-          .done(function () { location.reload() })
-      }
-    }
   }
-  let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-    @can('absence_delete')
-    dtButtons.push(deleteButton)
-    @endcan
+  function showPosition(position) {
+          console.log(position.coords.latitude)
+          const myLatlng = { lat: position.coords.latitude, lng: position.coords.longitude };
+          document.getElementById("lat").value = position.coords.latitude;
+    document.getElementById("lng").value = position.coords.longitude;
+          const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 14,
+    center: myLatlng,
+  });
+  // const input = document.getElementById("pac-input") as HTMLInputElement;
+  // const searchBox = new google.maps.places.SearchBox(input);
 
-  $('.datatable:not(.ajaxTable)').DataTable({ buttons: dtButtons })
+  // Create the initial InfoWindow.
+  let infoWindow = new google.maps.InfoWindow({
+    content: "Posisi anda sekarang",
+    position: myLatlng,
+  });
 
-  let dtOverrideGlobals = {
-    buttons: dtButtons,
-    serverSide: true,
-    aaSorting: [],
-    ajax: {
-      url: "{{ route('admin.absence.index') }}",
-      data: {
-        'type': $("#type").val(),
-      },
-      dataType: "JSON"
-    },
-    columns: [
-        { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
-        { data: 'day', name: 'day' },
-        { data: 'user', name: 'user' },
-        { data: 'lat', name: 'lat' },
-        { data: 'lng', name: 'lng' },
-        { data: 'register', name: 'register' },
-        { data: 'absence_category', name: 'absence_category' },
-        { data: 'value', name: 'value' },
-        { data: 'late', name: 'late' },
-        { data: 'image', name: 'image' ,  render: function( data, type, full, meta ) {
-                        return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
-                    }},
-        { data: 'user_image', name: 'user_image' ,  render: function( data, type, full, meta ) {
-                        return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
-                    }},
-        // { data: 'updated_at', name: 'updated_at' },
-        { data: 'actions', name: '{{ trans('global.actions') }}' }
-    ],
-    pageLength: 100,
-  };
-
-  $('.datatable-absence').DataTable(dtOverrideGlobals);
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-        $($.fn.dataTable.tables(true)).DataTable()
-            .columns.adjust();
+  infoWindow.open(map);
+  // Configure the click listener.
+  map.addListener("click", (mapsMouseEvent) => {
+    document.getElementById("lat").value = mapsMouseEvent.latLng.toJSON().lat;
+    document.getElementById("lng").value = mapsMouseEvent.latLng.toJSON().lng;
+    // console.log(mapsMouseEvent.latLng.toJSON().lat);
+    // Close the current InfoWindow.
+    infoWindow.close();
+    // Create a new InfoWindow.
+    infoWindow = new google.maps.InfoWindow({
+      position: mapsMouseEvent.latLng,
     });
-})
+    infoWindow.setContent(
+      JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+    );
+    infoWindow.open(map);
+  });
+}
+  // x.innerHTML = "Latitude: " + position.coords.latitude + 
+  // "<br>Longitude: " + position.coords.longitude;
+}
 
-</script>
-@endsection
-@endsection
+
+
+    </script>
+
+    <style type="text/css">
+        
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+#map {
+  height: 100%;
+}
+
+/* Optional: Makes the sample page fill the window. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="map" style="height: 500px;"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    {{-- <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxJpfNfWPonmRTm-TktgyaNEVyQxpBHd0&callback=initMap&v=weekly&channel=2"
+      async
+    ></script> --}}
+
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBDJyer8hPQZAOmynZbfVkizngMNZ3Hkkw&callback=initMap&v=weekly"
+    defer
+  ></script>
+
+<input type="text" name="lat" id="lat">
+
+<input type="text" name="lng" id="lng">
+  </body>
+</html>

@@ -512,7 +512,7 @@ class actionWmApiController extends Controller
             }
 
 
-            $last_code = $this->get_last_codeS('proposal_wm', $gU);
+            $last_code = $this->get_last_codeC('proposal_wm', $gU);
             // membuat nomor surat end
 
             $proposal_wms = proposalWms::where('id', $actionWm->proposal_wm_id)->first();

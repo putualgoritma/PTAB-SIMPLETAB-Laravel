@@ -9,15 +9,12 @@ class Absence extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'id',
-        'user_id',
-        'image',
-        'lat',
-        'lng',
-        'register',
-        'shift_id',
-        'requests_id',
-        'absence_category_id',
         'day_id',
+        'shift_group_id',
+        'staff_id',
+        'status_active',
+        'created_at',
+        'updated_at',
+
     ];
 }

@@ -3,45 +3,45 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.create') }} {{ trans('global.permit.title_singular') }}
+        {{ trans('global.create') }} {{ trans('global.excuse.title_singular') }}
     </div>
 
     <div class="card-body">
-        <form action="{{ route("admin.permit.update", $requests->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route("admin.excuse.update", $requests->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <div class="form-group {{ $errors->has('user_id') ? 'has-error' : '' }}">
-                <label for="user_id">user*</label>
-                <select id="user_id" name="user_id" class="form-control" value="{{ old('user_id', isset($shift_user) ? $shift_user->user_id : '') }}">
-                    <option value="">--Pilih user--</option>
-                    @foreach ($users as $user)
-                    <option value="{{ $user->id }}" @if ($requests && $requests->user_id==$user->id) selected @endif>{{ $user->name }}</option>
+            <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+                <label for="staff_id">staff*</label>
+                <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($shift_staff) ? $shift_staff->staff_id : '') }}">
+                    <option value="">--Pilih staff--</option>
+                    @foreach ($staffs as $staff)
+                    <option value="{{ $staff->id }}" @if ($requests && $requests->staff_id==$staff->id) selected @endif>{{ $staff->name }}</option>
                     @endforeach
            
                 </select>
-                @if($errors->has('user_id'))
+                @if($errors->has('staff_id'))
                     <em class="invalid-feedback">
-                        {{ $errors->first('user_id') }}
+                        {{ $errors->first('staff_id') }}
                     </em>
                 @endif
             </div>
 
-            <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
-                <label for="date">{{ trans('global.permit.fields.date') }}*</label>
-                <input type="date" id="date" name="date" class="form-control" value="{{ old('date', isset($requests) ? $requests->date : '') }}" required>
-                @if($errors->has('date'))
+            <div class="form-group {{ $errors->has('start') ? 'has-error' : '' }}">
+                <label for="start">{{ trans('global.excuse.fields.start') }}*</label>
+                <input type="date" id="start" name="start" class="form-control" value="{{ old('start', isset($requests) ? $requests->start : '') }}" required>
+                @if($errors->has('start'))
                     <em class="invalid-feedback">
-                        {{ $errors->first('date') }}
+                        {{ $errors->first('start') }}
                     </em>
                 @endif
                 <p class="helper-block">
-                    {{ trans('global.permit.fields.date_helper') }}
+                    {{ trans('global.excuse.fields.start_helper') }}
                 </p>
             </div>
 
      
             <div class="form-group {{ $errors->has('start') ? 'has-error' : '' }}">
-                <label for="start">{{ trans('global.permit.fields.start') }}*</label>
+                <label for="start">{{ trans('global.excuse.fields.start') }}*</label>
                 <input type="time" id="start" name="start" class="form-control" value="{{ old('start', isset($requests) ? $requests->start : '') }}" required>
                 @if($errors->has('start'))
                     <em class="invalid-feedback">
@@ -49,7 +49,7 @@
                     </em>
                 @endif
                 <p class="helper-block">
-                    {{ trans('global.permit.fields.start_helper') }}
+                    {{ trans('global.excuse.fields.start_helper') }}
                 </p>
             </div>
 

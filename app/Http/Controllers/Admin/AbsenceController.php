@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Absence;
 use App\Absence_categories;
+use App\AbsenceLog;
 use App\Day;
 use App\Holiday;
 use App\Http\Controllers\Controller;
@@ -17,87 +18,89 @@ class AbsenceController extends Controller
 {
     public function index(Request $request)
     {
-        abort_unless(\Gate::allows('absence_access'), 403);
-        $qry = Absence::selectRaw('absences.*, users.name as user, users.image as user_image, days.name as day, absence_categories.title as absence_category')->leftJoin('users', 'absences.user_id', '=', 'users.id')
-            ->leftJoin('days', 'absences.day_id', '=', 'days.id')
-            ->leftJoin('absence_categories', 'absences.absence_category_id', '=', 'absence_categories.id');
-        // dd($qry);
-        // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
-        // return $qry;
-        if ($request->ajax()) {
-            //set query
-            $table = Datatables::of($qry);
+        // abort_unless(\Gate::allows('absence_access'), 403);
+        // $qry = AbsenceLog::selectRaw('absence_logs.*, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
+        //     ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+        //     ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
+        //     ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+        //     ->orderBy('register', 'ASC');
+        // dd($qry->get());
+        // // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
+        // // return $qry;
+        // if ($request->ajax()) {
+        //     //set query
+        //     $table = Datatables::of($qry);
 
-            $table->addColumn('placeholder', '&nbsp;');
-            $table->addColumn('actions', '&nbsp;');
+        //     $table->addColumn('placeholder', '&nbsp;');
+        //     $table->addColumn('actions', '&nbsp;');
 
-            $table->editColumn('actions', function ($row) {
-                $viewGate = 'absence_show';
-                $editGate = 'absence_edit';
-                $deleteGate = 'absence_delete';
-                $crudRoutePart = 'absence';
+        //     $table->editColumn('actions', function ($row) {
+        //         $viewGate = 'absence_show';
+        //         $editGate = 'absence_edit';
+        //         $deleteGate = 'absence_delete';
+        //         $crudRoutePart = 'absence';
 
-                return view('partials.datatablesActions', compact(
-                    'viewGate',
-                    'editGate',
-                    'deleteGate',
-                    'crudRoutePart',
-                    'row'
-                ));
-            });
-            $table->editColumn('id', function ($row) {
-                return $row->id ? $row->id : "";
-            });
+        //         return view('partials.datatablesActions', compact(
+        //             'viewGate',
+        //             'editGate',
+        //             'deleteGate',
+        //             'crudRoutePart',
+        //             'row'
+        //         ));
+        //     });
+        //     $table->editColumn('id', function ($row) {
+        //         return $row->id ? $row->id : "";
+        //     });
 
-            $table->editColumn('user', function ($row) {
-                return $row->user ? $row->user : "";
-            });
+        //     $table->editColumn('user', function ($row) {
+        //         return $row->user ? $row->user : "";
+        //     });
 
-            $table->editColumn('image', function ($row) {
-                return $row->image ? $row->image : "";
-            });
+        //     $table->editColumn('image', function ($row) {
+        //         return $row->image ? $row->image : "";
+        //     });
 
-            $table->editColumn('user_image', function ($row) {
-                return $row->image ? $row->user_image : "";
-            });
+        //     $table->editColumn('user_image', function ($row) {
+        //         return $row->image ? $row->user_image : "";
+        //     });
 
-            $table->editColumn('lat', function ($row) {
-                return $row->lat ? $row->lat : "";
-            });
-            $table->editColumn('lng', function ($row) {
-                return $row->lng ? $row->lng : "";
-            });
-            $table->editColumn('register', function ($row) {
-                return $row->register ? $row->register : "";
-            });
-            $table->editColumn('absen_category', function ($row) {
-                return $row->absen_category ? $row->absen_category : "";
-            });
-            $table->editColumn('day', function ($row) {
-                return $row->day ? $row->day : "";
-            });
-            $table->editColumn('late', function ($row) {
-                return $row->late ? $row->late : "";
-            });
-            $table->editColumn('value', function ($row) {
-                return $row->value ? $row->value : "";
-            });
-            $table->editColumn('late', function ($row) {
-                if ($row->late === 0) {
-                    return "Lambat";
-                } else {
-                    return "Tepat";
-                }
-            });
-            $table->editColumn('updated_at', function ($row) {
-                return $row->updated_at ? $row->updated_at : "";
-            });
+        //     $table->editColumn('lat', function ($row) {
+        //         return $row->lat ? $row->lat : "";
+        //     });
+        //     $table->editColumn('lng', function ($row) {
+        //         return $row->lng ? $row->lng : "";
+        //     });
+        //     $table->editColumn('register', function ($row) {
+        //         return $row->register ? $row->register : "";
+        //     });
+        //     $table->editColumn('absen_category', function ($row) {
+        //         return $row->absen_category ? $row->absen_category : "";
+        //     });
+        //     $table->editColumn('day', function ($row) {
+        //         return $row->day ? $row->day : "";
+        //     });
+        //     $table->editColumn('late', function ($row) {
+        //         return $row->late ? $row->late : "";
+        //     });
+        //     $table->editColumn('value', function ($row) {
+        //         return $row->value ? $row->value : "";
+        //     });
+        //     $table->editColumn('late', function ($row) {
+        //         if ($row->late === 0) {
+        //             return "Lambat";
+        //         } else {
+        //             return "Tepat";
+        //         }
+        //     });
+        //     $table->editColumn('updated_at', function ($row) {
+        //         return $row->updated_at ? $row->updated_at : "";
+        //     });
 
-            $table->rawColumns(['actions', 'placeholder']);
+        //     $table->rawColumns(['actions', 'placeholder']);
 
-            $table->addIndexColumn();
-            return $table->make(true);
-        }
+        //     $table->addIndexColumn();
+        //     return $table->make(true);
+        // }
         //default view
         // return view('admin.schedule.index');
 

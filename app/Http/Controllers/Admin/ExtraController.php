@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AbsenceRequest;
 use App\Http\Controllers\Controller;
 use App\Requests;
+use App\Staff;
 use App\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -14,9 +16,10 @@ class ExtraController extends Controller
     {
 
         abort_unless(\Gate::allows('extra_access'), 403);
-        $qry = Requests::selectRaw('requests.*, users.name as user_name')->join('users', 'users.id', '=', 'requests.user_id')->where('requests.category', 'extra')
-            ->orderBy('requests.created_at', 'DESC');
-        // dd($qry);
+        $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+            ->where('absence_requests.category', 'extra')
+            ->orderBy('absence_requests.created_at', 'DESC');
+        // dd($qry->get());
         if ($request->ajax()) {
             //set query
             $table = Datatables::of($qry);
@@ -42,16 +45,16 @@ class ExtraController extends Controller
                 return $row->id ? $row->id : "";
             });
 
-            $table->editColumn('user_name', function ($row) {
-                return $row->user_name ? $row->user_name : "";
+            $table->editColumn('staff_name', function ($row) {
+                return $row->staff_name ? $row->staff_name : "";
             });
 
             $table->editColumn('desciption', function ($row) {
                 return $row->desciption ? $row->desciption : "";
             });
 
-            $table->editColumn('date', function ($row) {
-                return $row->date ? $row->date : "";
+            $table->editColumn('start', function ($row) {
+                return $row->start ? $row->start : "";
             });
 
             $table->editColumn('end', function ($row) {
@@ -89,21 +92,21 @@ class ExtraController extends Controller
     {
         abort_unless(\Gate::allows('extra_create'), 403);
         $type = $request->type;
-        $users = User::where('staff_id', '!=', '0')->orderBy('name')->get();
-        return view('admin.extra.create', compact('users', 'type'));
+        $staffs = Staff::orderBy('name')->get();
+        return view('admin.extra.create', compact('staffs', 'type'));
     }
     public function store(Request $request)
     {
         abort_unless(\Gate::allows('extra_create'), 403);
         $data = [
             'category' => 'extra',
-            'type' => 'extra',
-            'user_id' => $request->user_id,
+            'type' => 'other',
+            'staff_id' => $request->staff_id,
+            'time' => $request->time,
             'start' => $request->start,
-            'date' => $request->date,
             'description' => $request->description,
         ];
-        $extra = Requests::create($data);
+        $extra = AbsenceRequest::create($data);
         return redirect()->route('admin.extra.index');
     }
 
@@ -127,14 +130,14 @@ class ExtraController extends Controller
     public function reject($id)
     {
         abort_unless(\Gate::allows('extra_edit'), 403);
-        $d = Requests::where('id', $id)
+        $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'reject']);
         return redirect()->back();
     }
     public function approve($id)
     {
         abort_unless(\Gate::allows('extra_delete'), 403);
-        $d = Requests::where('id', $id)
+        $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
         return redirect()->back();
     }

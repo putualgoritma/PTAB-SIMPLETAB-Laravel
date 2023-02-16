@@ -21,10 +21,13 @@ use DB;
 use Illuminate\Database\QueryException;
 use App\Lock;
 use App\CtmWilayah;
+use App\Job;
 use App\LockAction;
 use App\proposalWms;
+use App\ShiftGroups;
 use App\wa_history;
 use App\WaTemplate;
+use App\WorkTypes;
 use App\WorkUnit;
 
 trait TraitModel
@@ -618,6 +621,36 @@ trait TraitModel
             }
         }
 
+        if ($type == "job") {
+            $workUnit = Job::orderBy('id', 'desc')
+                ->first();
+            if ($workUnit && (strlen($workUnit->code) == 8)) {
+                $code = $workUnit->code;
+            } else {
+                $code = acc_codedef_generate('JOB', 8);
+            }
+        }
+
+        if ($type == "work_type") {
+            $workUnit = WorkTypes::orderBy('id', 'desc')
+                ->first();
+            if ($workUnit && (strlen($workUnit->code) == 8)) {
+                $code = $workUnit->code;
+            } else {
+                $code = acc_codedef_generate('WOT', 8);
+            }
+        }
+
+
+        if ($type == "shift_group") {
+            $shift_group = ShiftGroups::orderBy('id', 'desc')
+                ->first();
+            if ($shift_group && (strlen($shift_group->code) == 8)) {
+                $code = $shift_group->code;
+            } else {
+                $code = acc_codedef_generate('SHF', 8);
+            }
+        }
 
         return $code;
     }
@@ -830,7 +863,7 @@ trait TraitModel
         $surat = '/' . $s . '/' . date('n') . '/' . date('Y');
 
         if ($type == "proposal_wm") {
-            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->where('status', 'close')->orderBy('id', 'desc')
+            $proposal_wm = proposalWms::where('code', 'like', '%' . $surat)->where('status', 'close')->orderBy('close_queue', 'desc')
                 ->first();
             // dd($proposal_wm);
             if ($proposal_wm && (strlen($proposal_wm->close_queue) >= 1)) {
