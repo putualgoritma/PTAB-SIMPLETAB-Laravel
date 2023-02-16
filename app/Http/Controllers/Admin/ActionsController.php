@@ -14,10 +14,48 @@ use App\User;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\ActionApi;
+use App\StaffApi;
 
 class ActionsController extends Controller
 {
     use TraitModel;
+
+    public function actionStaffStoreTest(Request $request)
+    {
+
+        $action = ActionApi::with('ticket')->find($request->action_id);
+        $staff = StaffApi::find($request->staff_id);
+
+        if ($action) {
+            $cek = $action->staff()->attach($request->staff_id, ['status' => 'pending']);
+
+            if (!$cek) {
+                $action = Action::where('id', $request->action_id)->with('staff')->first();
+
+                // dd($action->staff[0]->pivot->status);
+                $cekAllStatus = false;
+                $statusAction = 'close';
+                for ($status = 0; $status < count($action->staff); $status++) {
+                    // dd($action->staff[$status]->pivot->status);
+                    if ($action->staff[$status]->pivot->status == 'pending') {
+                        $statusAction = 'pending';
+                        break;
+                    } else if ($action->staff[$status]->pivot->status == 'active') {
+
+                        $statusAction = 'active';
+                    }
+                }
+
+                $dateNow = date('Y-m-d H:i:s');
+
+                echo $statusAction;                
+            }else{
+                print_r($cek);
+            }
+        }
+
+    }
 
     public function index()
     {
@@ -129,8 +167,7 @@ class ActionsController extends Controller
     }
 
     // list tindakan
-    function list($ticket_id)
-    {
+    function list($ticket_id) {
         abort_unless(\Gate::allows('action_access'), 403);
 
         $user_id = Auth::check() ? Auth::user()->id : null;
@@ -160,7 +197,7 @@ class ActionsController extends Controller
                 ->with('subdapertement')
                 ->with('ticket')
                 ->where('ticket_id', $ticket_id)
-                // ->orderBy('dapertements.group', 'desc')
+            // ->orderBy('dapertements.group', 'desc')
                 ->orderBy('start', 'desc')
                 ->get();
         } else {
@@ -168,7 +205,7 @@ class ActionsController extends Controller
                 ->with('dapertement')
                 ->with('subdapertement')
                 ->with('ticket')
-                // ->orderBy('dapertements.group', 'desc')
+            // ->orderBy('dapertements.group', 'desc')
                 ->where('ticket_id', $ticket_id)
                 ->orderBy('start', 'desc')
                 ->get();
@@ -364,24 +401,30 @@ class ActionsController extends Controller
 
         $action = Action::where('id', $request->action_id)->with('ticket')->with('staff')->first();
         $cekAllStatus = false;
-        $statusAction = $request->status;
+        $statusAction = $request->status;        
 
         $dateNow = date('Y-m-d H:i:s');
+
+        //check if current status is close
+        $date_end = $dateNow;
+        if($action->status == 'close'){
+            $date_end = $action->end;
+        }
 
         if ($request->file('image')) {
             $dataNewAction = array(
                 'status' => $statusAction,
                 'image' => str_replace("\/", "/", json_encode($dataImageName)),
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $date_end,
                 'memo' => $request->memo,
-                'todo' => $request->todo
+                'todo' => $request->todo,
             );
         } else {
             $dataNewAction = array(
                 'status' => $statusAction,
-                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $date_end,
                 'memo' => $request->memo,
-                'todo' => $request->todo
+                'todo' => $request->todo,
             );
         }
         if ($request->file('image_tools')) {
@@ -475,7 +518,6 @@ class ActionsController extends Controller
     {
         return view('admin.actions.printreport');
     }
-
 
     public function ubahData()
     {

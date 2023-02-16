@@ -113,6 +113,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //test
     Route::resource('test-customers', 'TestController');
     Route::get('test-get', 'TestController@getTest');
+    Route::get('test-action-staff-store', 'ActionsController@actionStaffStoreTest');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 
@@ -137,6 +138,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('reports/reportProposalWm', 'ReportsController@reportProposalWm')->name('report.reportProposalWm');
 
     Route::post('reports/reportProposalWm/proses', 'ReportsController@reportProposalWmProses')->name('report.reportProposalWmproses');
+
+    Route::get('reports/report-pwm', 'ReportsController@reportPWM')->name('report.reportPWM');
+
+    Route::post('reports/report-pwm/process', 'ReportsController@reportPWMProcess')->name('report.reportPWMProcess');
     // baru
 
     Route::get('get-staff', 'StaffsController@getStaff')->name('staffs.staff');
@@ -361,6 +366,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Route::resource('shift_planner_staff', 'shiftPlannerStaffController');
 
     Route::get('duty/edit1', 'DutyController@edit1')->name('duty.edit1');
+
     Route::get('duty/check', 'DutyController@check')->name('duty.check');
     Route::post('duty/{id}/approve', 'DutyController@approve')->name('duty.approve');
     Route::post('duty/{id}/reject', 'DutyController@reject')->name('duty.reject');

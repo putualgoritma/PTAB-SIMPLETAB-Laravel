@@ -517,8 +517,8 @@ class actionWmApiController extends Controller
 
             $proposal_wms = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
             $proposalWm = $proposal_wms;
-            $proposal->close_queue = $last_code;
-            $proposal->code = '/' . $s . '/' . date('n') . '/' . date('Y');
+            $proposal_wms->close_queue = $last_code;
+            $proposal_wms->code = '/' . $s . '/' . date('n') . '/' . date('Y');
             $customer_id =  $proposal_wms->customer_id;
             $proposal_wms->where('id', $proposal_wms->proposal_wm_id);
             // $proposal_wms->status = $dataForm->status;

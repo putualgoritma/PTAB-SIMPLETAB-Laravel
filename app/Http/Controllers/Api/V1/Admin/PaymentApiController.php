@@ -52,6 +52,7 @@ class PaymentApiController extends Controller
             $errors = $messages->all();
             return response()->json([
                 'status' => false,
+                'cek' => json_decode($request->form),
                 'message' => $errors,
                 'data' => $request->all(),
             ]);
@@ -78,7 +79,7 @@ class PaymentApiController extends Controller
                 'status' => true,
                 'message' => 'Data Pembayaran Update Success',
                 'data' => $result,
-                'failed' => $arrQry
+                //'failed' => $arrQry
             ]);
         } catch (QueryException $e) {
             return response()->json([

@@ -16,6 +16,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Auth;
+use App\proposalWms;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -463,6 +464,165 @@ class ReportsController extends Controller
         $jum = $request->jum;
         $take = $request->take - 1;
         return view('admin.reports.reportLockAction', compact('customer', 'request', 'month', 'monthR', 'd1', 'take', 'jum'));
+    }
+
+    public function reportPWM()
+    {
+        $monthList = array(
+            0 => '',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juli',
+            7 => 'Juni',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+        $departementlist = Dapertement::all();
+        $areas = CtmWilayah::select('id as code', 'NamaWilayah');
+
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+            $areas =   $areas->get();
+        } else {
+            $group_unit = Dapertement::select('dapertements.group_unit')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+            $areas->where('tblwilayah.group_unit', $group_unit);
+            $areas =   $areas->get();
+        }
+
+        $month = $monthList[date('n')];
+        // return view ('admin.reports.reportSubDistribusi');
+        return view('admin.reports.PWM', compact('departementlist', 'month', 'areas'));
+    }
+
+    public function reportPWMProcess(Request $request)
+    {
+        $unitName = "";
+        $time = strtotime($request->monthyear);
+        $monthR = date("n", $time);
+        $yearR = date("Y", $time);
+        $monthYear = $request->monthyear;
+        $monthList = array(
+            0 => '',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juli',
+            7 => 'Juni',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        );
+        $monthRomawi = array(
+            0 => '',
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        );
+
+        $month = $monthList[$monthR];
+        $monthR = $monthRomawi[$monthR];
+
+
+        $proposalWm = proposalWms::selectRaw('tblopp.operator as operator,
+        proposal_wms.code,
+        proposal_wms.queue,
+        proposal_wms.customer_id,
+        proposal_wms.status,
+        proposal_wms.status_wm,
+        proposal_wms.priority,
+        proposal_wms.created_at as diterima,
+        proposal_wms.updated_at,
+        tblpelanggan.namapelanggan,
+        tblpelanggan.nomorrekening,
+        tblpelanggan.alamat,
+        tblpelanggan.telp,
+        tblpelanggan.idareal,
+        tblpelanggan.idgol
+        ')
+            ->join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
+            ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+            ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
+            ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
+            // ->where('proposal_wms.created_at', 'like', date('Y-m-1', strtotime('-1 month', strtotime($request->monthyear))) . '%')
+            ->where('tblopp.status', '=', '1')
+            ->FilterAreas($request->areas);
+        // ->where('proposal_wms.status', 'close');
+
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+            $dapertement = "";
+            $sub_dapertement = "";
+            $proposalWm =  $proposalWm->get();
+        } else {
+            $group_unit = Dapertement::select('dapertements.group_unit')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
+            $dapertement = Dapertement::select('dapertements.name')
+                ->where('dapertements.id', Auth::user()->dapertement_id)->first()->name;
+            if (Auth::user()->subdapertement_id != 0 && Auth::user()->subdapertement_id != null) {
+                $sub_dapertement = Subdapertement::where('id', Auth::user()->subdapertement_id)->first()->name;
+            } else {
+                $sub_dapertement = "";
+            }
+
+            // $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();
+            // $areas = $data;
+            // $proposalWm = proposalWms::selectRaw('tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+            //     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening');
+            if ($group_unit == "1") {
+                $unitName = "Kota";
+            } else if ($group_unit == "2") {
+                $unitName = "Unit Kerambitan";
+            } else if ($group_unit == "3") {
+                $unitName = "Unit Selemadeg";
+            } else if ($group_unit == "4") {
+                $unitName = "Unit Penebel";
+            } else if ($group_unit == "5") {
+                $unitName = "Unit Baturiti";
+            }
+
+            $proposalWm->where('tblwilayah.group_unit', $group_unit);
+            $proposalWm =  $proposalWm->get();
+            // dd($proposalWm);
+            // dd($proposalWm->get());
+            // else {
+            //     for ($i = 0; $i < count($data); $i++) {
+            //         if ($i < 1) {
+
+            //             $proposalWm->where('tblpelanggan.idareal', $data[$i]->code);
+
+            //             // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
+            //         } else {
+            //             $proposalWm->orWhere('tblpelanggan.idareal', $data[$i]->code);
+            //         }
+            //     }
+        }
+
+        $director = Director::selectRaw('directors.name,directors.director_name,dapertements.name as dapertement_name')->join('dapertements', 'dapertements.director_id', '=', 'directors.id')
+            ->where('dapertements.id', Auth::user()->dapertement_id)->first();
+        $menyetujui = $director ? $director->name : "";
+        $director_name = $director ? $director->director_name : "";
+
+        $d1 = $proposalWm;
+        //return $proposalWm;
+        return view('admin.reports.reportPWM', compact('director_name', 'menyetujui', 'sub_dapertement', 'dapertement', 'proposalWm', 'd1', 'monthR', 'request', 'month', 'monthYear', 'unitName'));
     }
 
     public function reportProposalWm()
