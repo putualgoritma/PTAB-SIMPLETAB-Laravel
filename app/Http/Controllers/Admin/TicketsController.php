@@ -160,6 +160,10 @@ class TicketsController extends Controller
                 return $row->code ? $row->code : "";
             });
 
+            $table->editColumn('nomorrekening', function ($row) {
+                return $row->customer->nomorrekening ? $row->customer->nomorrekening : "";
+            });
+
             $table->editColumn('created_at', function ($row) {
                 return $row->created_at ?  strval($row->created_at) : "";
             });
@@ -173,6 +177,14 @@ class TicketsController extends Controller
             });
             $table->editColumn('description', function ($row) {
                 return $row->description ? $row->description : "";
+            });
+            $table->editColumn('address', function ($row) {
+
+                if ($row->address != "") {
+                    return $row->address != "" ? $row->address : "";
+                } else {
+                    return $row->customer->alamat;
+                }
             });
             $table->editColumn('status', function ($row) {
                 if ($row->print_report_status == "1") {

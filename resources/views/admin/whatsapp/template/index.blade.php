@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('user_create')
+@can('wablast_access')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route("admin.WaTemplate.create") }}">
@@ -52,12 +52,12 @@
                             {{ $WaTemplate->message ?? '' }}
                             </td>
                             <td>
-                                @can('user_show')
+                                @can('wablast_access')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.WaTemplate.show', $WaTemplate->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
-                                @can('user_edit')
+                                @can('wablast_access')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.WaTemplate.edit', $WaTemplate->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>

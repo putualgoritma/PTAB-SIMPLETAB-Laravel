@@ -61,6 +61,9 @@
                             {{ trans('global.ticket.fields.code') }}
                         </th>
                         <th>
+                            {{ trans('global.proposalwm.fields.nomorrekening') }}
+                        </th>
+                        <th>
                             {{ trans('global.ticket.fields.date') }}
                         </th>
                         <th>
@@ -71,6 +74,9 @@
                         </th>
                         <th>
                             {{ trans('global.ticket.fields.description') }}
+                        </th>
+                        <th>
+                            {{ trans('global.ticket.fields.address') }}
                         </th>
                         <th>
                             {{ trans('global.ticket.fields.status') }}
@@ -166,10 +172,12 @@
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no', searchable : false },
         { data: 'code', name: 'code' },
+        { data: 'nomorrekening', name: 'nomorrekening' },
         { data: 'created_at', name: 'created_at' },
         { data: 'dapertement', name: 'dapertement', searchable : false  },
         { data: 'title', name: 'title' },
         { data: 'description', name: 'description' },
+        { data: 'address', name: 'address', searchable : false },
         { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>'+dataField+'</button>': dataField === 'close2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'close'+'</button>': dataField === 'pending2' ?'<button type="button" class="btn bg-secondary btn-sm" disabled>'+'pending'+'</button>': dataField === 'active' ?'<button type="button" class="btn btn-primary btn-sm" disabled>'+dataField+'</button>':'<button type="button" class="btn btn-success btn-sm" disabled>'+dataField+'</button>'; } },
         { data: 'category', name: 'category', searchable : false  },
         { data: 'customer', name: 'customer_id' },

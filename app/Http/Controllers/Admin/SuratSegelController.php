@@ -2,29 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CtmPembayaran;
+use App\AreaStaff;
+use App\CtmWilayah;
 use App\Customer;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
-use App\Lock;
-use App\LockAction;
 use App\Staff;
-use App\AreaStaff;
-use App\Subdapertement;
-use App\Traits\TraitModel;
 use App\User;
-use DB;
-use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
-use OneSignal;
-use Yajra\DataTables\Facades\DataTables;
-use PhpOffice\PhpWord\TemplateProcessor;
-use DateTime;
-use Illuminate\Support\Facades\App;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\CtmPelanggan;
-use App\CtmWilayah;
+use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class SuratSegelController extends Controller
 {
@@ -142,7 +132,7 @@ class SuratSegelController extends Controller
             'total' => $item->wajibdibayar - $item->sudahdibayar + $ctm[$key]->denda,
             'tunggakan' => $jmlTunggakan,
             'ss1' => $jmlTunggakan,
-            'ss' => $ctm
+            'ss' => $ctm,
         ];
 
         // dd($recap);
@@ -170,7 +160,7 @@ class SuratSegelController extends Controller
             'Wed' => 'Rabu',
             'Thu' => 'Kamis',
             'Fri' => 'Jumat',
-            'Sat' => 'Sabtu'
+            'Sat' => 'Sabtu',
         );
         $day2Name = array(
             '01' => 'Satu',
@@ -218,7 +208,7 @@ class SuratSegelController extends Controller
             9 => 'IX',
             10 => 'X',
             11 => 'XI',
-            12 => 'XII'
+            12 => 'XII',
         );
         $monthList = array(
             0 => '',
@@ -233,7 +223,7 @@ class SuratSegelController extends Controller
             9 => 'September',
             10 => 'Oktober',
             11 => 'November',
-            12 => 'Desember'
+            12 => 'Desember',
         );
         $yearRibu = array(
             0 => '',
@@ -322,7 +312,7 @@ class SuratSegelController extends Controller
             6 => 'Ratus',
             7 => 'Juta',
             8 => 'Puluh Juta',
-            9 => 'Ratus Juta'
+            9 => 'Ratus Juta',
         ];
         $nominaldepan = array(
             0 => '',
@@ -352,17 +342,16 @@ class SuratSegelController extends Controller
         // dd(substr($total, 0, 1));
         for ($i = 0; $i <= strlen($total); $i++) {
 
-
             //diatas puluhan
             if (strlen($total) - $i > 5) {
                 if (substr($total, $i, 1) == "1") {
                     if (strlen($total) - $i != 7) {
                         $angkaTertulis = $angkaTertulis . ' Se' . strtolower($nominal[strlen($total) - $i]);
                     } else {
-                        $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
+                        $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
                     }
                 } else if (substr($total, $i, 1) != '0') {
-                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
+                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
                 } else {
                 }
             }
@@ -370,29 +359,29 @@ class SuratSegelController extends Controller
             //dibawah ratusan
             else {
                 if (substr($total, $i, 1) == "0") {
-                } else if (strlen($total) - $i === 5 && substr($total, $i, 1) == "1"  && substr($total, $i + 1, 1) != "1") {
-                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i + 1, 1)] . ' belas';
+                } else if (strlen($total) - $i === 5 && substr($total, $i, 1) == "1" && substr($total, $i + 1, 1) != "1") {
+                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i + 1, 1)] . ' belas';
                 } else if (strlen($total) - $i === 5 && substr($total, $i, 1) == "1" && substr($total, $i + 1, 1) == "1") {
                     $angkaTertulis = $angkaTertulis . ' sebelas';
                 } else if (strlen($total) - $i === 5 && substr($total, $i, 1) != "1") {
-                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i] . ' ' . $nominaldepan[(int)substr($total, $i + 1, 1)];
+                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i] . ' ' . $nominaldepan[(int) substr($total, $i + 1, 1)];
                 } else if (strlen($total) - $i === 3) {
                     if (substr($total, $i, 1) == "1") {
                         if (strlen($total) - $i != 7) {
                             $angkaTertulis = $angkaTertulis . ' se' . $nominal[strlen($total) - $i];
                         } else {
-                            $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
+                            $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
                         }
                     } else if (substr($total, $i, 1) != '0') {
-                        $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
+                        $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i];
                     } else {
                     }
-                } else if (strlen($total) - $i === 2 && substr($total, $i, 1) == "1"  && substr($total, $i + 1, 1) != "1") {
-                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i + 1, 1)] . ' belas';
+                } else if (strlen($total) - $i === 2 && substr($total, $i, 1) == "1" && substr($total, $i + 1, 1) != "1") {
+                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i + 1, 1)] . ' belas';
                 } else if (strlen($total) - $i === 2 && substr($total, $i, 1) == "1" && substr($total, $i + 1, 1) == "1") {
                     $angkaTertulis = $angkaTertulis . ' sebelas';
                 } else if (strlen($total) - $i === 2 && substr($total, $i, 1) != "1") {
-                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int)substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i] . ' ' . $nominaldepan[(int)substr($total, $i + 1, 1)];
+                    $angkaTertulis = $angkaTertulis . ' ' . $nominaldepan[(int) substr($total, $i, 1)] . ' ' . $nominal[strlen($total) - $i] . ' ' . $nominaldepan[(int) substr($total, $i + 1, 1)];
                 }
 
                 // else if (strlen($total) - $i === 4 && substr($total, $i, 1) == "1") {
@@ -418,16 +407,16 @@ class SuratSegelController extends Controller
             'yearPuluh' => $yearPuluh[substr(date('Y'), 2, 1)], 'yearSatuan' => $yearSatuan[substr(date('Y'), 3, 1)],
             'nama_staff' => $staff->name, 'dapartement' => 'Pelaksana Meter Segel', 'namapelanggan' => $customer->namapelanggan,
             'nomorrekening' => $customer->nomorrekening, 'address' => $customer->alamat, 'total' => rupiah($total),
-            'idareal' => $customer->idareal, 'jumlahtunggakan' => $recap['tunggakan'], 'jumlahtunggakanT' => $jumlahT[$recap['tunggakan']]
+            'idareal' => $customer->idareal, 'jumlahtunggakan' => $recap['tunggakan'], 'jumlahtunggakanT' => $jumlahT[$recap['tunggakan']],
         ];
 
-        $firstBulan = $monthList[(int)$blnCtm1];
-        $lastBulan = $monthList[(int)$blnCtm2];
+        $firstBulan = $monthList[(int) $blnCtm1];
+        $lastBulan = $monthList[(int) $blnCtm2];
 
         $firstTahun = $thnCtm1;
         $lastTahun = $thnCtm2;
 
-        $dapertement =  ucwords(strtolower($request->dapertement));
+        $dapertement = ucwords(strtolower($request->dapertement));
         // dd($dapertement);
         if ($request->jenis == "penyegelan") {
             $pdf = pdf::loadView('admin.suratSegel.penyegelan', compact('data', 'lastTahun', 'firstTahun', 'lastBulan', 'firstBulan', 'dapertement'));
@@ -479,21 +468,21 @@ class SuratSegelController extends Controller
                 ->join('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
                 ->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')
                 ->groupBy('staffs.id');
-            for ($i = 0; $i < count($data); $i++) {
-                if ($i < 1) {
 
-                    $qrystf->where('area_id', $data[$i]->code)
-                        ->where('subdapertement_id', 10)
-                        ->orWhere('dapertements.group_unit', '>', 1)
-                        ->where('area_id', $data[$i]->code);
-                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                } else {
-                    $qrystf->orWhere('area_id', $data[$i]->code)
-                        ->where('subdapertement_id', 10)
-                        ->orWhere('dapertements.group_unit', '>', 1)
-                        ->Where('area_id', $data[$i]->code);
+            $qrystf->where(function ($query) use ($data) {
+                //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                for ($i = 0; $i < count($data); $i++) {
+                    if ($i == 0) {
+                        $query->where('area_id', $data[$i]->code);
+                    } else {
+                        $query->orWhere('area_id', $data[$i]->code);
+                    }
                 }
-            }
+            });
+
+            $qrystf->where(function ($query) {
+                $query->where('subdapertement_id', 10)->orWhere('dapertements.group_unit', '>', 1);
+            });
 
             $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                 ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening');
@@ -504,25 +493,22 @@ class SuratSegelController extends Controller
                     // $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->code;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->code);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->code);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -531,25 +517,22 @@ class SuratSegelController extends Controller
                 } else {
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->code);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->code);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -558,30 +541,26 @@ class SuratSegelController extends Controller
                 }
             } else {
 
-
                 if ($request->staff != '') {
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -590,25 +569,22 @@ class SuratSegelController extends Controller
                 } else {
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->code)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->code);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->code);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -636,25 +612,22 @@ class SuratSegelController extends Controller
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -667,34 +640,30 @@ class SuratSegelController extends Controller
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
                         ->groupBy('tblpembayaran.nomorrekening')
-                        ->FilterStatus(request()->input('status'));
+                        ->FilterStatusNew(request()->input('status'));
                 }
             } else {
-
 
                 if ($request->staff != '') {
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -707,7 +676,7 @@ class SuratSegelController extends Controller
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
                         ->groupBy('tblpembayaran.nomorrekening')
-                        ->FilterStatus(request()->input('status'));
+                        ->FilterStatusNew(request()->input('status'));
                 }
             }
         }
@@ -730,25 +699,22 @@ class SuratSegelController extends Controller
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -761,34 +727,30 @@ class SuratSegelController extends Controller
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
                         ->groupBy('tblpembayaran.nomorrekening')
-                        ->FilterStatus(request()->input('status'));
+                        ->FilterStatusNew(request()->input('status'));
                 }
             } else {
-
 
                 if ($request->staff != '') {
                     $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                     if (count($data) > 0) {
 
-                        for ($i = 0; $i < count($data); $i++) {
-                            if ($i < 1) {
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew(request()->input('status'));
 
-                                $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
-                                // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                            } else {
-                                $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                    ->where('tblpelanggan.status', 1)
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                    ->having('jumlahtunggakan', '>', 1)
-                                    ->FilterStatus(request()->input('status'));
+                        $qry->where(function ($query) use ($data) {
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                }
                             }
-                        }
+                        });
                     } else {
                         $qry->where('tblpelanggan.nomorrekening', null);
                     }
@@ -801,7 +763,7 @@ class SuratSegelController extends Controller
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->FilterWilayah(request()->input('area'))
                         ->groupBy('tblpembayaran.nomorrekening')
-                        ->FilterStatus(request()->input('status'));
+                        ->FilterStatusNew(request()->input('status'));
                 }
             }
         }

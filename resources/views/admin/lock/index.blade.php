@@ -21,9 +21,9 @@
                     <div class="input-group">
                         <select id="status" name="status" class="form-control">
                             <option value="">== Semua Status ==</option>
-                            <option value="notice">Penyampaian Surat</option>
+                            <option value="lock_resist">Hambatan Segel</option>
                             <option value="lock">Segel</option>
-                            <option value="notice2">Kunjungan</option>
+                            <option value="unplug_resist">Hambatan Cabut</option>
                             <option value="unplug">Cabut</option>
                         </select>
                     </div>
@@ -212,7 +212,7 @@
             retrieve: true,
             aaSorting: [],
             ajax: {
-            url: "{{ route('admin.lock.index') }}",
+            url: "{{ route('admin.locks.index') }}",
             data: {
                 'status': $("#status").val(),
                 'from': $("#from").val(),

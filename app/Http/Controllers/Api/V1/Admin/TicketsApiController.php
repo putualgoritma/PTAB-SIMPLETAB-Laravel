@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\v1\admin1;
+namespace App\Http\Controllers\api\v1\admin;
 
 use App\Action;
 use App\CustomerApi;
@@ -224,6 +224,12 @@ class TicketsApiController extends Controller
                 $dataForm->lng = $customermaps->lng;
             }
         }
+        //set address
+        if (!isset($dataForm->address) || $dataForm->address == '') {
+            $address_value = '';
+        } else {
+            $address_value = $dataForm->address;
+        }
         //set data
         $data = array(
             'code' => $code,
@@ -238,6 +244,7 @@ class TicketsApiController extends Controller
             'dapertement_id' => $dapertement_id,
             'spk' => $spk,
             'dapertement_receive_id' => $dapertement_id,
+            'address' => $address_value,
         );
 
         if ($dapertement_def_id != $dataForm->dapertement_id) {

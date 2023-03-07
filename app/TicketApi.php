@@ -25,6 +25,7 @@ class TicketApi extends Model
         'spk',
         'dapertement_receive_id',
         'delegated_at',
+        'address',
     ];
 
     // public function setCreatedAtAttribute($value)

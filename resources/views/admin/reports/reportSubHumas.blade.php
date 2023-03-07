@@ -118,7 +118,7 @@
                 <td>{{$ticket->area }}</td>
                 <td>{{$ticket->customer->id}}</td>
                 <td>{{ $ticket->customer->name }}</td>
-                <td>{{$ticket->customer->address}}</td>
+                <td> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</td>
                 <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('H:i:s')}} @endif</td>
                 <td>@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('H:i:s')}} @else {{$ticket->created_at->format('H:i:s')}} @endif</td>
                 <?php 

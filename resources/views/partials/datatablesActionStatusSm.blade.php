@@ -25,10 +25,10 @@
     <input type="submit" class="btn btn-xs btn-danger" value="Tolak">
 </form> --}}
 @else
-@if($row->proposalwm_status == "pending")
-Sudah Diteruskan
-@else
+@if($row->proposalwm_status == "reject")
 Ditolak
+@else
+Sudah Diteruskan
 @endif
 @endif
 @endif

@@ -103,7 +103,7 @@
                     <tr>
                         <td class="text-center">{{$no++}}</td>
                         <td>{{ $ticket->customer->name }}</td>
-                        <td>{{$ticket->customer->address}}</td>
+                        <td> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</td>
                         <td>{{$ticket->area}}</td>
                         <td>@if ($ticket->created_at != null) {{$ticket->created_at->format('d/m/Y')}} @endif</td>
                         <td>{{$ticket->description}}</td>
