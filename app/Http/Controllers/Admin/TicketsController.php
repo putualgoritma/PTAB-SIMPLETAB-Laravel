@@ -165,6 +165,10 @@ class TicketsController extends Controller
                 return $row->code ? $row->code : "";
             });
 
+            $table->editColumn('nomorrekening', function ($row) {
+                return $row->customer->nomorrekening ? $row->customer->nomorrekening : "";
+            });
+
             $table->editColumn('created_at', function ($row) {
                 return $row->created_at ?  strval($row->created_at) : "";
             });

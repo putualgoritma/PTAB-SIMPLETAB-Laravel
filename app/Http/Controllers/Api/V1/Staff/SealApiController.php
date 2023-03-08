@@ -2,22 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1\Staff;
 
-use App\CtmPelanggan;
+use App\AreaStaff;
+use App\CtmPbk;
 use App\CtmPembayaran;
 use App\Customer;
 use App\Http\Controllers\Controller;
-use DB;
-use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
-use App\Lock;
-use App\Traits\TraitModel;
-use App\AreaStaff;
-use App\CtmPbk;
 use App\LockAction;
 use App\Staff;
-use App\Subdapertement;
+use App\Traits\TraitModel;
 use App\User;
-use OneSignal;
+use DB;
+use Illuminate\Http\Request;
 
 class SealApiController extends Controller
 {
@@ -32,338 +27,126 @@ class SealApiController extends Controller
         //set query
         $user = User::where('id', $id)->first();
 
+        $staffPbk = array();
 
         if ($user->staff_id != 0 || $user->staff_id != null) {
             $staff = Staff::where('id', $user->staff_id)->first();
             $staffPbk = CtmPbk::where('Name', $staff->pbk)->get();
             if (count($staffPbk) > 0) {
                 if ($date_now < $date_comp) {
+                    $tes = "1";
                     $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                         ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                         ->join('tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-                        ->where('tblopp.operator',  $staff->pbk)
+                        ->where('tblopp.operator', $staff->pbk)
                         ->FilterCustomerId($request->customer)
                         ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->having('jumlahtunggakan', '>', 1)
-                        ->FilterStatus($request->status)
+                        ->FilterKeyword($request->search)
+                        ->FilterStatusNew($request->status)
                         ->groupBy('tblpembayaran.nomorrekening')->paginate(10, ['*'], 'page', $request->page);
                 } else {
+                    $tes = "2";
                     $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                         ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                         ->join('tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
-                        ->where('tblopp.operator',  $staff->pbk)
-                        ->where('tblpelanggan.nomorrekening', $request->search)
+                        ->where('tblopp.operator', $staff->pbk)
                         ->where('tblpelanggan.status', 1)
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                         ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                         ->having('jumlahtunggakan', '>', 1)
-                        ->FilterStatus($request->status)
+                        ->FilterKeyword($request->search)
+                        ->FilterStatusNew($request->status)
                         ->groupBy('tblpembayaran.nomorrekening')->paginate(10, ['*'], 'page', $request->page);
                 }
             } else {
                 $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                     ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening');
                 if ($date_now > $date_comp) {
-                    if ($request->search != '') {
-                        $tes = "1";
-                        $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
-                        if (count($data) > 0) {
+                    $tes = "3";
+                    $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
+                    if (count($data) > 0) {
 
-                            for ($i = 0; $i < count($data); $i++) {
-                                if ($i < 1) {
-
-                                    $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status)
-
-                                        ->orWhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                                } else {
-                                    $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status)
-
-                                        ->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
+                        $qry->where(function ($query) use ($data) {
+                                //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                                for ($i = 0; $i < count($data); $i++) {
+                                    if ($i == 0) {
+                                        $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                    } else {
+                                        $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                    }
                                 }
-                            }
-                        } else {
-                            $qry->where('tblpelanggan.nomorrekening', null);
-                        }
+                            });
 
-                        $qry = $qry->groupBy('tblpembayaran.nomorrekening')->paginate(10, ['*'], 'page', $request->page);
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew($request->status)
+                            ->FilterKeyword($request->search);
                     } else {
-                        $tes = "2";
-                        $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
-                        if (count($data) > 0) {
-
-                            for ($i = 0; $i < count($data); $i++) {
-                                if ($i < 1) {
-
-                                    $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                                } else {
-                                    $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                }
-                            }
-                        } else {
-                            $qry->where('tblpelanggan.nomorrekening', null);
-                        }
-
-                        $qry = $qry->groupBy('tblpembayaran.nomorrekening')->paginate(10, ['*'], 'page', $request->page);
-                        // $qry->having('jumlahtunggakan', '>', 1)
-                        //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        //     ->groupBy('tblpembayaran.nomorrekening')
-                        //     ->FilterStatus($request->status);
+                        $qry->where('tblpelanggan.nomorrekening', null);
                     }
+
+                    $qry = $qry->groupBy('tblpembayaran.nomorrekening')->paginate(10, ['*'], 'page', $request->page);
                 }
                 // tanggal beda
                 else {
-                    if ($request->search != '') {
-                        $tes = "3";
-                        $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
-                        if (count($data) > 0) {
+                    $tes = "4";
+                    $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
+                    $data_area = $data;
+                    if (count($data) > 0) {
 
-                            for ($i = 0; $i < count($data); $i++) {
-
-                                if ($i < 1) {
-                                    $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status)
-
-                                        ->orWhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                                        ->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                                } else {
-                                    $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.nomorrekening', $request->search)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status)
-
-                                        ->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->where('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
+                        $qry->where(function ($query) use ($data) {
+                                // $query->where('tblpelanggan.idareal', 'K010107')->orWhere('tblpelanggan.idareal', 'K010108')->orWhere('tblpelanggan.idareal', 'K010109');
+                                for ($i = 0; $i < count($data); $i++) {
+                                    if ($i == 0) {
+                                        $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                    } else {
+                                        $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
+                                    }
                                 }
-                            }
-                            $qry = $qry->groupBy('tblpembayaran.nomorrekening')
-                                ->paginate(10, ['*'], 'page', $request->page);
-                        }
-                    } else {
-                        $tes = 'k';
-                        $data = AreaStaff::select('area_id')->where('staff_id', $user->staff_id)->get();
-                        if (count($data) > 0) {
-                            $tes = 'T';
-                            for ($i = 0; $i < count($data); $i++) {
-                                if ($i < 1) {
+                            });
 
-                                    $qry->where('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                    // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
-                                } else {
-                                    $qry->orWhere('tblpelanggan.idareal', $data[$i]->area_id)
-                                        ->where('tblpelanggan.status', 1)
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                                        ->having('jumlahtunggakan', '>', 1)
-                                        ->FilterStatus($request->status);
-                                }
-                            }
-                        } else {
-                            $tes = 'B';
-                            $qry->where('tblpelanggan.nomorrekening', null);
-                        }
+                        $qry->where('tblpelanggan.status', 1)
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                            ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                            ->having('jumlahtunggakan', '>', 1)
+                            ->FilterStatusNew($request->status)
+                            ->FilterKeyword($request->search);
 
                         $qry = $qry->groupBy('tblpembayaran.nomorrekening')
                             ->paginate(10, ['*'], 'page', $request->page);
                     }
-                    // $tes = '0';
                 }
             }
         } else {
-            //tessssLama
-            $tes = "4";
             if ($date_now > $date_comp) {
-
-                if ($request->status != '' && $request->search != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.nomorrekening', $request->search)
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-
-                        ->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->having('jumlahtunggakan', $request->status)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else if ($request->status != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->having('jumlahtunggakan', $request->status)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else if ($request->search != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.nomorrekening', $request->search)
-                        ->where('tblpelanggan.status', 1)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                        ->where('tblpelanggan.status', 1)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else {
-
-                    // $count = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    //     ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    //     ->where('tblpelanggan.status', 1)
-                    //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                    //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                    //     ->groupBy('tblpembayaran.nomorrekening')->get()->count();
-                    // if ($count % 10 === 0) {
-                    //     $total_data = floor($count / 10);
-                    // } else {
-                    //     $total_data = floor($count / 10) + 1;
-                    // }
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                }
+                $tes = "5";
+                $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                    ->where('tblpelanggan.status', 1)
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                    ->FilterStatusNew($request->status)
+                    ->FilterKeyword($request->search)
+                // ->having('jumlahtunggakan', '>', '1')
+                    ->groupBy('tblpembayaran.nomorrekening')
+                    ->paginate(10, ['*'], 'page', $request->page);
             } else {
-                if ($request->status != '' && $request->search != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.nomorrekening', $request->search)
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-
-                        ->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->having('jumlahtunggakan', $request->status)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else if ($request->status != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->having('jumlahtunggakan', $request->status)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else if ($request->search != '') {
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.nomorrekening', $request->search)
-                        ->where('tblpelanggan.status', 1)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
-                        ->where('tblpelanggan.status', 1)
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                } else {
-
-                    // $count = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    //     ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    //     ->where('tblpelanggan.status', 1)
-                    //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
-                    //     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                    //     ->groupBy('tblpembayaran.nomorrekening')->get()->count();
-                    // if ($count % 10 === 0) {
-                    //     $total_data = floor($count / 10);
-                    // } else {
-                    //     $total_data = floor($count / 10) + 1;
-                    // }
-                    $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                        ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                        ->where('tblpelanggan.status', 1)
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
-                        ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
-                        ->groupBy('tblpembayaran.nomorrekening')
-                        ->having('jumlahtunggakan', '>', '1')
-                        ->paginate(10, ['*'], 'page', $request->page);
-                }
+                $tes = "6";
+                $qry = Customer::selectRaw('tblpelanggan.*, ((((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2)) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+                    ->where('tblpelanggan.status', 1)
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
+                    ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                    ->FilterStatusNew($request->status)
+                    ->FilterKeyword($request->search)
+                // ->having('jumlahtunggakan', '>', '1')
+                    ->groupBy('tblpembayaran.nomorrekening')
+                    ->paginate(10, ['*'], 'page', $request->page);
             }
         }
 
@@ -375,6 +158,8 @@ class SealApiController extends Controller
                     // 'data2' => $data,
                     'data3' => $staffPbk,
                     'user' => $user,
+                    'tes' => $tes,
+                    'data_area' => $data_area,
                 ]);
             }
         } catch (QueryException $ex) {
@@ -441,7 +226,6 @@ class SealApiController extends Controller
             $sisa = $item->wajibdibayar - $item->sudahdibayar;
             $tagihan = $tagihan + $sisa;
 
-
             if ($month_now == $item->bulanrekening && $ctm_lock_old == 1) {
                 $ctm_lock = 1;
             }
@@ -456,8 +240,6 @@ class SealApiController extends Controller
             }
             //set to prev
             $periode = date('Y-m', strtotime(date($item->tahunrekening . '-' . $item->bulanrekening . '-01') . " -1 month"));
-
-
 
             $dataPembayaran[$key] = [
                 // 'no' => $key +1,
@@ -487,8 +269,38 @@ class SealApiController extends Controller
             $total = $tagihan;
         }
 
+        //list actions
+        $actions = array();
+        $input_Status = 0;
+
+        //get last action
+        if (date('d') > 20) {
+            $cek_last_action = LockAction::where('customer_id', $id)->whereBetween('created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])->orderBy('created_at', 'ASC')->first();
+        } else {
+            $cek_last_action = LockAction::where('customer_id', $id)->whereBetween('created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])->orderBy('created_at', 'ASC')->first();
+        }
+
         if ($tunggakan === 2) {
             $tindakan = ['tindakan' => "notice"];
+            if ($cek_last_action) {
+                if ($cek_last_action->type == 'lock_resist') {
+                    $actions[] = [
+                        'id' => 'resist',
+                        'name' => 'Segel',
+                    ];
+                }else{
+                    $input_Status = 1;
+                }
+            } else {
+                $actions[] = [
+                    'id' => 'lock_resist',
+                    'name' => 'Hambatan Segel',
+                ];
+                $actions[] = [
+                    'id' => 'resist',
+                    'name' => 'Segel',
+                ];
+            }
         } else if ($tunggakan === 3) {
             $cek = LockAction::where('customer_id', $id)->where('type', 'lock')->get();
             if (count($cek) >= 1) {
@@ -496,17 +308,77 @@ class SealApiController extends Controller
             } else {
                 $tindakan = ['tindakan' => "lock"];
             }
+            if ($cek_last_action) {
+                if ($cek_last_action->type == 'lock_resist') {
+                    $actions[] = [
+                        'id' => 'lock',
+                        'name' => 'Segel',
+                    ];
+                } else if ($cek_last_action->type == 'lock') {
+                    $input_Status = 1;
+                } else {
+                    $actions[] = [
+                        'id' => 'lock_resist',
+                        'name' => 'Hambatan Segel',
+                    ];
+                    $actions[] = [
+                        'id' => 'lock',
+                        'name' => 'Segel',
+                    ];
+                }
+            } else {
+                $actions[] = [
+                    'id' => 'lock_resist',
+                    'name' => 'Hambatan Segel',
+                ];
+                $actions[] = [
+                    'id' => 'lock',
+                    'name' => 'Segel',
+                ];
+            }
         } else if ($tunggakan > 3) {
             $tindakan = ['tindakan' => "unplug"];
+            if ($cek_last_action) {
+                if ($cek_last_action->type == 'unplug_resist') {
+                    $actions[] = [
+                        'id' => 'unplug',
+                        'name' => 'Cabut',
+                    ];
+                } else if ($cek_last_action->type == 'unplug') {
+                    $input_Status = 1;
+                } else {
+                    $actions[] = [
+                        'id' => 'unplug_resist',
+                        'name' => 'Hambatan Cabut',
+                    ];
+                    $actions[] = [
+                        'id' => 'unplug',
+                        'name' => 'Cabut',
+                    ];
+                }
+            } else {
+                $actions[] = [
+                    'id' => 'unplug_resist',
+                    'name' => 'Hambatan Cabut',
+                ];
+                $actions[] = [
+                    'id' => 'unplug',
+                    'name' => 'Cabut',
+                ];
+            }
         }
 
-        $cekInput = LockAction::where('customer_id', $id)->where('type', $tindakan)->get();
-        if (count($cekInput) >= 1) {
+        //$cekInput = LockAction::where('customer_id', $id)->where('type', $tindakan)->get();       
+        // if (count($cekInput) >= 1) {
+        //     $inputStatus = ["inputStatus" => "sudah"];
+        // } else {
+        //     $inputStatus = ["inputStatus" => "belum"];
+        // }
+        if ($input_Status == 1) {
             $inputStatus = ["inputStatus" => "sudah"];
         } else {
             $inputStatus = ["inputStatus" => "belum"];
-        }
-
+        }        
 
         $recap = [
             'tagihan' => $tagihan,
@@ -524,6 +396,7 @@ class SealApiController extends Controller
                     'data3' => $recap,
                     'data4' => $tindakan,
                     'data5' => $inputStatus,
+                    'data6' => $actions,
                     'status_paid_this_month' => $status_paid_this_month,
                 ]);
             }
@@ -534,7 +407,6 @@ class SealApiController extends Controller
             ]);
         }
     }
-
 
     public function store(Request $request)
     {
@@ -681,12 +553,10 @@ class SealApiController extends Controller
         }
     }
 
-
-
     public function history(Request $request, $id)
     {
 
-        if ($request->status != '' && $request->search != ''  && $request->date != '') {
+        if ($request->status != '' && $request->search != '' && $request->date != '') {
             $qry = LockAction::join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')->where('created_at', 'like', $request->date . '%')->where('type', $request->status)
                 ->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
                 ->where('created_at', 'like', $request->date . '%')->where('type', $request->status)
@@ -699,7 +569,7 @@ class SealApiController extends Controller
                 ->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
                 ->where('type', $request->status)
                 ->where('staff_id', $id)->paginate(10, ['*'], 'page', $request->page);
-        } else if ($request->search != ''  && $request->date != '') {
+        } else if ($request->search != '' && $request->date != '') {
             $qry = LockAction::join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')->where('created_at', 'like', $request->date . '%')
                 ->where('tblpelanggan.nomorrekening', $request->search)->orwhere('tblpelanggan.namapelanggan', 'like', '%' . $request->search . '%')
                 ->where('created_at', 'like', $request->date . '%')

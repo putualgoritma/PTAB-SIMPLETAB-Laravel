@@ -29,7 +29,7 @@
                 <span class="v103_257"><!--@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('d/m/Y')}} @else {{$ticket->created_at->format('d/m/Y')}} @endif--></span>
                 <span class="v103_258"><!--@if ($ticket->delegated_at != null) {{$ticket->delegated_at->format('d/m/Y')}} @else {{$ticket->created_at->format('d/m/Y')}} @endif--></span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
-                <span class="v103_260">{{$ticket->customer->address}}</span>
+                <span class="v103_260"> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
                 <span class="v103_262">{{$ticket->customer->name}}</span>
                 <span class="v103_263">{{isset($ticket->dapertementReceive->name) ? $ticket->dapertementReceive->name : $ticket->dapertement->name}}</span>

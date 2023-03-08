@@ -71,12 +71,14 @@
                 </div>
                 <h5 style="font-weight:bold">Foto Laporan</h5>
                 <div class="row">
-                        @foreach (json_decode($customer->image) as $item)
+                @if ($customer->image != null)        
+                @foreach (json_decode($customer->image) as $item)
                         <div class="col-md-5">
                             <img  height="250px" width="350px"  src={{"https://simpletabadmin.ptab-vps.com/$item"}} alt="">
                             <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$item"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
                         </div>
                         @endforeach
+                        @endif
                 </div>
             </div>
         </div>

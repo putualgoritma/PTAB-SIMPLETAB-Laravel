@@ -28,9 +28,8 @@
                             <option value="">== Status Tunggaakan ==</option>
                             {{-- <option value="0" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==0 ?'selected' : '' }} >Lunas</option>
                             <option value="1" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Perhatian</option> --}}
-                            <option value="2" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Tunggak</option>
-                            <option value="3" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Segel</option>
-                            <option value="4" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  ==1 ?'selected' : '' }}>Cabut</option>
+                            <option value="2" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  >=2 && $_GET['status_tunggakan']  <4 ?'selected' : '' }}>Segel</option>
+                            <option value="4" {{ !empty($_GET['status_tunggakan']) && $_GET['status_tunggakan']  <=4 ?'selected' : '' }}>Cabut</option>
                         </select>
                     </div> 
                     <br>

@@ -166,7 +166,7 @@ class LockController extends Controller
                 // $staffGate = 'lock_access';
                 // $actionLockGate = 'lock_action_access';
                 // $viewSegelGate = 'lock_access';
-                $crudRoutePart = 'lock';
+                $crudRoutePart = 'locks';
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'editGate',
@@ -348,11 +348,13 @@ class LockController extends Controller
     {
         abort_unless(\Gate::allows('lock_show'), 403);
         // dd($id);
-        $customer = LockAction::join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
+        $customer = LockAction::selectRaw('lock_action.*')->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
             ->join('users', 'lock_action.staff_id', '=', 'users.id')
             ->where('lock_action.id', $id)
+            ->with('customer')
             ->first();
         // dd($customer);
+        // return $customer;
         return view('admin.lock.show', compact('customer'));
     }
 
@@ -506,14 +508,26 @@ class LockController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Lock $lock)
+    public function destroy(Request $request)
     {
-        abort_unless(\Gate::allows('lock_delete'), 403);
+        abort_unless(\Gate::allows('lock_action_delete'), 403);
+        $lockaction = LockAction::find($request->_id);
         try {
-            $lock->delete();
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin", \base_path());
+            $img = $lockaction->image;
+            $img = str_replace('"', '', $img);
+            $img = str_replace('[', '', $img);
+            $img = str_replace(']', '', $img);
+            $img_arr = explode(",", $img);
+            foreach ($img_arr as $img_name) {
+                $file_path = $basepath . $img_name;
+                if (trim($img_name) != '' && file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
+            $lockaction->delete();
             return back();
         } catch (QueryException $e) {
-
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
         }
     }
