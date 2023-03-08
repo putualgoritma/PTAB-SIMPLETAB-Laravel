@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Dapertement;
 use App\Http\Controllers\Controller;
+use App\Job;
+use App\ShiftGroups;
 use App\Subdapertement;
 // use App\Http\Requests\MassDestroyWaCategoryRequest;
 use App\Traits\TraitModel;
+use App\WorkTypeDays;
 use App\WorkTypes;
+use App\WorkUnit;
 use Illuminate\Http\Request;
 
 class WorkTypeController extends Controller
@@ -16,7 +20,7 @@ class WorkTypeController extends Controller
 
     public function index()
     {
-        $work_types = WorkTypes::get();
+        $work_types = WorkTypes::where('type', 'reguler')->get();
         return view('admin.work_type.index', compact('work_types'));
     }
     public function create()
@@ -25,9 +29,9 @@ class WorkTypeController extends Controller
 
         $code = acc_code_generate($last_code, 8, 3);
 
-        $departementlist = Dapertement::all();
 
-        return view('admin.work_type.create', compact('code', 'departementlist'));
+
+        return view('admin.work_type.create', compact('code'));
     }
     public function store(Request $request)
     {
@@ -58,7 +62,15 @@ class WorkTypeController extends Controller
     }
     public function destroy($id)
     {
+
         $work_type = WorkTypes::where('id', $id)->first();
+        $shift_group = ShiftGroups::where('work_type_id', $work_type->id)->first();
+        $work_type_day = WorkTypeDays::where('work_type_id', $work_type->id)->first();
+        if ($shift_group) {
+            dd('Hapus Data Shift Group Terlebih dahulu');
+        } else if ($work_type_day) {
+            dd('Hapus data jadwal terlebih dahulu');
+        }
         $work_type->delete();
         return back();
     }

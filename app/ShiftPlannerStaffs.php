@@ -18,4 +18,20 @@ class ShiftPlannerStaffs extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function scopeFilterJob($query, $job)
+    {
+        if ($job != '' && $job != '0') {
+            $query->where('shift_groups.job_id', '=', $job);
+        }
+        return $query;
+    }
+
+    public function scopeFilterWorkUnit($query, $WorkUnit)
+    {
+        if ($WorkUnit != '' && $WorkUnit != '0') {
+            $query->where('shift_groups.work_unit_id', '=', $WorkUnit);
+        }
+        return $query;
+    }
 }

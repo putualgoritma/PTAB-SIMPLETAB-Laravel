@@ -23,7 +23,7 @@
                 </p>
             </div>
 
-            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+            {{-- <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
                 <label for="type">{{ trans('global.staff.fields.dapertement') }}*</label>
                 <select id="type" name="type" class="form-control" value="{{ old('type', isset($user) ? $user->type : '') }}">
                     <option value="">--Pilih Dapertement--</option>
@@ -35,7 +35,7 @@
                         {{ $errors->first('type') }}
                     </em>
                 @endif
-            </div>
+            </div> --}}
 
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">

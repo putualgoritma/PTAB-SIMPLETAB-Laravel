@@ -159,13 +159,12 @@ class Customer extends Model
     public function scopeFilterStatusNew($query, $status)
     {
         if ($status != '') {
-            if($status == 2){
+            if ($status == 2) {
                 $query->having('jumlahtunggakan', '>=', 2)->having('jumlahtunggakan', '<', 4);
-            }
-            else if($status == 4){
+            } else if ($status == 4) {
                 $query->having('jumlahtunggakan', '>=', 4);
-            }else{
-            $query->having('jumlahtunggakan', '=', $status);
+            } else {
+                $query->having('jumlahtunggakan', '=', $status);
             }
             return $query;
         } else {

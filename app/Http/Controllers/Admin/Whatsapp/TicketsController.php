@@ -177,74 +177,73 @@ class TicketsController extends Controller
 
         abort_unless(\Gate::allows('ticket_create'), 403);
 
-   $customer_id = Customer::where('nomorrekening', $request->customer_id)->get();
+        $customer_id = Customer::where('nomorrekening', $request->customer_id)->get();
         // dd($customer_id);
         if (count($customer_id) < 1) {
             return back()->withError('No.SBG tidak ada !')->withInput();
-        }
-else{
-        $img_path = "/images/complaint";
-        $video_path = "/videos/complaint";
+        } else {
+            $img_path = "/images/complaint";
+            $video_path = "/videos/complaint";
 
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
 
-        // upload image
-        if ($request->file('image')) {
+            // upload image
+            if ($request->file('image')) {
 
-            foreach ($request->file('image') as $key => $image) {
-                $resourceImage = $image;
-                $nameImage = strtolower($request->code);
-                $file_extImage = $image->extension();
-                $nameImage = str_replace(" ", "-", $nameImage);
-                $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . $key . "." . $file_extImage;
+                foreach ($request->file('image') as $key => $image) {
+                    $resourceImage = $image;
+                    $nameImage = strtolower($request->code);
+                    $file_extImage = $image->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
+                    $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . $key . "." . $file_extImage;
 
-                $resourceImage->move($basepath . $img_path, $img_name);
-                $dataImageName[] = $img_name;
-            }
-        }
-
-        // video
-        $video_path = "/videos/complaint";
-        $resource = $request->file('video');
-        $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
-
-        $resource->move($basepath . $video_path, $video_name);
-
-        // data
-        $dapertement_id = Auth::check() ? Auth::user()->dapertement_id : 1;
-        //set SPK
-        $arr['dapertement_id'] = $dapertement_id;
-        $arr['month'] = date("m");
-        $arr['year'] = date("Y");
-        $last_spk = $this->get_last_code('spk-ticket', $arr);
-        $spk = acc_code_generate($last_spk, 21, 17, 'Y');
-        //set data
-        $data = array(
-            'code' => $request->code,
-            'title' => $request->title,
-            'category_id' => $request->category_id,
-            'description' => $request->description,
-            'image' => '',
-            'video' => $video_name,
-            'customer_id' => $request->customer_id,
-            'dapertement_id' => $dapertement_id,
-            'spk' => $spk,
-        );
-
-        try {
-            $ticket = Ticket::create($data);
-            if ($ticket) {
-                $upload_image = new Ticket_Image;
-                $upload_image->image = str_replace("\/", "/", json_encode($dataImageName));
-                $upload_image->ticket_id = $ticket->id;
-                $upload_image->save();
+                    $resourceImage->move($basepath . $img_path, $img_name);
+                    $dataImageName[] = $img_name;
+                }
             }
 
-            return redirect()->route('admin.tickets.index');
-        } catch (QueryException $ex) {
-            return back()->withErrors($ex);
+            // video
+            $video_path = "/videos/complaint";
+            $resource = $request->file('video');
+            $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
+
+            $resource->move($basepath . $video_path, $video_name);
+
+            // data
+            $dapertement_id = Auth::check() ? Auth::user()->dapertement_id : 1;
+            //set SPK
+            $arr['dapertement_id'] = $dapertement_id;
+            $arr['month'] = date("m");
+            $arr['year'] = date("Y");
+            $last_spk = $this->get_last_code('spk-ticket', $arr);
+            $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+            //set data
+            $data = array(
+                'code' => $request->code,
+                'title' => $request->title,
+                'category_id' => $request->category_id,
+                'description' => $request->description,
+                'image' => '',
+                'video' => $video_name,
+                'customer_id' => $request->customer_id,
+                'dapertement_id' => $dapertement_id,
+                'spk' => $spk,
+            );
+
+            try {
+                $ticket = Ticket::create($data);
+                if ($ticket) {
+                    $upload_image = new Ticket_Image;
+                    $upload_image->image = str_replace("\/", "/", json_encode($dataImageName));
+                    $upload_image->ticket_id = $ticket->id;
+                    $upload_image->save();
+                }
+
+                return redirect()->route('admin.tickets.index');
+            } catch (QueryException $ex) {
+                return back()->withErrors($ex);
+            }
         }
-}
 
         // dd(json_encode($dataImageName));
 
@@ -253,7 +252,7 @@ else{
     public function show(Ticket $ticket)
     {
         // dd($ticket->customer);
-        
+
         return view('admin.tickets.show', compact('ticket'));
     }
 
@@ -289,29 +288,28 @@ else{
         // dd($request->all());
         abort_unless(\Gate::allows('ticket_edit'), 403);
 
-   $customer_id = Customer::where('nomorrekening', $request->customer_id)->get();
+        $customer_id = Customer::where('nomorrekening', $request->customer_id)->get();
         // dd($customer_id);
         if (count($customer_id) < 1) {
             return back()->withError('No.SBG tidak ada !')->withInput();
-        }
-else{
-        $data = $request->all();
-        if ($ticket->dapertement_id != $request->dapertement_id) {
-            //set SPK
-            $arr['dapertement_id'] = $request->dapertement_id;
-            $created_at = date_create($ticket->created_at);
-            $arr['month'] = date_format($created_at, "m");
-            $arr['year'] = date_format($created_at, "Y");
-            $last_spk = $this->get_last_code('spk-ticket', $arr);
-            $spk = acc_code_generate($last_spk, 21, 17, 'Y');
-            //merge data
-            $data = array_merge($data, ['spk' => $spk]);
-        }
+        } else {
+            $data = $request->all();
+            if ($ticket->dapertement_id != $request->dapertement_id) {
+                //set SPK
+                $arr['dapertement_id'] = $request->dapertement_id;
+                $created_at = date_create($ticket->created_at);
+                $arr['month'] = date_format($created_at, "m");
+                $arr['year'] = date_format($created_at, "Y");
+                $last_spk = $this->get_last_code('spk-ticket', $arr);
+                $spk = acc_code_generate($last_spk, 21, 17, 'Y');
+                //merge data
+                $data = array_merge($data, ['spk' => $spk]);
+            }
 
-        $ticket->update($data);
+            $ticket->update($data);
 
-        return redirect()->route('admin.tickets.index');
-}
+            return redirect()->route('admin.tickets.index');
+        }
     }
 
     public function destroy(Ticket $ticket)
@@ -342,7 +340,6 @@ else{
         } catch (QueryException $e) {
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
         }
-
     }
 
     public function massDestroy()
@@ -350,7 +347,8 @@ else{
         # code...
     }
 
-    function print($id) {
+    function print($id)
+    {
         $ticket = Ticket::findOrFail($id);
         // $newtime = strtotime($data->created_at);
         // $data->time = date('M d, Y',$newtime);

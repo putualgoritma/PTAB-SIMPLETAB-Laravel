@@ -10,13 +10,15 @@ class ShiftGroups extends Model
     use HasFactory;
     protected $fillable = [
         'id',
-        'code',
+        // 'code',
         'title',
         'dapertement_id',
         'job_id',
         'subdapertement_id',
-        'work_unit_id',
+        'shift_parent_id',
         'created_at',
         'updated_at',
+        'work_type_id',
+        'queue',
     ];
 }

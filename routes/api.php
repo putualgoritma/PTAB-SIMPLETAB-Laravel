@@ -254,7 +254,12 @@ Route::group(['prefix' => 'close/admin1', 'namespace' => 'Api\V1\Admin1', 'middl
 Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], function () {
     Route::get('absence', 'AbsenceApiController@index');
     Route::get('history', 'AbsenceApiController@history');
+    Route::get('requests/listFile', 'RequestApiController@listFile');
     Route::get('requests/history', 'RequestApiController@history');
+    Route::delete('requests/imageDelete/{id}', 'RequestApiController@imageDelete');
+    Route::get('absence/schedule', 'AbsenceApiController@schedule');
+
+
     Route::get('requests/absenceList', 'RequestApiController@absenceList');
     Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
     Route::get('menu', 'MenuApiController@index');
@@ -262,7 +267,20 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('shift/listChange', 'ShiftApiController@listChange');
     Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
     Route::post('absence/store', 'AbsenceApiController@store');
+
+
+    Route::get('message', 'MessageApiController@index');
+    Route::post('message/read', 'MessageApiController@read');
+    Route::post('message/check', 'MessageApiController@check');
+
+
+    Route::post('absence/storeLocationEnd', 'AbsenceApiController@storeLocationEnd');
     Route::post('absence/storeLocation', 'AbsenceApiController@storeLocation');
+    Route::post('absence/storeLocationExtra', 'AbsenceApiController@storeLocationExtra');
+    Route::post('absence/storeLocationDuty', 'AbsenceApiController@storeLocationDuty');
+    Route::post('leaveEnd', 'AbsenceApiController@leaveEnd');
+
+    Route::post('requests/update', 'RequestApiController@update');
     Route::post('requests/store', 'RequestApiController@store');
     Route::post('shift/update', 'ShiftApiController@update');
     Route::post('shift/approve', 'ShiftApiController@approve');
@@ -271,4 +289,11 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('shift/myShift', 'ShiftApiController@myShift');
     Route::get('shiftChange', 'ShiftChangeApiController@index');
     Route::post('shiftChange/store', 'ShiftChangeApiController@store');
+
+    Route::get('changeShiftProposal', 'ShiftChangeApiController@changeShiftProposal');
+    Route::get('changeShift', 'ShiftChangeApiController@changeShift');
+    Route::post('changeShiftApprove', 'ShiftChangeApiController@changeShiftApprove');
+
+
+    Route::get('holiday', 'AbsenceApiController@holiday');
 });

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1\Absence;
 
 use App\Absence;
+use App\AbsenceRequest;
+use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
 use App\Requests;
 use App\Requests_file;
@@ -38,18 +40,35 @@ class RequestApiController extends Controller
     {
 
         // $last_code = $this->get_last_code('lock_action');
-
         // $code = acc_code_generate($last_code, 8, 3);
         $dataForm = json_decode($request->form);
 
+        $start = "";
+        $end = "";
 
-        $requests = new Requests();
-        $requests->user_id = $dataForm->user_id;
+        if ($dataForm->start == "") {
+            $start = date('Y-m-d H:i:s');
+        } else if ($dataForm->start != "" && $dataForm->time == "") {
+            $start = date("Y-m-d H:i:s", strtotime($dataForm->start));
+        } else {
+            $start = date("Y-m-d H:i:s", strtotime($dataForm->start . $dataForm->time));
+        }
+
+        if ($dataForm->end == "") {
+            $end = date("Y-m-d H:i:s", strtotime($dataForm->start . '23:59:59'));
+        } else {
+            $end = date("Y-m-d H:i:s", strtotime($dataForm->end . '23:59:59'));
+        }
+
+
+
+        $requests = new AbsenceRequest();
+        $requests->staff_id = $dataForm->staff_id;
         $requests->description = $dataForm->description;
-        $requests->date = $dataForm->date == "" ? $dataForm->date : date('Y-m-d');
-        $requests->end = $dataForm->end;
+        $requests->start = $start;
+        $requests->end = $end;
         $requests->type = $dataForm->type;
-        $requests->start = $dataForm->start;
+        $requests->time = $dataForm->time;
         $requests->status = $dataForm->status;
         $requests->category = $dataForm->category;
 
@@ -76,11 +95,11 @@ class RequestApiController extends Controller
             //     }
             // }
             $data = [
-                'file' => $nameImage,
-                'requests_id' => $requests_id,
-                'type' => 'persetujuan'
+                'image' => $nameImage,
+                'absence_request_id' => $requests_id,
+                'type' => 'approve'
             ];
-            $data = Requests_file::create($data);
+            $data = AbsenceRequestLogs::create($data);
         }
 
         if ($request->file('imagePng')) {
@@ -93,11 +112,11 @@ class RequestApiController extends Controller
 
 
             $data = [
-                'file' =>  $nameImage,
-                'requests_id' => $requests_id,
-                'type' => 'pengajuan'
+                'image' =>  $nameImage,
+                'absence_request_id' => $requests_id,
+                'type' => 'request'
             ];
-            $data = Requests_file::create($data);
+            $data = AbsenceRequestLogs::create($data);
         }
 
         return response()->json([
@@ -105,11 +124,78 @@ class RequestApiController extends Controller
             'data' => $requests,
         ]);
     }
-    public function history(Request $request)
+
+    public function update(Request $request)
     {
-        $requests = Requests::where('user_id', $request->user_id)->get();
+
+        // $last_code = $this->get_last_code('lock_action');
+        // $code = acc_code_generate($last_code, 8, 3);
+        $dataForm = json_decode($request->form);
+
+        if ($request->file('imageP')) {
+            $image = $request->file('imageP');
+            $resourceImage = $image;
+            $nameImage = 'imageP' . date('Y-m-d h:i:s') . '.' . $image->extension();
+            $file_extImage = $image->extension();
+            $folder_upload = 'images/RequestFile';
+            $resourceImage->move($folder_upload, $nameImage);
+
+            // dd($request->file('old_image')->move($folder_upload, $img_name));
+
+            // if ($actionWm->old_image != '') {
+            //     foreach (json_decode($actionWm->old_image) as $n) {
+            //         if (file_exists($n)) {
+
+            //             unlink($basepath . $n);
+            //         }
+            //     }
+            // }
+            $data = [
+                'image' => $nameImage,
+                'absence_request_id' => $dataForm->id,
+                'type' => 'approve'
+            ];
+            $data = AbsenceRequestLogs::create($data);
+        }
+
+        if ($request->file('imagePng')) {
+            $image = $request->file('imagePng');
+            $resourceImage = $image;
+            $nameImage = 'imagePng' . date('Y-m-d h:i:s') . '.' . $image->extension();
+            $file_extImage = $image->extension();
+            $folder_upload = 'images/RequestFile';
+            $resourceImage->move($folder_upload, $nameImage);
+
+
+            $data = [
+                'image' =>  $nameImage,
+                'absence_request_id' => $dataForm->id,
+                'type' => 'request'
+            ];
+            $data = AbsenceRequestLogs::create($data);
+        }
+
         return response()->json([
             'message' => 'Pengajuan Terkirim',
+        ]);
+    }
+
+    public function history(Request $request)
+    {
+        $requests = AbsenceRequest::where('staff_id', $request->staff_id)
+            ->paginate(3, ['*'], 'page', $request->page);
+        return response()->json([
+            'message' => 'Pengajuan Terkirim',
+            'data' => $requests,
+        ]);
+    }
+
+    public function imageDelete($id)
+    {
+        $requests = AbsenceRequestLogs::where('id', $id)->delete();
+        return response()->json([
+            'message' => 'Bukti Dihapus',
+            'id' => $id,
             'data' => $requests,
         ]);
     }
@@ -117,9 +203,8 @@ class RequestApiController extends Controller
     public function getPermissionCat(Request $request)
     {
         $cat = [
-            ['id' => '1', 'name' => 'sakit', 'checked' => false],
-            ['id' => '2', 'name' => 'Izin', 'checked' => false],
-            ['id' => '3', 'name' => 'Lain-Lain', 'checked' => false],
+            ['id' => 'sick', 'name' => 'sakit', 'checked' => false],
+            ['id' => 'other', 'name' => 'Lain-Lain', 'checked' => false],
         ];
         return response()->json([
             'message' => 'Pengajuan Terkirim',
@@ -127,6 +212,17 @@ class RequestApiController extends Controller
         ]);
     }
 
+    public function listFile(Request $request)
+    {
+        $file = AbsenceRequestLogs::selectRaw('image, id')->where('absence_request_id', $request->id)->get();
+        return response()->json([
+            'message' => 'Pengajuan Terkirim',
+            'data' => $file,
+            '$s' => $request->id
+        ]);
+    }
+
+    // mungkin tidak dipakai
     public function absenceList(Request $request)
     {
         $duty = Requests::where('category', 'duty')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->get();

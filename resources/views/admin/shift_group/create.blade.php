@@ -9,6 +9,10 @@
     <div class="card-body">
         <form action="{{ route("admin.shift_group.store") }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <input type="hidden" name ="shift_parent_id" value="{{ $shift_parent_id }}">
+            <input type="hidden" name ="queue" value="{{ $queue }}">
+
             <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.shift_group.fields.code') }}*</label>
                 <input type="text" id="code" name="code" class="form-control" value="{{ old('code', isset($code) ? $code : '') }}" required>
@@ -45,7 +49,7 @@
                 @endif
             </div> --}}
 
-            <div class="form-group {{ $errors->has('dapertement_id') ? 'has-error' : '' }}">
+            {{-- <div class="form-group {{ $errors->has('dapertement_id') ? 'has-error' : '' }}">
                 <label for="dapertement_id">{{ trans('global.staff.fields.dapertement') }}*</label>
                 <select id="dapertement_id" name="dapertement_id" class="form-control" value="{{ old('dapertement_id', isset($user) ? $user->dapertement_id : '') }}">
                     <option value="">--Pilih Dapertement--</option>
@@ -100,7 +104,7 @@
                         {{ $errors->first('job_id') }}
                     </em>
                 @endif
-            </div>
+            </div> --}}
 
 
 

@@ -462,7 +462,6 @@ class SegelMeterController extends Controller
                     if ($request->staff != '') {
                         $data = AreaStaff::select('area_id')->where('staff_id', $request->staff)->get();
                         if (count($data) > 0) {
-//echo"ini masalah?";
                             $qry->where('tblpelanggan.status', 1)
                                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
@@ -747,7 +746,7 @@ class SegelMeterController extends Controller
 
         $staff = $qrystf->get();
         // dd($staff);
-        return view('admin.segelmeter.index', compact('staff', 'areas'));
+        //return view('admin.segelmeter.index', compact('staff', 'areas'));
     }
 
     public function show($id)

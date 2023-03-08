@@ -605,6 +605,7 @@ class ReportsController extends Controller
         action_wms.subdapertement_id,
         proposal_wms.code,
         proposal_wms.queue,
+        proposal_wms.close_queue,
         proposal_wms.customer_id,
         proposal_wms.status,
         proposal_wms.status_wm,
@@ -635,7 +636,7 @@ class ReportsController extends Controller
         if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
             $dapertement = "";
             $sub_dapertement = "";
-            $proposalWm = $proposalWm->get();
+            $proposalWm =  $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
         } else {
             $group_unit = Dapertement::select('dapertements.group_unit')
                 ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
@@ -664,7 +665,7 @@ class ReportsController extends Controller
             }
 
             $proposalWm->where('tblwilayah.group_unit', $group_unit);
-            $proposalWm = $proposalWm->get();
+            $proposalWm =  $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
             // dd($proposalWm);
             // dd($proposalWm->get());
             // else {

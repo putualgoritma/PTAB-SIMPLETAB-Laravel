@@ -44,7 +44,7 @@ class ProposalWmController extends Controller
             if (date('d') > 20) {
                 $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
                     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
-                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                    // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
@@ -53,7 +53,7 @@ class ProposalWmController extends Controller
             } else {
                 $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
                     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
-                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                    // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
@@ -100,7 +100,7 @@ class ProposalWmController extends Controller
             if (in_array('18', $roles) || in_array('15', $roles) || in_array('16', $roles) || in_array('14', $roles) || in_array('17', $roles)) {
                 if (date('d') > 20) {
                     $statussm->where('tblwilayah.group_unit', $group_unit)
-                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                         ->FilterPriority($request->priority)
                         ->FilterStatus($request->status)
                         ->FilterStatusWM($request->statussm)
@@ -109,7 +109,7 @@ class ProposalWmController extends Controller
                     // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
                 } else {
                     $statussm->where('tblwilayah.group_unit', $group_unit)
-                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
                         ->FilterPriority($request->priority)
                         ->FilterStatus($request->status)
                         ->FilterStatusWM($request->statussm)
@@ -121,7 +121,7 @@ class ProposalWmController extends Controller
             else {
                 if (date('d') > 20) {
                     $statussm->orWhere('staffs.id', Auth::user()->id)
-                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                        // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                         ->FilterPriority($request->priority)
                         ->FilterStatus($request->status)
                         ->FilterStatusWM($request->statussm)
@@ -129,7 +129,7 @@ class ProposalWmController extends Controller
                         ->FilterDate(request()->input('from'), request()->input('to'));
                 } else {
                     $statussm->orWhere('staffs.id', Auth::user()->id)
-                        ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
+                        // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
                         ->FilterPriority($request->priority)
                         ->FilterStatus($request->status)
                         ->FilterStatusWM($request->statussm)
@@ -447,7 +447,7 @@ class ProposalWmController extends Controller
                 ->leftJoin('action_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
                 ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
                 ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
-                ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                 ->where('action_wms.id', '=', null)
                 ->FilterPriority($request->priority)
                 ->FilterStatus($request->status)
@@ -494,7 +494,7 @@ class ProposalWmController extends Controller
 
                 $proposalWm->where('tblwilayah.group_unit', $group_unit)
                     ->where('action_wms.id', '=', null)
-                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                    // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
@@ -506,7 +506,7 @@ class ProposalWmController extends Controller
             } else {
 
                 $proposalWm->orWhere('staffs.id', Auth::user()->id)
-                    ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
+                    // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)

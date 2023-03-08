@@ -450,7 +450,9 @@ trait TraitModel
             $action = Ticket::where('dapertement_id', $arr['dapertement_id'])
                 ->whereYear('created_at', '=', $arr['year'])
                 ->whereMonth('created_at', '=', $arr['month'])
-                ->orderBy('id', 'desc')
+                // ->orderByRaw('spk *1 desc')
+                // ->orderByRaw('RIGHT(spk , 4 )', 'desc')
+                ->orderBy('spk', 'DESC')
                 ->first();
             if ($action && strlen($action->spk) == 21) {
                 $code = $action->spk;

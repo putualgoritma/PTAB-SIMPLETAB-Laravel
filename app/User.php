@@ -42,6 +42,7 @@ class User extends Authenticatable
         'staff_id',
         'phone',
         'image',
+        'device',
     ];
 
     public function dapertement()

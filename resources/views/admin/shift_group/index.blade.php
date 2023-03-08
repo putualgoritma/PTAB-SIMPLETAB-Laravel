@@ -3,7 +3,7 @@
 @can('user_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.shift_group.create") }}">
+            <a class="btn btn-success" href="{{ route("admin.shift_group.create",['shift_parent_id'=>$shift_parent_id]) }}">
                 {{ trans('global.add') }} {{ trans('global.shift_group.title_singular') }}
             </a>
         </div>
@@ -26,7 +26,7 @@
                             {{ trans('global.shift_group.fields.title') }}
                         </th>
                         <th>
-                            {{ trans('global.shift_group.fields.type') }}
+                            {{ trans('global.shift_group.fields.queue') }}
                         </th>
                     
 
@@ -45,7 +45,7 @@
                                 {{ $shift_group->title ?? '' }}
                             </td>
                             <td>
-                            {{ $shift_group->type ?? '' }}
+                            {{ $shift_group->queue ?? '' }}
                             </td>
                        
                             <td>
@@ -55,9 +55,11 @@
                                     </a>
                                 @endcan
 
+                          
+
                                 @can('user_show')
-                                <a class="btn btn-xs btn-primary" href="{{ route('admin.shift_group.schedule', $shift_group->id) }}">
-                                    {{ trans('global.view') }}
+                                <a class="btn btn-xs btn-success" href="{{ route('admin.shift_group.schedule', $shift_group->id) }}">
+                                   Jadwal
                                 </a>
                             @endcan
                                 {{-- @if ($shift_group->id != 1 && $shift_group->id != 2) --}}

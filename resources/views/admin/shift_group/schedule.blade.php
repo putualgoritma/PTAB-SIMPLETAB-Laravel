@@ -26,16 +26,10 @@
                             {{ trans('global.schedule.fields.title') }}
                         </th>
                         <th>
-                            {{ trans('global.schedule.fields.type') }}
+                            {{ trans('global.work_type_day.fields.time') }}
                         </th>
                         <th>
-                            {{ trans('global.schedule.fields.title') }}
-                        </th>
-                        <th>
-                            {{ trans('global.schedule.fields.type') }}
-                        </th>
-                        <th>
-                            {{ trans('global.schedule.fields.title') }}
+                            {{ trans('global.work_type_day.fields.duration') }}
                         </th>
                    
                     
@@ -58,21 +52,15 @@
                             {{ $schedule->time ?? '' }}
                             </td>
                             <td>
-                                {{ $schedule->start?? '' }}
-                            </td>
-                            <td>
-                            {{ $schedule->end ?? '' }}
-                            </td>
-                            <td>
                                 {{ $schedule->duration ?? '' }}
                                 </td>
                        
                             <td>
-                                @if ($schedule->type == "presence")
+                                @if ($schedule->type == "presence" && $schedule->queue == "1")
                                     
                                 @can('user_show')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.shift_group.scheduleEdit', $schedule->id) }}">
-                                        {{ trans('global.view') }}
+                                        {{ trans('global.edit') }}
                                     </a>
                                 @endcan
                                 

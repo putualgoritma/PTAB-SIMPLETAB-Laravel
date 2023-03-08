@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Absence;
+use App\Exports\AbsenceExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Absence_categories;
 use App\AbsenceLog;
 use App\Day;
+use App\Exports\AbsenceReport;
 use App\Holiday;
 use App\Http\Controllers\Controller;
 use App\Requests;
@@ -13,95 +16,96 @@ use App\ShiftStaff;
 use App\User;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AbsenceController extends Controller
 {
     public function index(Request $request)
     {
-        // abort_unless(\Gate::allows('absence_access'), 403);
-        // $qry = AbsenceLog::selectRaw('absence_logs.*, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
-        //     ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-        //     ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
-        //     ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-        //     ->orderBy('register', 'ASC');
+        abort_unless(\Gate::allows('absence_access'), 403);
+        $qry = AbsenceLog::selectRaw('absence_logs.*, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
+            ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+            ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
+            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+            ->orderBy('register', 'ASC');
         // dd($qry->get());
-        // // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
-        // // return $qry;
-        // if ($request->ajax()) {
-        //     //set query
-        //     $table = Datatables::of($qry);
+        // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
+        // return $qry;
+        if ($request->ajax()) {
+            //set query
+            $table = Datatables::of($qry);
 
-        //     $table->addColumn('placeholder', '&nbsp;');
-        //     $table->addColumn('actions', '&nbsp;');
+            $table->addColumn('placeholder', '&nbsp;');
+            $table->addColumn('actions', '&nbsp;');
 
-        //     $table->editColumn('actions', function ($row) {
-        //         $viewGate = 'absence_show';
-        //         $editGate = 'absence_edit';
-        //         $deleteGate = 'absence_delete';
-        //         $crudRoutePart = 'absence';
+            $table->editColumn('actions', function ($row) {
+                $viewGate = 'absence_show';
+                $editGate = 'absence_edit';
+                $deleteGate = 'absence_delete';
+                $crudRoutePart = 'absence';
 
-        //         return view('partials.datatablesActions', compact(
-        //             'viewGate',
-        //             'editGate',
-        //             'deleteGate',
-        //             'crudRoutePart',
-        //             'row'
-        //         ));
-        //     });
-        //     $table->editColumn('id', function ($row) {
-        //         return $row->id ? $row->id : "";
-        //     });
+                return view('partials.datatablesActions', compact(
+                    'viewGate',
+                    'editGate',
+                    'deleteGate',
+                    'crudRoutePart',
+                    'row'
+                ));
+            });
+            $table->editColumn('id', function ($row) {
+                return $row->id ? $row->id : "";
+            });
 
-        //     $table->editColumn('user', function ($row) {
-        //         return $row->user ? $row->user : "";
-        //     });
+            $table->editColumn('user', function ($row) {
+                return $row->user ? $row->user : "";
+            });
 
-        //     $table->editColumn('image', function ($row) {
-        //         return $row->image ? $row->image : "";
-        //     });
+            $table->editColumn('image', function ($row) {
+                return $row->image ? $row->image : "";
+            });
 
-        //     $table->editColumn('user_image', function ($row) {
-        //         return $row->image ? $row->user_image : "";
-        //     });
+            $table->editColumn('user_image', function ($row) {
+                return $row->image ? $row->user_image : "";
+            });
 
-        //     $table->editColumn('lat', function ($row) {
-        //         return $row->lat ? $row->lat : "";
-        //     });
-        //     $table->editColumn('lng', function ($row) {
-        //         return $row->lng ? $row->lng : "";
-        //     });
-        //     $table->editColumn('register', function ($row) {
-        //         return $row->register ? $row->register : "";
-        //     });
-        //     $table->editColumn('absen_category', function ($row) {
-        //         return $row->absen_category ? $row->absen_category : "";
-        //     });
-        //     $table->editColumn('day', function ($row) {
-        //         return $row->day ? $row->day : "";
-        //     });
-        //     $table->editColumn('late', function ($row) {
-        //         return $row->late ? $row->late : "";
-        //     });
-        //     $table->editColumn('value', function ($row) {
-        //         return $row->value ? $row->value : "";
-        //     });
-        //     $table->editColumn('late', function ($row) {
-        //         if ($row->late === 0) {
-        //             return "Lambat";
-        //         } else {
-        //             return "Tepat";
-        //         }
-        //     });
-        //     $table->editColumn('updated_at', function ($row) {
-        //         return $row->updated_at ? $row->updated_at : "";
-        //     });
+            $table->editColumn('lat', function ($row) {
+                return $row->lat ? $row->lat : "";
+            });
+            $table->editColumn('lng', function ($row) {
+                return $row->lng ? $row->lng : "";
+            });
+            $table->editColumn('register', function ($row) {
+                return $row->register ? $row->register : "";
+            });
+            $table->editColumn('absen_category', function ($row) {
+                return $row->absen_category ? $row->absen_category : "";
+            });
+            $table->editColumn('day', function ($row) {
+                return $row->day ? $row->day : "";
+            });
+            $table->editColumn('late', function ($row) {
+                return $row->late ? $row->late : "";
+            });
+            $table->editColumn('value', function ($row) {
+                return $row->value ? $row->value : "";
+            });
+            $table->editColumn('late', function ($row) {
+                if ($row->late === 0) {
+                    return "Lambat";
+                } else {
+                    return "Tepat";
+                }
+            });
+            $table->editColumn('updated_at', function ($row) {
+                return $row->updated_at ? $row->updated_at : "";
+            });
 
-        //     $table->rawColumns(['actions', 'placeholder']);
+            $table->rawColumns(['actions', 'placeholder']);
 
-        //     $table->addIndexColumn();
-        //     return $table->make(true);
-        // }
-        //default view
+            $table->addIndexColumn();
+            return $table->make(true);
+        }
+        // default view
         // return view('admin.schedule.index');
 
         return view('admin.absence.index');
@@ -299,5 +303,261 @@ class AbsenceController extends Controller
         unlink($basepath . "images/absence/" . $absence->image);
         Absence::where('id', $id)->delete();
         return redirect()->back();
+    }
+
+    public function reportAbsenceExcelView()
+    {
+        return view('admin.absence.reportExcel');
+    }
+
+    public function reportAbsenceView()
+    {
+        return view('admin.absence.report');
+    }
+
+    public function reportAbsenceExcel(Request $request)
+    {
+        $report =  Absence::select(DB::raw('RIGHT(staffs.NIK , 3 ) AS No'), 'staffs.name as Name', DB::raw('TIME(in.timein) AS on_duty'), DB::raw('TIME(out.timein) AS off_duty'), DB::raw('TIME(in.register) AS clock_in'), DB::raw('TIME(out.register) AS clock_out'), 'days.name as timetable', DB::raw('DATE(absences.created_at) AS date'))
+            ->join('staffs', 'staffs.id', '=', 'absences.staff_id')
+            ->join('days', 'days.id', '=', 'absences.day_id')
+            ->rightJoin('absence_logs as in', function ($join) {
+                $join->on('in.absence_id', '=', 'absences.id')
+                    ->where('in.absence_category_id', '=', 1);
+            })
+            ->join('absence_logs as out', function ($join) {
+                $join->on('out.absence_id', '=', 'absences.id')
+                    ->where('out.absence_category_id', '=', 2);
+            })
+            ->get();
+
+        // perulangan tanggal
+        $begin = strtotime('21-01-2023');
+        $end   = strtotime('21-02-2023');
+        $data = [];
+
+        foreach ($report as $value) {
+            $day = "";
+            if (date("w", strtotime($value->date)) == 0) {
+                $day = "Minggu";
+            } else if (date("w", strtotime($value->date)) == 1) {
+                $day = "Senin";
+            } else if (date("w", strtotime($value->date)) == 2) {
+                $day = "Selasa";
+            } else if (date("w", strtotime($value->date)) == 3) {
+                $day = "Rabu";
+            } else if (date("w", strtotime($value->date)) == 4) {
+                $day = "Kamis";
+            } else if (date("w", strtotime($value->date)) == 5) {
+                $day = "Jumat";
+            } else if (date("w", strtotime($value->date)) == 6) {
+                $day = "Sabtu";
+            }
+            $data[] = [
+                'Emp No' => '',
+                'AC-No' => '',
+                'No' => $value->No,
+                'Name' => $value->Name,
+                'Auto-Asign' => '',
+                'Date' => $value->date,
+                'TimeTable' => $day,
+                'On_Duty' => $value->on_duty,
+                'Off_Duty' => $value->off_duty,
+                'Clock_in' => $value->clock_in,
+                'Clock_out' => $value->clock_out,
+            ];
+        }
+
+
+        // Excel::create('Filename', function ($excel) use ($data) {
+
+        //     $excel->sheet('Sheetname', function ($sheet) use ($data) {
+
+        //         $sheet->fromArray($data);
+        //     });
+        // })->export('xls');
+        // $data = [
+        //     [
+        //         'name' => 'Povilasaaa',
+        //         'surname' => 'Korop',
+        //         'email' => 'povilas@laraveldaily.com',
+        //         'twitter' => '@povilaskorop'
+        //     ],
+        //     [
+        //         'name' => 'Taylor',
+        //         'surname' => 'Otwell',
+        //         'email' => 'taylor@laravel.com',
+        //         'twitter' => '@taylorotwell'
+        //     ]
+        // ];
+        return Excel::download(new AbsenceExport($data), 'report_excel.xlsx');
+        // dd($report);
+    }
+
+    public function reportAbsence()
+    {
+        // mencari hari libur
+        // $fdate = date('Y-m-20');
+        // $tdate = date('Y-m-23');
+        // $datetime1 = new DateTime($fdate);
+        // $datetime2 = new DateTime($tdate);
+        // $interval = $datetime1->diff($datetime2);
+        // $days = $interval->format('%a'); //now do whatever you like with $days
+        $awal_cuti = '2023-02-20';
+        $akhir_cuti = '2023-03-21';
+
+        // tanggalnya diubah formatnya ke Y-m-d 
+        $awal_cuti = date_create_from_format('Y-m-d', $awal_cuti);
+        $awal_cuti = date_format($awal_cuti, 'Y-m-d');
+        $awal_cuti = strtotime($awal_cuti);
+
+        $akhir_cuti = date_create_from_format('Y-m-d', $akhir_cuti);
+        $akhir_cuti = date_format($akhir_cuti, 'Y-m-d');
+        $akhir_cuti = strtotime($akhir_cuti);
+
+        $haricuti = array();
+        $sabtuminggu = array();
+
+        for ($i = $awal_cuti; $i <= $akhir_cuti; $i += (60 * 60 * 24)) {
+            if (date('w', $i) !== '0' && date('w', $i) !== '6') {
+                $haricuti[] = $i;
+            } else {
+                $sabtuminggu[] = $i;
+            }
+        }
+        $jumlah_cuti = count($haricuti);
+        $jumlah_sabtuminggu = count($sabtuminggu);
+        $abtotal = $jumlah_cuti + $jumlah_sabtuminggu;
+
+        // // jumlah hari
+        // $startTimeStamp = strtotime("2023/01/21");
+        // $endTimeStamp = strtotime("2023/02/20");
+
+        // $timeDiff = abs($endTimeStamp - $startTimeStamp);
+
+        // $numberDays = $timeDiff / 86400;  // 86400 seconds in one day
+
+        // // and you might want to convert to integer
+        // $numberDays = intval($numberDays);
+
+
+        $report = AbsenceLog::select(
+            DB::raw('count(IF(absence_category_id = 1 ,1,NULL)) as hadir'),
+            DB::raw('count(IF(absence_category_id = 13 ,1,NULL)) as izin'),
+            DB::raw('count(IF(absence_category_id = 7 ,1,NULL)) as dinas_luar'),
+            DB::raw('count(IF(absence_category_id = 8 ,1,NULL)) as cuti'),
+            DB::raw('count(IF(absence_category_id = 5 ,1,NULL)) as dinas_dalam'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "1" AND late != "00:00:00" THEN 1 ELSE 0 END) as terlambat'),
+            DB::raw('count(IF(absence_category_id = 11 ,1,NULL)) as permisi'),
+            // total jam
+            DB::raw('SUM(CASE WHEN absence_category_id = "1" AND late != "00:00:00" THEN duration ELSE "00:00:00" END) as jam_terlambat'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "2" THEN duration ELSE "00:00:00" END) as jam_hadir'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "4" THEN duration ELSE "00:00:00" END) as jam_istirahat'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "10" THEN duration ELSE "00:00:00" END) as jam_lembur'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "6" THEN duration ELSE "00:00:00" END) as jam_dinas_umum'),
+            DB::raw('SUM(CASE WHEN absence_category_id = "13" THEN duration ELSE "00:00:00" END) as jam_permisi'),
+            // DB::raw("SUM(DATEDIFF(hour,duration)  as jam_test"),
+            'staffs.name as staff_name',
+            'staffs.code as staff_code',
+            'jobs.name as job_name',
+
+
+        )
+            ->join('absences', 'absences.id', '=', 'absence_logs.absence_id')
+            ->join('staffs', 'staffs.id', '=', 'absences.staff_id')
+            ->join('jobs', 'jobs.id', '=', 'staffs.job_id')
+            ->groupBy('staffs.id')
+            ->get();
+
+
+        // foreach ($report as $value) {
+        //     $day = "";
+        //     if (date("w", strtotime($value->date)) == 0) {
+        //         $day = "Minggu";
+        //     } else if (date("w", strtotime($value->date)) == 1) {
+        //         $day = "Senin";
+        //     } else if (date("w", strtotime($value->date)) == 2) {
+        //         $day = "Selasa";
+        //     } else if (date("w", strtotime($value->date)) == 3) {
+        //         $day = "Rabu";
+        //     } else if (date("w", strtotime($value->date)) == 4) {
+        //         $day = "Kamis";
+        //     } else if (date("w", strtotime($value->date)) == 5) {
+        //         $day = "Jumat";
+        //     } else if (date("w", strtotime($value->date)) == 6) {
+        //         $day = "Sabtu";
+        //     }
+        //     $data[] = [
+        //         'Emp No' => '',
+        //         'AC-No' => '',
+        //         'No' => $value->No,
+        //         'Name' => $value->Name,
+        //         'Auto-Asign' => '',
+        //         'Date' => $value->date,
+        //         'TimeTable' => $day,
+        //         'On_Duty' => $value->on_duty,
+        //         'Off_Duty' => $value->off_duty,
+        //         'Clock_in' => $value->clock_in,
+        //         'Clock_out' => $value->clock_out,
+        //     ];
+        // }
+
+        $day1 = "2023-02-12 12:30:00";
+        $day1 = strtotime($day1);
+        $day2 = "2023-02-12 14:00:00";
+        $day2 = strtotime($day2);
+
+        $diffHours = ($day2 - $day1) / 3600;
+        // dd($report, $jumlah_cuti, $jumlah_sabtuminggu, $abtotal, $diffHours);
+
+
+        $no = 1;
+
+        foreach ($report as $value) {
+            $day = "";
+            if (date("w", strtotime($value->date)) == 0) {
+                $day = "Minggu";
+            } else if (date("w", strtotime($value->date)) == 1) {
+                $day = "Senin";
+            } else if (date("w", strtotime($value->date)) == 2) {
+                $day = "Selasa";
+            } else if (date("w", strtotime($value->date)) == 3) {
+                $day = "Rabu";
+            } else if (date("w", strtotime($value->date)) == 4) {
+                $day = "Kamis";
+            } else if (date("w", strtotime($value->date)) == 5) {
+                $day = "Jumat";
+            } else if (date("w", strtotime($value->date)) == 6) {
+                $day = "Sabtu";
+            }
+            $data[] = [
+                'No' => $no++,
+                'Kode' => $value->staff_code,
+                'Nama' => $value->staff_name,
+                'Karyawan' => '',
+                'Sub_Bagian' => '',
+                'Job' => $value->job_name,
+                'Total Hari' => $abtotal,
+                'Total Libur' => $jumlah_sabtuminggu,
+                'Total Efektif Kerja' => $abtotal - $jumlah_sabtuminggu,
+                'Total Hadir' => $value->hadir,
+                'Total Alfa' => '',
+                'Total Izin' => $value->izin,
+                'Total Dinas Luar' => $value->dinas_luar,
+                'Total Cuti' => $value->cuti,
+                'Total Jam Kerja' => $value->jam_hadir,
+                'Total Jam Istirahat' => $value->jam_istirahat,
+                'Total Jam Lembur' => $value->jam_lembur,
+                'Total Jam Dinas Dalam' => $value->jam_dinas_dusun,
+                'Total Hari Dinas Dalam' => $value->dinas_dalam,
+                'Total Jam Terlambat' => $value->dinas_dalam,
+                'Total Hari Terlambat' => $value->terlambat,
+                'Total Jam Permisi' => $value->jam_permisi,
+                'Total Hari Permisi' => $value->permisi,
+            ];
+        }
+        // dd($data);
+        return Excel::download(new AbsenceReport($data), 'report.xlsx');
+
+        // dd($days, $jumlah_cuti, $jumlah_sabtuminggu, $abtotal, $diffHours);
     }
 }

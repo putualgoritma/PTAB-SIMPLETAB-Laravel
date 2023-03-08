@@ -17,4 +17,9 @@ class Absence extends Model
         'updated_at',
 
     ];
+    public function getDateAttribute()
+    {
+        $timeStamp = date("Y-m-d", strtotime($this->attributes['date']));
+        return $timeStamp;
+    }
 }
