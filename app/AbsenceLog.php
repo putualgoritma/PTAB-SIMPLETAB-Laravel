@@ -29,5 +29,10 @@ class AbsenceLog extends Model
         'status',
         'late',
         'day_id',
+        'absence_request_id',
+        'work_type_day_id',
+        'shift_group_timesheet_id',
+        'timein',
+        'timeout'
     ];
 }

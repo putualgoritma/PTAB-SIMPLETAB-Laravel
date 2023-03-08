@@ -12,5 +12,9 @@ class WorkTypes extends Model
         // 'code',
         'title',
         'type',
+        'dapertement_id',
+        'work_unit_id',
+        'job_id',
+        'subdapertement_id'
     ];
 }

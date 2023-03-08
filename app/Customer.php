@@ -156,6 +156,21 @@ class Customer extends Model
         return $query;
     }
 
+    public function scopeFilterStatusNew($query, $status)
+    {
+        if ($status != '') {
+            if ($status == 2) {
+                $query->having('jumlahtunggakan', '>=', 2)->having('jumlahtunggakan', '<', 4);
+            } else if ($status == 4) {
+                $query->having('jumlahtunggakan', '>=', 4);
+            } else {
+                $query->having('jumlahtunggakan', '=', $status);
+            }
+            return $query;
+        } else {
+        }
+    }
+
     public function scopeFilterStatus($query, $status)
     {
         if ($status != '') {
@@ -255,5 +270,14 @@ class Customer extends Model
     public function jenispelanggan()
     {
         return $this->belongsTo(Jenispelanggan::class, 'idgol', 'id');
+    }
+
+    public function scopeFilterKeyword($query, $keyword)
+    {
+        if ($keyword != '') {
+            $query->where('tblpelanggan.nomorrekening', 'LIKE',  '%' . $keyword . '%')->orWhere('tblpelanggan.namapelanggan', 'LIKE',  '%' . $keyword . '%');
+            return $query;
+        } else {
+        }
     }
 }

@@ -108,7 +108,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a href="{{ route('admin.lock.index') }}" class="nav-link">
+                        <a href="{{ route('admin.locks.index') }}" class="nav-link">
                             <i class="nav-icon fa fa-info-circle"></i>
                             Info Tindakan
                         </a>
@@ -322,16 +322,58 @@
                         </a>
                     </li>
                     @endcan
+
+                       {{-- @can('shift_access') --}}
+                       <li class="nav-item">
+                        <a href="{{ route('admin.shift_parent.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-calendar"></i>
+                       Jadwal Shift
+                        </a>
+                    </li>
+                    {{-- @endcan --}}
  
                     @can('schedule_access')
                     <li class="nav-item">
-                        <a href="{{ route('admin.schedule.index') }}" class="nav-link">
+                        <a href="{{ route('admin.work_type.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
                         <i class="nav-icon fas fa-calendar"></i>
                        Jadwal
                         </a>
                     </li>
                     @endcan
+
+                          {{-- @can('absence_report') --}}
+                          <li class="nav-item">
+                            <a href="{{ route('admin.geolocation_off.index') }}" class="nav-link">
+                            <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                            <i class="nav-icon fas fa-book"></i>
+                          Geofence Off
+                            </a>
+                        </li>
+                        {{-- @endcan --}}
+    
+                    
+
+                    {{-- @can('absence_report') --}}
+                    <li class="nav-item">
+                        <a href="{{ route('admin.absence.reportAbsenceExcelView') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-book"></i>
+                      Laporan Excel
+                        </a>
+                    </li>
+                    {{-- @endcan --}}
+
+                               {{-- @can('absence_report') --}}
+                               <li class="nav-item">
+                                <a href="{{ route('admin.absence.reportAbsenceView') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-book"></i>
+                              Laporan
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
 
                     @can('absence_report')
                     <li class="nav-item">
@@ -518,7 +560,17 @@
                     </li>
                     @endcan  
 
-                    @can('workUnit_access')          
+                       {{-- @can('absence_report') --}}
+                       <li class="nav-item">
+                        <a href="{{ route('admin.job.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-book"></i>
+                     Pekerjaan
+                        </a>
+                    </li>
+                    {{-- @endcan --}}
+
+                    {{-- @can('workUnit_access')          
                     <li class="nav-item">
                         <a href="{{ route('admin.workUnit.index') }}" class="nav-link">
                         <!-- <i class="nav-icon fas fa-landmark"></i> -->
@@ -526,7 +578,7 @@
                             {{ trans('global.workUnit.title') }}
                         </a>
                     </li>
-                    @endcan  
+                    @endcan   --}}
                 </ul>
             </li>
             @can('user_management_access') 

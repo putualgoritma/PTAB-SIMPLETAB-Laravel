@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\AbsenceRequest;
 use App\Http\Controllers\Controller;
+use App\MessageLog;
 use App\Requests;
 use App\Staff;
 use App\User;
@@ -132,6 +133,16 @@ class ExtraController extends Controller
         abort_unless(\Gate::allows('extra_edit'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'reject']);
+
+        $d = AbsenceRequest::where('id', $id)->first();
+        MessageLog::create([
+            'staff_id' => $d->staff_id,
+            'memo' => "Lembur anda tanggal " . $d->start . " ditolak",
+            'type' => 'message',
+            'status' => 'pending',
+        ]);
+
+
         return redirect()->back();
     }
     public function approve($id)
@@ -139,6 +150,16 @@ class ExtraController extends Controller
         abort_unless(\Gate::allows('extra_delete'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
+
+        $d = AbsenceRequest::where('id', $id)->first();
+        MessageLog::create([
+            'staff_id' => $d->staff_id,
+            'memo' => "Lembur anda tanggal " . $d->start . " diterima",
+            'type' => 'message',
+            'status' => 'pending',
+        ]);
+
+
         return redirect()->back();
     }
 }

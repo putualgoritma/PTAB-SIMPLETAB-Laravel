@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class LockAction extends Model
 {
@@ -45,7 +46,8 @@ class LockAction extends Model
             $to =  request()->input('to');
             // $from = '2021-09-01';
             // $to = '2021-09-20';
-            return $query->whereBetween('lock_action.created_at', [$from, $to]);
+            //return $query->whereBetween('lock_action.created_at', [$from, $to]);
+            return $query->whereBetween(DB::raw('DATE(lock_action.created_at)'), [$from, $to]);
             // return $query->where('froms_id', $from);
             // dd(request()->input('from'));
 

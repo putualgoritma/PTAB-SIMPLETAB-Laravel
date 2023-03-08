@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Absence;
 
 use App\Http\Controllers\Controller;
+use App\Staff;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class UserApiController extends Controller
 
                 if (!empty($request->_id_onesignal)) {
                     //     if ($admin->subdapertement_id != 0) {
-                    $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                    $admin->update(['_id_onesignal' => $request->_id_onesignal, 'device' => $request->device]);
                     return response()->json([
                         'success' => true,
                         'message' => 'success login',
@@ -103,7 +104,7 @@ class UserApiController extends Controller
             $data = [
                 'image' => $data_image,
             ];
-            $users = User::where('id', $request->id)->update($data);
+            $users = Staff::where('id', $request->id)->update($data);
 
             return response()->json([
                 'message' => 'Absen Terkirim',

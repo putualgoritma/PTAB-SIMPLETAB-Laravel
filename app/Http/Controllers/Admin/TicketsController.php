@@ -24,6 +24,11 @@ class TicketsController extends Controller
 
     public function index(Request $request)
     {
+        // $arr['dapertement_id'] = 2;
+        // $arr['month'] = date("m");
+        // $arr['year'] = date("Y");
+        // $last_spk = $this->get_last_code('spk-ticket', $arr);
+
         abort_unless(\Gate::allows('ticket_access'), 403);
         $departementlist = Dapertement::all();
         $ticket = Ticket::all();
@@ -173,6 +178,14 @@ class TicketsController extends Controller
             });
             $table->editColumn('description', function ($row) {
                 return $row->description ? $row->description : "";
+            });
+            $table->editColumn('address', function ($row) {
+
+                if ($row->address != "") {
+                    return $row->address != "" ? $row->address : "";
+                } else {
+                    return $row->customer->alamat;
+                }
             });
             $table->editColumn('status', function ($row) {
                 if ($row->print_report_status == "1") {

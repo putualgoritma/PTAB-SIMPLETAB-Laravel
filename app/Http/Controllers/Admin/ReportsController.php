@@ -702,7 +702,12 @@ class ReportsController extends Controller
 
         $month = $monthList[$monthR];
         $monthR = $monthRomawi[$monthR];
-
+        // dd(proposalWms::select('close_queue')
+        //     ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
+        //     ->join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
+        //     ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+        //     ->where('tblwilayah.group_unit', 1)
+        //     ->orderBy('close_queue', 'ASC')->limit(20)->get());
 
         $proposalWm = actionWms::selectRaw('action_wms.id, action_wms.code,
         action_wms.proposal_wm_id,
@@ -720,6 +725,7 @@ class ReportsController extends Controller
         action_wms.subdapertement_id,
         proposal_wms.code,
         proposal_wms.queue,
+        proposal_wms.close_queue,
         proposal_wms.customer_id,
         proposal_wms.status,
         proposal_wms.status_wm,
@@ -751,7 +757,7 @@ class ReportsController extends Controller
         if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
             $dapertement = "";
             $sub_dapertement = "";
-            $proposalWm =  $proposalWm->get();
+            $proposalWm =  $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
         } else {
             $group_unit = Dapertement::select('dapertements.group_unit')
                 ->where('dapertements.id', Auth::user()->dapertement_id)->first()->group_unit;
@@ -780,7 +786,7 @@ class ReportsController extends Controller
             }
 
             $proposalWm->where('tblwilayah.group_unit', $group_unit);
-            $proposalWm =  $proposalWm->get();
+            $proposalWm =  $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
             // dd($proposalWm);
             // dd($proposalWm->get());
             // else {

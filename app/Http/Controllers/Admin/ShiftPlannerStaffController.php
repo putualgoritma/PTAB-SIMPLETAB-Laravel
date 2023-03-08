@@ -7,6 +7,7 @@ use App\Job;
 use App\Requests;
 use App\Shift;
 use App\ShiftGroups;
+use App\ShiftParent;
 use App\ShiftPlannerStaff;
 use App\ShiftPlannerStaffs;
 use App\Staff;
@@ -28,22 +29,110 @@ class ShiftPlannerStaffController extends Controller
         //     ->orderBy('shift_groups.queue', 'ASC')
         //     ->get();
         // dd($data);
-        if ($request->ajax()) {
+        $shift_parent = ShiftParent::where('id', $request->id)->first();
+        // dd($ShiftGroup);
+        // if ($ShiftGroup == null) {
+        //     dd('Buat Shift di menu shift group terlebih dahulu');
+        // }
+        // if ($ShiftGroup->job_id != "") {
+        //     $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //         ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //         ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+        //         ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //         ->orderBy('shift_groups.queue', 'ASC')
+        //         ->where('work_types.id', $request->id)
+        //         ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
+        //         ->get();
+        // } else if ($ShiftGroup->work_unit_id != "") {
+        //     $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //         ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //         ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //         ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+        //         ->orderBy('shift_groups.queue', 'ASC')
+        //         ->where('work_types.id', $request->id)
+        //         ->where('shift_groups.work_unit', '=', $ShiftGroup->work_unit_id)
+        //         ->get();
+        // } else if ($ShiftGroup->dapertement_id != "") {
+        //     $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //         ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //         ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //         ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+        //         ->orderBy('shift_groups.queue', 'ASC')
+        //         ->where('work_types.id', $request->id)
+        //         ->where('shift_groups.dapertement_id', '=', $ShiftGroup->dapertement_id)
+        //         ->get();
+        // }
+        // $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //     ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //     ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+        //     ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //     ->orderBy('shift_groups.queue', 'ASC')
+        //     ->where('work_types.id', $request->id)
+        //     ->FilterJob($ShiftGroup->job_id)
+        //     ->FilterWorkUnit($ShiftGroup->work_unit_id)
+        //     // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
+        //     ->get();
+        // $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //     ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //     ->join('shift_parents', 'shift_parents.id', '=', 'shift_groups.shift_parent_id')
+        //     ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //     ->orderBy('shift_groups.queue', 'ASC')
+        //     ->where('shift_parents.id', $request->id)
+        //     ->FilterJob($shift_parent->job_id)
+        //     ->FilterWorkUnit($shift_parent->work_unit_id)
+        //     // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
+        //     ->get();
+        // dd($data);
 
+        if ($request->ajax()) {
+            $shift_parent = ShiftParent::where('id', $request->id)->first();
+            // dd($ShiftGroup);
+            // if ($ShiftGroup->job_id != "") {
             $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
                 ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+                ->join('shift_parents', 'shift_parents.id', '=', 'shift_groups.shift_parent_id')
                 ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
                 ->orderBy('shift_groups.queue', 'ASC')
-                ->where('shift_groups.job_id', '=', $request->id)
+                ->where('shift_parents.id', $request->id)
+                ->FilterJob($shift_parent->job_id)
+                ->FilterWorkUnit($shift_parent->work_unit_id)
+                // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
                 ->get();
+            // } else if ($ShiftGroup->work_unit_id != "") {
+            //     $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+            //         ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+            //         ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+            //         ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+            //         ->orderBy('shift_groups.queue', 'ASC')
+            //         ->where('work_types.id', $request->id)
+            //         ->where('shift_groups.work_unit', '=', $ShiftGroup->work_unit_id)
+            //         ->get();
+            // } else if ($ShiftGroup->dapertement_id != "") {
+            //     $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+            //         ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+            //         ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+            //         ->join('work_types', 'work_types.id', '=', 'shift_groups.work_type_id')
+            //         ->orderBy('shift_groups.queue', 'ASC')
+            //         ->where('work_types.id', $request->id)
+            //         ->where('shift_groups.dapertement_id', '=', $ShiftGroup->dapertement_id)
+            //         ->get();
+            // }
+            // $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+            //     ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+            //     ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+            //     ->orderBy('shift_groups.queue', 'ASC')
+            //     ->where('shift_groups.job_id', '=', $request->id)
+            //     ->get();
 
             return response()->json($data);
         }
-        $pgw = Staff::where('job_id', $request->id)->get();
-        $sg = ShiftGroups::where('job_id', $request->id)->get();
-        $id = $request->id;
-        $job = Job::where('id', $request->id)->first();
-        return view('admin.shiftstaff.index', compact('pgw', 'sg', 'id', 'job'));
+        $pgw = Staff::FilterJob($shift_parent->job_id)
+            ->FilterWorkUnit($shift_parent->work_unit_id)->get();
+        $sg = ShiftGroups::where('shift_parent_id', $request->id)->get();
+        $id = $shift_parent->job_id;
+
+
+        return view('admin.shiftstaff.index', compact('pgw', 'sg', 'id', 'shift_parent'));
     }
     public function create(Request $request)
     {
@@ -62,15 +151,26 @@ class ShiftPlannerStaffController extends Controller
     public function edit(Request $request)
     {
         abort_unless(\Gate::allows('duty_edit'), 403);
-
+        // $requests = ShiftPlannerStaffs::select('shift_groups.job_id', 'shift_parent_id', 'shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+        //     ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
+        //     ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
+        //     ->where('shift_planner_staffs.id', $request->id)->first();
+        // dd($requests);
+        // $shift_parent = ShiftParent::where('id', $request->shift_parent_id)->first();
+        // $pgw = Staff::FilterJob($shift_parent->job_id)
+        //     ->FilterWorkUnit($shift_parent->work_unit_id)->get();
+        // dd($pgw);
         if ($request->ajax()) {
             $data = [];
             $staff = "";
-            $requests = ShiftPlannerStaffs::select('shift_groups.job_id', 'shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+
+            $requests = ShiftPlannerStaffs::select('shift_groups.job_id', 'shift_parent_id', 'shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
                 ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
                 ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
                 ->where('shift_planner_staffs.id', $request->id)->first();
-            $pgw = Staff::where('job_id', $requests->job_id)->get();
+            $shift_parent = ShiftParent::where('id', $requests->shift_parent_id)->first();
+            $pgw = Staff::FilterJob($shift_parent->job_id)
+                ->FilterWorkUnit($shift_parent->work_unit_id)->get();
             foreach ($pgw as $value) {
                 if ($requests->user_id === $value->id) {
                     $select = "selected";
@@ -163,9 +263,11 @@ class ShiftPlannerStaffController extends Controller
                     ->first();
                 if ($cek) {
                     $event = "fail";
-                } else if (date("Y-m-d",  strtotime($request->start)) <= date('Y-m-d')) {
-                    $event = "fail";
-                } else {
+                }
+                // else if (date("Y-m-d",  strtotime($request->start)) <= date('Y-m-d')) {
+                //     $event = "fail";
+                // } 
+                else {
                     $ShiftGroup = ShiftGroups::where('id', $request->shift_group_id)->first();
                     $time = date("Y-m-d 0" . $ShiftGroup->queue . ":i:s",  strtotime($request->start));
                     $event = ShiftPlannerStaffs::create([

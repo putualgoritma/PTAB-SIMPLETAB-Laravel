@@ -178,23 +178,27 @@ class CustomersController extends Controller
         abort_unless(\Gate::allows('customer_edit'), 403);
         $import = new CustomerImport;
         $test =  Excel::import($import, $request->file('file'));
-
+        // dd($test);
         $array = $import->getArray();
-
+        // dd($array);
         abort_unless(\Gate::allows('wablast_access'), 403);
 
         $customers = $import->getArray();
 
+        // dd($customers);
         ini_set("memory_limit", -1);
         set_time_limit(0);
         //ini test
 
         // dd($customers[2]['name']);
-        for ($i = 0; $i < count($customers); $i++) {
-            $customer = Customer::find($customers[$i]['nomorrekening']);
-            $customer->phone = $customers[$i]['phone'];
-            $customer->_synced = 0;
-            $customer->save();
+        for ($i = 0; $i < count($customers) - 1; $i++) {
+            if ($customers[$i]['phone'] != null && $customers[$i]['nomorrekening'] != null) {
+                $customer = Customer::find($customers[$i]['nomorrekening']);
+                $customer->phone = $customers[$i]['phone'];
+                $customer->nomorhp = $customers[$i]['nomorhp'];
+                $customer->_synced = 0;
+                $customer->save();
+            }
         }
 
         return redirect()->route('admin.customers.index');

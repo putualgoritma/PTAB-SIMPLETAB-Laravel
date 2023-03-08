@@ -46,7 +46,7 @@
                             {{ trans('global.extra.fields.id') }}
                         </th> --}}
                         <th>
-                            {{ trans('global.extra.fields.user_name') }}
+                            {{ trans('global.extra.fields.staff_name') }}
                         </th>
                         <th>
                             {{ trans('global.extra.fields.category') }}

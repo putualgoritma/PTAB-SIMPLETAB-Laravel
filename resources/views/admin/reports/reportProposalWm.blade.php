@@ -168,9 +168,9 @@
             {{-- <td>{{ $d1->subdapertement_id === 10? '4' : '3'}}</td> --}}
             {{-- <td>{{ $d1->subdapertement_id === 10? 'Ganti WM.' : 'Perbaikan WM.'}}</td> --}}
             <td>Ganti WM.</td>
-            <td>PDAM</td>
+            <td>Perumda TAB</td>
             {{-- group start --}}
-            <td >{{ $d1->queue }}</td>
+            <td >{{ $d1->close_queue }}</td>
              <td >{{ $d1->code }}</td>
   {{-- group end --}}
 <td>{{ date('d-m-Y', strtotime('0 month', strtotime($d1->date)))  }}</td>

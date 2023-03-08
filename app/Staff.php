@@ -17,7 +17,8 @@ class Staff extends Model
         'pbk',
         'work_type_id',
         'job_id',
-        'NIK'
+        'NIK',
+        'image'
     ];
 
     public function dapertement()
@@ -45,6 +46,20 @@ class Staff extends Model
     {
         if ($dapertement != '') {
             $query->where('dapertement_id', $dapertement);
+        }
+        return $query;
+    }
+    public function scopeFilterJob($query, $job)
+    {
+        if ($job != '') {
+            $query->where('job_id', $job);
+        }
+        return $query;
+    }
+    public function scopeFilterWorkUnit($query, $work_unit)
+    {
+        if ($work_unit != '') {
+            $query->where('work_unit_id', $work_unit);
         }
         return $query;
     }

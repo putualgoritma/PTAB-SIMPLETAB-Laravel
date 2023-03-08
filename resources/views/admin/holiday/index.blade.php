@@ -14,13 +14,13 @@
     @extends('layouts.admin3')
 @section('content')
 {{-- @can('holiday_create') --}}
-    <div style="margin-bottom: 10px;" class="row">
+    {{-- <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route('admin.holiday.create') }}">
                 {{ trans('global.add') }} {{ trans('global.holiday.title_singular') }}
             </a>
         </div>
-    </div>
+    </div> --}}
     
 {{-- @endcan --}}
 <div class="card">
@@ -31,7 +31,7 @@
     <div class="card-body">
         <div class="container">
             <br />
-            <h1 class="text-center text-primary"><u>Hari Libur</u></h1>
+            <h1 class="text-center" >Hari Libur</h1>
             <br />
         
             <div id="calendar"></div>

@@ -31,7 +31,7 @@
                     </em>
                 @endif
                 <p class="helper-block">
-                    {{ trans('global.work_type.fields.name_helper') }}
+                    {{ trans('global.work_type.fields.title_helper') }}
                 </p>
             </div>
 
@@ -45,19 +45,9 @@
                 @endif
             </div> --}}
 
-            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
-                <label for="type">{{ trans('global.staff.fields.dapertement') }}*</label>
-                <select id="type" name="type" class="form-control" value="{{ old('type', isset($user) ? $user->type : '') }}">
-                    <option value="">--Pilih Dapertement--</option>
-                    <option value="reguler">reguler</option>
-                    <option value="shift">shift</option>     
-                </select>
-                @if($errors->has('type'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('type') }}
-                    </em>
-                @endif
-            </div>
+
+
+           
 
 
             <div>

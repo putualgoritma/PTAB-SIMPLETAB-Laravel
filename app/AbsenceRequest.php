@@ -21,6 +21,7 @@ class AbsenceRequest extends Model
         'attendance',
         'created_at',
         'updated_at',
+        'attendance'
 
     ];
 }

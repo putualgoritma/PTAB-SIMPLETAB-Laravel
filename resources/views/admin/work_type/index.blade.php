@@ -54,6 +54,18 @@
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
+
+                               
+                                @can('user_show')
+                                <a class="btn btn-xs btn-success" href="{{ route('admin.work_type_day.index', ["id"=>"$work_type->id"]) }}">
+                                  Schedule
+                                </a>
+                            @endcan
+                              
+
+                          
+
+                   
                                 {{-- @if ($work_type->id != 1 && $work_type->id != 2) --}}
 
                                 @can('user_edit')

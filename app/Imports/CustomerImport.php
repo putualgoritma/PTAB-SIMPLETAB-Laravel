@@ -15,7 +15,7 @@ class CustomerImport implements ToArray
     public function array(array $rows)
     {
         foreach ($rows as $row) {
-            $this->data[] = array('nomorrekening' => $row[0], 'phone' => $row[1]);
+            $this->data[] = array('nomorrekening' => $row[0], 'phone' => $row[1], 'nomorhp' => $row[2]);
         }
     }
 

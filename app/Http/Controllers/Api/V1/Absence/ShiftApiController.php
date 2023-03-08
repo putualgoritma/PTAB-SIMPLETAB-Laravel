@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api\V1\Absence;
 
 use App\Http\Controllers\Controller;
 use App\Shift;
-use App\ShiftStaff;
+use App\ShiftGroups;
+use App\ShiftPlannerStaffs;
 use Illuminate\Http\Request;
 
 class ShiftApiController extends Controller
@@ -13,17 +14,17 @@ class ShiftApiController extends Controller
     {
         $data = [];
         $data2 = [];
-        $staff_list = ShiftStaff::selectRaw('shift_staff.id ,user.name as user_name, user_change.name as userc_name')
-            ->join('users as user', 'user.id', '=', 'shift_staff.staff_id')
-            ->leftJoin('users as user_change', 'user_change.id', '=', 'shift_staff.change_staff_id')
-            ->where('shift_id', $request->shift_id)
-            ->whereDate('date', '=', $request->date)
+        $staff_list = ShiftPlannerStaffs::selectRaw('shift_planner_staffs.id ,staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'shift_planner_staffs.staff_id')
+            ->where('shift_group_id', $request->shift_id)
+            ->whereDate('start', '=', $request->start)
+            ->whereDate('staff_id', '!=', $request->staff_id)
             ->get();
 
-        $shift_list = Shift::get();
+        $shift_list = ShiftGroups::get();
 
         foreach ($staff_list as $key => $value) {
-            $data[] = ['id' => $value->id, 'name' => $value->user_name, 'checked' => false];
+            $data[] = ['id' => $value->id, 'name' => $value->staff_name, 'checked' => false];
         }
 
         foreach ($shift_list as $key => $value) {
@@ -38,10 +39,10 @@ class ShiftApiController extends Controller
 
     public function listChange(Request $request)
     {
-        $staff_list = ShiftStaff::selectRaw('shift_staff.id ,user.name as user_name, user_change.name as userc_name, shifts.*, shift_staff.*')
-            ->join('shifts', 'shifts.id', '=', 'shift_staff.shift_id')
-            ->join('users as user', 'user.id', '=', 'shift_staff.staff_id')
-            ->join('users as user_change', 'user_change.id', '=', 'shift_staff.change_staff_id')
+        $staff_list = ShiftPlannerStaffs::selectRaw('shift_planner_staffs.id ,staff.name as staff_name, staff_change.name as staffc_name, shifts.*, shift_planner_staffs.*')
+            ->join('shifts', 'shifts.id', '=', 'shift_planner_staffs.shift_group_id')
+            ->join('staffs as staff', 'staff.id', '=', 'shift_planner_staffs.staff_id')
+            ->join('staffs as staff_change', 'staff_change.id', '=', 'shift_planner_staffs.change_staff_id')
             ->where('change_staff_id', $request->staff_id)
             ->get();
 
@@ -55,10 +56,10 @@ class ShiftApiController extends Controller
     {
         $dataForm = json_decode($request->form);
         $change = [];
-        $staff_list = ShiftStaff::selectRaw('shift_staff.id ,user.name as user_name, user_change.name as userc_name')
-            ->join('users as user', 'user.id', '=', 'shift_staff.staff_id')
-            ->join('users as user_change', 'user_change.id', '=', 'shift_staff.change_staff_id')
-            ->where('shift_staff.id', $dataForm->id)
+        $staff_list = ShiftPlannerStaffs::selectRaw('shift_planner_staffs.id ,staff.name as staff_name, staff_change.name as staffc_name')
+            ->join('staffs as staff', 'staff.id', '=', 'shift_planner_staffs.staff_id')
+            ->join('staffs as staff_change', 'staff_change.id', '=', 'shift_planner_staffs.change_staff_id')
+            ->where('shift_planner_staffs.id', $dataForm->id)
             ->first();
         if ($staff_list) {
             return response()->json([
@@ -66,7 +67,7 @@ class ShiftApiController extends Controller
                 'data' => $change,
             ]);
         } else {
-            $change = ShiftStaff::where('id', $dataForm->id)->update(['change_staff_id' => $dataForm->staff_id, 'description' => $dataForm->description]);
+            $change = ShiftPlannerStaffs::where('id', $dataForm->id)->update(['change_staff_id' => $dataForm->staff_id, 'description' => $dataForm->description]);
             return response()->json([
                 'message' => 'pengajuan berhasil',
                 'data' => $change,
@@ -76,7 +77,7 @@ class ShiftApiController extends Controller
 
     public function approve(Request $request)
     {
-        $change = ShiftStaff::where('id', $request->id)->update(['staff_id' => $request->staff_id, 'change_staff_id' => '']);
+        $change = ShiftPlannerStaffs::where('id', $request->id)->update(['staff_id' => $request->staff_id, 'change_staff_id' => '']);
         return response()->json([
             'message' => 'pengajuan berhasil',
             'data' => $change,
@@ -85,10 +86,10 @@ class ShiftApiController extends Controller
 
     public function myShift(Request $request)
     {
-        $staff_list = ShiftStaff::selectRaw('shifts.time_in, shifts.time_out, shifts.title, shift_staff.id, shift_staff.date, shift_staff.id ,user.name as user_name')
-            ->join('users as user', 'user.id', '=', 'shift_staff.staff_id')
-            ->join('shifts', 'shifts.id', '=', 'shift_staff.shift_id')
-            ->where('shift_staff.staff_id', $request->staff_id)
+        $staff_list = ShiftPlannerStaffs::selectRaw('shifts.time_in, shifts.time_out, shifts.title, shift_planner_staffs.id, shift_planner_staffs.date, shift_planner_staffs.id ,staff.name as staff_name')
+            ->join('staffs as staff', 'staff.id', '=', 'shift_planner_staffs.staff_id')
+            ->join('shifts', 'shifts.id', '=', 'shift_planner_staffs.shift_group_id')
+            ->where('shift_planner_staffs.staff_id', $request->staff_id)
             ->get();
         return response()->json([
             'message' => 'success',
