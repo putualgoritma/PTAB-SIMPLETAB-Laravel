@@ -3,7 +3,7 @@
 @can('user_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a class="btn btn-success" href="{{ route("admin.work_type_day.create") }}">
+            <a class="btn btn-success" href="{{ route("admin.work_type_day.create",["work_type_id" => $work_type_id]) }}">
                 {{ trans('global.add') }} {{ trans('global.work_type_day.title_singular') }}
             </a>
         </div>
@@ -11,7 +11,7 @@
 @endcan
 <div class="card">
     <div class="card-header">
-        {{ trans('global.work_type_day.title_singular') }} {{ trans('global.list') }}
+        {{ trans('global.work_type_day.title_singular') }}  {{ trans('global.list') }} {{ $work_type_title }}
     </div>
 
     <div class="card-body">
@@ -26,13 +26,17 @@
                             {{ trans('global.work_type_day.fields.day') }}
                         </th>
                         <th>
-                            {{ trans('global.work_type_day.fields.category') }}
+                            {{ trans('global.work_type_day.fields.time_in') }}
                         </th>
                         <th>
-                            {{ trans('global.work_type_day.fields.time') }}
+                            {{ trans('global.work_type_day.fields.time_breakin') }}
                         </th>
                         <th>
-                            {{ trans('global.work_type_day.fields.duration') }}
+                            {{ trans('global.work_type_day.fields.time_breakout') }}
+                        </th>
+
+                        <th>
+                            {{ trans('global.work_type_day.fields.time_out') }}
                         </th>
 
                         <th>
@@ -47,16 +51,20 @@
 
                             </td>
                             <td>
-                                {{ $work_type_day->day ?? '' }}
+                                {{ $work_type_day->name ?? '' }}
                             </td>
                             <td>
-                                {{ $work_type_day->category ?? '' }}
+                                {{ $work_type_day->time_in ?? '' }}
                                 </td>
                             <td>
-                            {{ $work_type_day->time ?? '' }}
+                            {{ $work_type_day->time_breakin ?? '' }}
                             </td>
                             <td>
-                                {{ $work_type_day->duration ?? '' }}
+                                {{ $work_type_day->time_breakout ?? '' }}
+                            </td>
+
+                            <td>
+                                {{ $work_type_day->time_out ?? '' }}
                             </td>
                        
                             <td>
@@ -66,13 +74,13 @@
                                     </a>
                                 @endcan
                                 {{-- @if ($work_type_day->id != 1 && $work_type_day->id != 2) --}}
-@if ($work_type_day->type == "presence" && $work_type_day->queue == "1")
+
 @can('user_edit')
 <a class="btn btn-xs btn-info" href="{{ route('admin.work_type_day.edit', $work_type_day->id) }}">
     {{ trans('global.edit') }}
 </a>
 @endcan
-@endif
+
                               
                                 @can('user_delete')
                                     <form action="{{ route('admin.work_type_day.destroy', $work_type_day->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">

@@ -24,4 +24,20 @@ class AbsenceRequest extends Model
         'attendance'
 
     ];
+
+    public function scopeFilterCategory($query, $category)
+    {
+        if ($category != '') {
+            $query->where('absence_requests.category', $category);
+        }
+        return $query;
+    }
+
+    public function scopeFilterStatus($query, $status)
+    {
+        if ($status != '') {
+            $query->where('absence_requests.status', $status);
+        }
+        return $query;
+    }
 }

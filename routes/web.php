@@ -329,7 +329,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('actions/ubahData', 'ActionsController@ubahData')->name('actions.ubahData');
 
 
-    Route::post('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
+    Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
 
     Route::get('absence/reportAbsenceExcelView', 'AbsenceController@reportAbsenceExcelView')->name('absence.reportAbsenceExcelView');
@@ -432,6 +432,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('geolocation_off/{id}/approve', 'GeolocationOffController@approve')->name('geolocation_off.approve');
     Route::post('geolocation_off/{id}/reject', 'GeolocationOffController@reject')->name('geolocation_off.reject');
     Route::resource('geolocation_off', 'GeolocationOffController');
+
+
+
+    Route::get('cronjob', 'CronJobController@index');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

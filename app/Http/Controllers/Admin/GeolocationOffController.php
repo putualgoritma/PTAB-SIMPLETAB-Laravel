@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AbsenceRequest;
+use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
@@ -17,8 +18,10 @@ class GeolocationOffController extends Controller
     {
 
         // abort_unless(\Gate::allows('geolocation_off_access'), 403);
-        $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+        $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'geolocation_off')
+            ->FilterStatus($request->status)
             ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
@@ -29,7 +32,7 @@ class GeolocationOffController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'duty_access';
                 $editGate = '';
                 $deleteGate = 'geolocation_off_delete';
                 $crudRoutePart = 'geolocation_off';
@@ -96,6 +99,20 @@ class GeolocationOffController extends Controller
         $staffs = Staff::orderBy('name')->get();
         return view('admin.geolocation_off.create', compact('staffs', 'type'));
     }
+
+    public function show($id)
+    {
+        // abort_unless(\Gate::allows('geolocation_off_access'), 403);
+        $geolocation_off = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+            ->where('absence_requests.id', $id)->first();
+
+        $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
+
+        // dd($geolocation_off, $file);
+        return view('admin.geolocation_off.show', compact('geolocation_off', 'file'));
+    }
+
     public function store(Request $request)
     {
         // abort_unless(\Gate::allows('geolocation_off_create'), 403);

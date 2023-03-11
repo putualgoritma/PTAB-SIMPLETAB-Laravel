@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\TraitModel;
 use App\WorkTypeDays;
+use App\WorkTypes;
 
 class WorkTypeDayController extends Controller
 {
@@ -16,15 +17,67 @@ class WorkTypeDayController extends Controller
 
     public function index(Request $request)
     {
-        $work_type_days = WorkTypeDays::selectRaw('work_type_days.*, days.name as day, absence_categories.title as category, absence_categories.type, absence_categories.queue ')
-            ->join('days', 'work_type_days.day_id', '=', 'days.id')
-            ->join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-            ->where('work_type_id', $request->id)
-            ->orderBy('day_id')
+        $work_type_days = Day::selectRaw('
+        days.*,
+        in.id,
+        in.time as time_in,
+        out.time as time_out,
+        breakin.time as time_breakin,
+        breakout.time as time_breakout
+        ')
+            // ->join('work_type_days', 'work_type_days.day_id', '=', 'days.id')
+            // ->join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
+            ->join(
+                'work_type_days as in',
+                function ($join) use ($request) {
+                    $join->on('days.id', '=', 'in.day_id')
+                        ->join('absence_categories as c_in', 'in.absence_category_id', '=', 'c_in.id')
+                        ->where('c_in.type', 'presence')
+                        ->where('in.work_type_id', $request->id)
+                        ->where('c_in.queue', '1');
+                }
+            )
+            ->leftJoin(
+                'work_type_days as out',
+                function ($join) use ($request) {
+                    $join->on('days.id', '=', 'out.day_id')
+                        ->join('absence_categories as c_out', 'out.absence_category_id', '=', 'c_out.id')
+                        ->where('c_out.type', 'presence')
+                        ->where('out.work_type_id', $request->id)
+                        ->where('c_out.queue', '2');
+                }
+            )
+            ->join(
+                'work_type_days as breakin',
+                function ($join) use ($request) {
+                    $join->on('days.id', '=', 'breakin.day_id')
+                        ->join('absence_categories as c_breakin', 'breakin.absence_category_id', '=', 'c_breakin.id')
+                        ->where('c_breakin.type', 'break')
+                        ->where('breakin.work_type_id', $request->id)
+                        ->where('c_breakin.queue', '1');
+                }
+            )
+            ->join(
+                'work_type_days as breakout',
+                function ($join) use ($request) {
+                    $join->on('days.id', '=', 'breakout.day_id')
+                        ->join('absence_categories as c_breakout', 'breakout.absence_category_id', '=', 'c_breakout.id')
+                        ->where('c_breakout.type', 'break')
+                        ->where('breakout.work_type_id', $request->id)
+                        ->where('c_breakout.queue', '2');
+                }
+            )
+
+            ->orderBy('days.id')
+            ->groupBy('days.id')
             ->get();
-        return view('admin.work_type_day.index', compact('work_type_days'));
+        // dd($work_type_days);
+        $work_type_id = $request->id;
+        $work_type_title = WorkTypes::where('id', $request->id)->first()->title;
+        // dd($work_type_title);
+        return view('admin.work_type_day.index', compact('work_type_days', 'work_type_id', 'work_type_title'));
     }
-    public function create()
+    public function create(Request $request)
     {
         // $last_code = $this->get_last_code('work_type_day');
 
@@ -32,9 +85,9 @@ class WorkTypeDayController extends Controller
 
         $days = Day::select('days.*')->leftJoin(
             'work_type_days',
-            function ($join) {
+            function ($join) use ($request) {
                 $join->on('days.id', '=', 'work_type_days.day_id')
-                    ->where('work_type_id', '1');
+                    ->where('work_type_id', $request->work_type_id);
             }
         )
 
@@ -44,7 +97,9 @@ class WorkTypeDayController extends Controller
             ->where('work_type_days.day_id', '=', null)->get();
         // dd($days);
 
-        return view('admin.work_type_day.create', compact('days'));
+        $work_type_id = $request->work_type_id;
+
+        return view('admin.work_type_day.create', compact('days', 'work_type_id'));
     }
     public function store(Request $request)
     {
@@ -57,8 +112,8 @@ class WorkTypeDayController extends Controller
                 'absence_category_id' => $p->id,
                 'time' => $p->queue == 1 ? '07:30:00' : '15:30:00',
                 'duration' => $p->queue == 1 ? 8 : 0,
-                'duration_exp' => 0,
-                'work_type_id' => '1',
+                'duration_exp' => 1,
+                'work_type_id' => $request->work_type_id,
             ];
             $work_type_day =  WorkTypeDays::create($data);
         }
@@ -71,7 +126,7 @@ class WorkTypeDayController extends Controller
                 'time' => '00:00:00',
                 'duration' => 8,
                 'duration_exp' => 0,
-                'work_type_id' => '1',
+                'work_type_id' => $request->work_type_id,
             ];
             $work_type_day =  WorkTypeDays::create($data);
         }
@@ -111,7 +166,7 @@ class WorkTypeDayController extends Controller
                 $update = WorkTypeDays::where('id', $d->id)->first();
                 $update->update([
                     'duration' => $request->duration,
-                    'duration_exp' => $request->duration_exp,
+                    'duration_exp' =>  $request->duration_exp,
                     'time' => $request->time
                 ]);
                 // dd($update);
@@ -120,8 +175,8 @@ class WorkTypeDayController extends Controller
 
                 $time = date("H:i:s", strtotime('+' . ($request->duration) . ' hours', strtotime(date('Y-m-d ' . $request->time))));
                 $update->update([
-                    'duration' => $request->duration,
-                    'duration_exp' => 0,
+                    'duration' => 0,
+                    'duration_exp' => $request->duration_exp,
                     'time' => $time
                 ]);
                 // dd($update);

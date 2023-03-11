@@ -393,8 +393,15 @@ class AbsenceController extends Controller
         // dd($report);
     }
 
-    public function reportAbsence(Request $request)
+    public function reportAbsence()
     {
+        // mencari hari libur
+        // $fdate = date('Y-m-20');
+        // $tdate = date('Y-m-23');
+        // $datetime1 = new DateTime($fdate);
+        // $datetime2 = new DateTime($tdate);
+        // $interval = $datetime1->diff($datetime2);
+        // $days = $interval->format('%a'); //now do whatever you like with $days
         $awal_cuti = '2023-02-20';
         $akhir_cuti = '2023-03-21';
 
@@ -420,6 +427,17 @@ class AbsenceController extends Controller
         $jumlah_cuti = count($haricuti);
         $jumlah_sabtuminggu = count($sabtuminggu);
         $abtotal = $jumlah_cuti + $jumlah_sabtuminggu;
+
+        // // jumlah hari
+        // $startTimeStamp = strtotime("2023/01/21");
+        // $endTimeStamp = strtotime("2023/02/20");
+
+        // $timeDiff = abs($endTimeStamp - $startTimeStamp);
+
+        // $numberDays = $timeDiff / 86400;  // 86400 seconds in one day
+
+        // // and you might want to convert to integer
+        // $numberDays = intval($numberDays);
 
 
         $report = AbsenceLog::select(
@@ -447,8 +465,8 @@ class AbsenceController extends Controller
             ->join('absences', 'absences.id', '=', 'absence_logs.absence_id')
             ->join('staffs', 'staffs.id', '=', 'absences.staff_id')
             ->join('jobs', 'jobs.id', '=', 'staffs.job_id')
-            ->groupBy('staffs.id');
-        // ->get();
+            ->groupBy('staffs.id')
+            ->get();
 
 
         // foreach ($report as $value) {
@@ -537,106 +555,9 @@ class AbsenceController extends Controller
                 'Total Hari Permisi' => $value->permisi,
             ];
         }
-
-        if ($request->ajax()) {
-            //set query
-            $table = Datatables::of($report);
-
-            $table->addColumn('placeholder', '&nbsp;');
-            $table->addColumn('actions', '&nbsp;');
-
-            $table->editColumn('actions', function ($row) {
-                $viewGate = '';
-                $editGate = '';
-                $deleteGate = '';
-                $crudRoutePart = 'absence';
-
-                return view('partials.datatablesActions', compact(
-                    'viewGate',
-                    'editGate',
-                    'deleteGate',
-                    'crudRoutePart',
-                    'row'
-                ));
-            });
-            $table->editColumn('staff_code', function ($row) {
-                return $row->staff_code ? $row->staff_code : "";
-            });
-
-            $table->editColumn('staff_name', function ($row) {
-                return $row->staff_name ? $row->staff_name : "";
-            });
-
-            $table->editColumn('job_name', function ($row) {
-                return $row->job_name ? $row->job_name : "";
-            });
-
-            $table->editColumn('abtotal', function ($row) use ($abtotal) {
-                return $abtotal ? $abtotal : "";
-            });
-
-            $table->editColumn('jumlah_sabtuminggu', function ($row) use ($jumlah_sabtuminggu) {
-                return $jumlah_sabtuminggu ? $jumlah_sabtuminggu : "";
-            });
-
-            $table->editColumn('efective_kerja', function ($row) use ($jumlah_sabtuminggu, $abtotal) {
-                return $abtotal - $jumlah_sabtuminggu;
-            });
-
-            $table->editColumn('hadir', function ($row) {
-                return $row->hadir ? $row->hadir : "";
-            });
-            $table->editColumn('izin', function ($row) {
-                return $row->izin ? $row->izin : "";
-            });
-            $table->editColumn('dinas_luar', function ($row) {
-                return $row->dinas_luar ? $row->dinas_luar : "";
-            });
-            $table->editColumn('cuti', function ($row) {
-                return $row->cuti ? $row->cuti : "";
-            });
-            $table->editColumn('jam_hadir', function ($row) {
-                return $row->jam_hadir ? $row->jam_hadir : "";
-            });
-            $table->editColumn('jam_istirahat', function ($row) {
-                return $row->jam_istirahat ? $row->jam_istirahat : "";
-            });
-            $table->editColumn('jam_lembur', function ($row) {
-                return $row->jam_lembur ? $row->jam_lembur : "";
-            });
-
-
-            $table->editColumn('jam_dinas_dalam', function ($row) {
-                return $row->jam_dinas_dalam ? $row->jam_dinas_dalam : "";
-            });
-            $table->editColumn('hari_dinas_dalam', function ($row) {
-                return $row->dinas_dalam ? $row->dinas_dalam : "";
-            });
-
-            // $table->editColumn('jam_dinas_dalam', function ($row) {
-            //     return $row->jam_dinas_dalam ? $row->jam_dinas_dalam : "";
-            // });
-            // $table->editColumn('hari_dinas_dalam', function ($row) {
-            //     return $row->dinas_dalam ? $row->dinas_dalam : "";
-            // });
-
-            $table->editColumn('jam_permisi', function ($row) {
-                return $row->jam_permisi ? $row->jam_permisi : "";
-            });
-            $table->editColumn('hari_permisi', function ($row) {
-                return $row->permisi ? $row->permisi : "";
-            });
-            $table->rawColumns(['actions', 'placeholder']);
-
-            $table->addIndexColumn();
-            return $table->make(true);
-        }
-        // default view
-        // return view('admin.schedule.index');
-
-        return view('admin.absence.report');
-
         // dd($data);
-        // return Excel::download(new AbsenceReport($data), 'report.xlsx');
+        return Excel::download(new AbsenceReport($data), 'report.xlsx');
+
+        // dd($days, $jumlah_cuti, $jumlah_sabtuminggu, $abtotal, $diffHours);
     }
 }

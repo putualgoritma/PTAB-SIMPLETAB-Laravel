@@ -89,12 +89,23 @@ class AbsenceApiController extends Controller
         $leave = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
             ->where('end', '>=', date('Y-m-d H:i:s'))
             ->where('category', 'leave')
+            ->where('status', 'approve')
             ->where('staff_id', $request->staff_id)
-            ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active')->orWhere('status', 'pending')
-                    ->orWhere('status', 'close');
-            })
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'leave')
+            ->where('status', 'active')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'leave')
+            ->where('status', 'pending')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'leave')
+            ->where('status', 'close')
             ->first();
 
 
@@ -102,24 +113,46 @@ class AbsenceApiController extends Controller
         $permission = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
             ->where('end', '>=', date('Y-m-d H:i:s'))
             ->where('category', 'permission')
+            ->where('status', 'approve')
             ->where('staff_id', $request->staff_id)
-            ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active')->orWhere('status', 'pending')
-                    ->orWhere('status', 'close');
-            })
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'permission')
+            ->where('status', 'active')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'permission')
+            ->where('status', 'pending')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'permission')
+            ->where('status', 'close')
             ->first();
 
 
         $duty = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
             ->where('end', '>=', date('Y-m-d H:i:s'))
             ->where('category', 'duty')
+            ->where('status', 'approve')
             ->where('staff_id', $request->staff_id)
-            ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active')->orWhere('status', 'pending')
-                    ->orWhere('status', 'close');
-            })
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'duty')
+            ->where('status', 'active')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'duty')
+            ->where('status', 'pending')
+            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+            ->where('staff_id', $request->staff_id)
+            ->where('end', '>=', date('Y-m-d H:i:s'))
+            ->where('category', 'duty')
+            ->where('status', 'close')
             ->first();
 
         $absence_extra = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id ,absence_request_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
@@ -376,11 +409,13 @@ class AbsenceApiController extends Controller
                 $absence_excuse = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
                     ->where('end', '>=', date('Y-m-d H:i:s'))
                     ->where('category', 'excuse')
+                    ->where('status', '=', 'approve')
                     ->where('staff_id', $request->staff_id)
-                    ->where(function ($query) {
-                        $query->where('status', 'approve')
-                            ->orWhere('status', 'active');
-                    })
+                    ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+                    ->where('end', '>=', date('Y-m-d H:i:s'))
+                    ->where('category', 'excuse')
+                    ->where('status', '=', 'active')
+                    ->where('staff_id', $request->staff_id)
                     ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
                     ->first();
                 if ($absence_excuse) {
@@ -408,10 +443,11 @@ class AbsenceApiController extends Controller
                 $absence_visit = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
                     ->where('end', '>=', date('Y-m-d H:i:s'))
                     ->where('category', 'visit')
-                    ->where(function ($query) {
-                        $query->where('status', 'approve')
-                            ->orWhere('status', 'active');
-                    })
+                    ->where('status', '=', 'approve')
+                    ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+                    ->where('end', '>=', date('Y-m-d H:i:s'))
+                    ->where('category', 'visit')
+                    ->where('status', '=', 'active')
                     ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
                     ->first();
                 if ($absence_visit) {
@@ -701,11 +737,11 @@ class AbsenceApiController extends Controller
                             $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
                                 ->where('end', '>=', date('Y-m-d H:i:s'))
                                 ->where('category', 'extra')
-                                ->where(function ($query) {
-                                    $query->where('status', 'approve')
-                                        ->orWhere('status', 'active');
-                                })
-
+                                ->where('status', '=', 'approve')
+                                ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+                                ->where('end', '>=', date('Y-m-d H:i:s'))
+                                ->where('category', 'extra')
+                                ->where('status', '=', 'active')
                                 ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
                                 ->first();
                             if ($absence_extra) {
@@ -973,11 +1009,11 @@ class AbsenceApiController extends Controller
                                 $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
                                     ->where('end', '>=', date('Y-m-d H:i:s'))
                                     ->where('category', 'extra')
-                                    ->where(function ($query) {
-                                        $query->where('status', 'approve')
-                                            ->orWhere('status', 'active')->orWhere('status', 'pending')
-                                            ->orWhere('status', 'close');
-                                    })
+                                    ->where('status', '=', 'approve')
+                                    ->orWhere('start', '<=', date('Y-m-d H:i:s'))
+                                    ->where('end', '>=', date('Y-m-d H:i:s'))
+                                    ->where('category', 'extra')
+                                    ->where('status', '=', 'active')
                                     ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
                                     ->first();
                                 if ($absence_extra) {

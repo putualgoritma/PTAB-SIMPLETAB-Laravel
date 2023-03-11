@@ -901,6 +901,8 @@ return [
             'end_helper' => '',
             'time' => 'Jam',
             'time_helper' => '',
+            'file' => 'File',
+            'file_helper' => '',
             'description' => 'Deskripsi',
             'description_helper' => '',
             'status' => 'Status',
@@ -1157,8 +1159,16 @@ return [
             'day_helper' => '',
             'duration' => 'Durasi Kerja',
             'duration_helper' => '',
-            'duration_exp' => 'Durasi Kerja',
-            'duration_exp_helper' => ''
+            'duration_exp' => 'Toleransi',
+            'duration_exp_helper' => '',
+            'time_in' => 'Masuk',
+            'time_in_helper' => '',
+            'time_out' => 'Pulang',
+            'time_out_helper' => '',
+            'time_breakin' => 'Istirahat Mulai',
+            'time_breakin_helper' => '',
+            'time_breakout' => 'Istirahat Selesai',
+            'time_breakout_helper' => ''
         ]
     ],
 
