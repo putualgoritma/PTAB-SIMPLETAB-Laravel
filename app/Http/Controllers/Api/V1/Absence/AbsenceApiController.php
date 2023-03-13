@@ -105,8 +105,8 @@ class AbsenceApiController extends Controller
             ->where('staff_id', $request->staff_id)
             ->where(function ($query) {
                 $query->where('status', 'approve')
-                    ->orWhere('status', 'active')->orWhere('status', 'pending')
-                    ->orWhere('status', 'close');
+                    ->orWhere('status', 'active')->orWhere('status', 'pending');
+                // ->orWhere('status', 'close');
             })
             ->first();
 
@@ -572,11 +572,11 @@ class AbsenceApiController extends Controller
                             //     'c' => $c
                             // ]);
 
-                            $expired_date = date('Y-m-d H:i:s');
+                            // $expired_date = date('Y-m-d H:i:s');
                             try {
                                 for ($n = 0; $n < count($list_absence); $n++) {
-                                    $expired_date = date("Y-m-d H:i:s", strtotime('+ ' . ($list_absence[$n]->duration + $list_absence[$n]->duration_exp) . ' hours', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
-                                    $timeout = date("Y-m-d H:i:s", strtotime('+ ' . $list_absence[$n]->duration . ' hours', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                    $expired_date = date("Y-m-d H:i:s", strtotime('+ ' . ($list_absence[$n]->duration + $list_absence[$n]->duration_exp) . ' hours', strtotime(date('Y-m-d ' . $list_absence[$n]->time))));
+                                    $timeout = date("Y-m-d H:i:s", strtotime('+ ' . $list_absence[$n]->duration . ' hours', strtotime(date('Y-m-d ' . $list_absence[$n]->time))));
                                     $timein = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[$n]->time)));
 
                                     $status = 0;
@@ -975,8 +975,7 @@ class AbsenceApiController extends Controller
                                     ->where('category', 'extra')
                                     ->where(function ($query) {
                                         $query->where('status', 'approve')
-                                            ->orWhere('status', 'active')->orWhere('status', 'pending')
-                                            ->orWhere('status', 'close');
+                                            ->orWhere('status', 'active');
                                     })
                                     ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
                                     ->first();
@@ -1628,23 +1627,21 @@ class AbsenceApiController extends Controller
             $upload_image->save();
 
             if ($AbsenceRequestLogs) {
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close']);
-                Absence::whereDate('created_at', '>', date('Y-m-d'))->delete();
-                AbsenceLog::whereDate('register', '>', date('Y-m-d'))->delete();
-            } else {
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
                 $absenceRequest = AbsenceRequest::select('category', DB::raw('DATE(start) as start'), DB::raw('DATE(end) as end'))
                     ->where('id', $request->absence_request_id)->first();
+                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close', 'attendance' => date("Y-m-d H:i:s", strtotime('- ' . 1 . ' days', strtotime(date('Y-m-d ' . '23:59:59'))))]);
+                Absence::whereDate('created_at', '>', date('Y-m-d'))->delete();
+                AbsenceLog::whereDate('register', '>', date('Y-m-d'))->delete();
                 $begin = strtotime($absenceRequest->start);
-                $end   = strtotime($absenceRequest->end);
+                $end   = strtotime(date('Y-m-d'));
 
-                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                for ($i = $begin; $i < $end; $i = $i + 86400) {
                     $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
-                    if ($holiday) {
+                    if (!$holiday) {
                         if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
 
                             Absence::create([
-                                'day_id' => '',
+                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
                                 'staff_id' => $request->staff_id,
                                 'created_at' => date('Y-m-d H:i:s', $i),
                                 'updated_at' => date('Y-m-d H:i:s')
@@ -1661,6 +1658,10 @@ class AbsenceApiController extends Controller
                         }
                     }
                 }
+            } else {
+                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
+                // $absenceRequest = AbsenceRequest::select('category', DB::raw('DATE(start) as start'), DB::raw('DATE(end) as end'))
+                //     ->where('id', $request->absence_request_id)->first();
             }
 
 
@@ -1774,11 +1775,57 @@ class AbsenceApiController extends Controller
     public function leaveEnd(Request $request)
     {
         try {
-            AbsenceRequest::where('id', $request->id)->update(['status' => 'close', 'attendance' => date('Y-m-d H:i:s')]);
-            return response()->json([
-                'message' => 'Absen Terkirim',
-                // 'data' => $upload_image,
-            ]);
+            $absenceRequest =  AbsenceRequest::where('id', $request->id)->first();
+
+            if (date('Y-m-d') > $absenceRequest->start) {
+                AbsenceRequest::where('id', $request->id)->update(['status' => 'close', 'attendance' => date("Y-m-d H:i:s", strtotime('- ' . 1 . ' days', strtotime(date('Y-m-d ' . '23:59:59'))))]);
+                $absenceLog = AbsenceLog::where('absence_request_id', $absenceRequest->id)->get();
+                foreach ($absenceLog as $d) {
+                    $deleteAbsence = Absence::where('id', $d->id)->first();
+                    if ($deleteAbsence) {
+                        Absence::where('id', $d->id)->delete();
+                    }
+                }
+
+                AbsenceLog::where('absence_request_id', $absenceRequest->id)->delete();
+
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime(date('Y-m-d'));
+
+                for ($i = $begin; $i < $end; $i = $i + 86400) {
+                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                    if (!$holiday) {
+                        if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                            $ab_id = Absence::create([
+                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                'staff_id' => $absenceRequest->staff_id,
+                                'created_at' => date('Y-m-d H:i:s', $i),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                            AbsenceLog::create([
+                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                                'lat' => '',
+                                'lng' => '',
+                                'absence_request_id' => $absenceRequest->id,
+                                'register' => date('Y-m-d', $i),
+                                'absence_id' => $ab_id->id,
+                                'duration' => '',
+                                'status' => ''
+                            ]);
+                        }
+                    }
+                }
+                return response()->json([
+                    'message' => 'Absen Terkirim',
+                    // 'data' => $upload_image,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'tidak bisa diakhiri hari ini karena tanggal mulai sama dengan tanggal sekarang',
+                    // 'data' => $upload_image,
+                ]);
+            }
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal',
@@ -1804,7 +1851,11 @@ class AbsenceApiController extends Controller
     public function history(Request $request)
     {
         $data = [];
-        $absence = Absence::join('days', 'days.id', '=', 'absences.day_id')->selectRaw('absences.id,DATE(created_at) as created_at, days.name as day_name')->where('staff_id', $request->staff_id)->groupByRaw('DATE(created_at)')->get();
+        $absence = Absence::join('days', 'days.id', '=', 'absences.day_id')
+            ->selectRaw('absences.id,DATE(created_at) as created_at, days.name as day_name')
+            ->where('staff_id', $request->staff_id)
+            ->FilterDate($request->from, $request->to)
+            ->groupByRaw('DATE(created_at)')->get();
 
         foreach ($absence as $d) {
             $data[] = ['date' => $d->created_at, 'day_name' => $d->day_name, 'list' => AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')->selectRaw('absence_logs.*, absence_categories.title as category_title')->where('absence_id', '=', $d->id)->get()];
@@ -1884,5 +1935,112 @@ class AbsenceApiController extends Controller
             'message' => 'success',
             'data' => $holiday,
         ]);
+    }
+
+    // untuk lembur
+    public function storeExtra(Request $request)
+    {
+
+        // $last_code = $this->get_last_code('lock_action');
+
+        // $code = acc_code_generate($last_code, 8, 3);
+        $img_path = "/images/absence";
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+        // $dataForm = json_decode($request->form);
+        $responseImage = '';
+
+        if (date('w') == '0') {
+            $day = '7';
+        } else {
+            $day = date('w');
+        }
+
+        if ($request->file('image')) {
+            $resource_image = $request->file('image');
+            $name_image = $request->staff_id;
+            $file_ext_image = $request->file('image')->extension();
+            // $id_name_image = str_replace(' ', '-', $id_image);
+
+            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+
+            $resource_image->move($basepath . $img_path, $name_image);
+            $data_image = $name_image;
+        }
+
+
+        if ($responseImage != '') {
+            return response()->json([
+                'message' => $responseImage,
+            ]);
+        }
+
+        $absenceBefore = AbsenceLog::select('register')
+            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+            ->where('absence_id', $request->absence_id)
+            ->where('queue', '1')
+            ->where('type', 'extra')
+            ->first();
+
+        // mencari durasi
+        $duration = 0;
+
+
+        if ($absenceBefore != null) {
+            $day1 = $absenceBefore->register;
+        } else {
+            $day1 = $absenceBefore->register;
+        }
+
+
+        $day1 = strtotime($day1);
+        $day2 = date('Y-m-d H:i:s');
+        $day2 = strtotime($day2);
+
+        $duration = ($day2 - $day1) / 3600;
+
+        // variable early dan late
+        $late = 0;
+        $early = 0;
+        try {
+            $upload_image = AbsenceLog::where('id', $request->id)->first();
+
+
+
+            $upload_image->late = $late;
+            $upload_image->early = $early;
+
+
+            $upload_image->image = $data_image;
+            // sementara start
+            $upload_image->created_by_staff_id = $request->staff_id;
+            $upload_image->updated_by_staff_id = $request->staff_id;
+            $upload_image->register = date('Y-m-d H:i:s');
+            // $upload_image->late = $late;
+            // $upload_image->early = $early;
+            $upload_image->duration = $duration;
+            // sementara end
+            $upload_image->register = date('Y-m-d H:i:s');
+            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->lat = $request->lat;
+            $upload_image->lng = $request->lng;
+            $upload_image->status =  0;
+            // $upload_image->shift_id = $request->shift_id;
+
+            $upload_image->save();
+
+            // start update request
+            if ($upload_image->absence_request_id != "" && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where('id', $upload_image->absence_request_id)->update(['status' => 'close']);
+            }
+
+            return response()->json([
+                'message' => 'Absen Terkirim',
+                'data' => $upload_image,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal',
+            ]);
+        }
     }
 }

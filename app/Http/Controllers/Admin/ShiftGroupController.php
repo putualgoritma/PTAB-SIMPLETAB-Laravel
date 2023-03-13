@@ -160,7 +160,7 @@ class ShiftGroupController extends Controller
                 $update = ShiftGroupTimesheets::where('id', $d->id)->first();
                 $update->update([
                     'duration' => $request->duration,
-                    'duration_exp' => $request->duration_exp,
+                    'duration_exp' =>  $request->duration_exp,
                     'time' => $request->time
                 ]);
                 // dd($update);
@@ -169,7 +169,7 @@ class ShiftGroupController extends Controller
 
                 $time = date("H:i:s", strtotime('+' . ($request->duration) . ' hours', strtotime(date('Y-m-d ' . $request->time))));
                 $update->update([
-                    'duration' => $request->duration,
+                    'duration' => 0,
                     'duration_exp' => $request->duration_exp,
                     'time' => $time
                 ]);
@@ -182,6 +182,7 @@ class ShiftGroupController extends Controller
                 ]);
             }
         }
+
         $schedule = ShiftGroupTimesheets::where('id', $id)->first();
 
 

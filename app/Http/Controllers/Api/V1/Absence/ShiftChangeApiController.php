@@ -31,6 +31,7 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as C', 'A.shift_group_id', '=', 'C.id')
             ->join('shift_planner_staffs as B', 'shift_changes.shift_id', '=', 'B.id')
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
+            ->FilterDate($request->from, $request->to)
             ->where('A.staff_id', $request->staff_id)
             ->paginate(3, ['*'], 'page', $request->page);
 
@@ -48,6 +49,7 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as C', 'A.shift_group_id', '=', 'C.id')
             ->join('shift_planner_staffs as B', 'shift_changes.shift_id', '=', 'B.id')
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
+            ->FilterDate($request->from, $request->to)
             ->where('B.staff_id', $request->staff_id)
             ->paginate(3, ['*'], 'page', $request->page);
 

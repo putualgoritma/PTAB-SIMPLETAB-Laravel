@@ -267,6 +267,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('shift/listChange', 'ShiftApiController@listChange');
     Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
     Route::post('absence/store', 'AbsenceApiController@store');
+    Route::post('absence/storeExtra', 'AbsenceApiController@storeExtra');
 
 
     Route::get('message', 'MessageApiController@index');

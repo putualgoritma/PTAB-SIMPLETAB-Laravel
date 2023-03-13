@@ -18,5 +18,6 @@ class ShiftGroupTimesheets extends Model
         'duration',
         'created_at',
         'updated_at',
+        'duration_exp',
     ];
 }

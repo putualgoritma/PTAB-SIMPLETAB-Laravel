@@ -26,9 +26,10 @@ class MenuApiController extends Controller
         // $duty = Requests::where('category', 'duty')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->first();
         // $extra = Requests::where('category', 'extra')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->first();
         // $permit = Requests::where('category', 'permit')->whereDate('date', '=', date('Y-m-d'))->where('user_id', $request->user_id)->where('status', 'approve')->first();
-        $staff = Staff::selectRaw('staffs.*, work_types.type, users.email')
+        $staff = Staff::selectRaw('staffs.*, work_types.type, users.email, work_units.lng, work_units.lat, work_units.radius ')
             ->join('work_types', 'staffs.work_type_id', '=', 'work_types.id')
             ->join('users', 'users.staff_id', '=', 'staffs.id')
+            ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')
             ->where('staffs.id', $request->staff_id)->first();
         // $messageLogs = MessageLog::where('staff_id', $request->staff_id)->get();
         $messageLogs = MessageLog::where('staff_id', $request->staff_id)

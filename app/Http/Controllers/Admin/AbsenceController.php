@@ -395,6 +395,14 @@ class AbsenceController extends Controller
 
     public function reportAbsence(Request $request)
     {
+        // if (date('d') > 20) {
+        //     $from = date("Y-m-d", strtotime(date('Y-m') . "-21"));
+        //     $to = date("Y-m-d", strtotime('+1 month', strtotime(date('Y-m') . "-20")));
+        // } else {
+        //     $from = date("Y-m-d", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
+        //     $to = date("Y-m-d", strtotime(date("Y-m") . "-20"));
+        // }
+        // dd($from, $to);
         $awal_cuti = '2023-02-20';
         $akhir_cuti = '2023-03-21';
 
