@@ -20,10 +20,13 @@
         <div class="col-md-6">
              <form action="" id="filtersForm">
                 <div class="input-group">
-                    <select id="type" name="type" class="form-control">
-                        <option value="">== Semua Tipe ==</option>
-                        <option value="extra">Pelanggan</option>
-                        <option value="public">Umum</option>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">== Semua Status ==</option>
+                        <option value="pending">pending</option>
+                        <option value="approve">approve</option>
+                        <option value="active">active</option>
+                        <option value="reject">reject</option>
+                        <option value="close">close</option>
                     </select>
                     <span class="input-group-btn">
                     &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
@@ -83,11 +86,11 @@
 <script>
     $(function () {
         let searchParams = new URLSearchParams(window.location.search)
-        let type = searchParams.get('type')
-        if (type) {
-            $("#type").val(type);
+        let status = searchParams.get('status')
+        if (status) {
+            $("#status").val(status);
         }else{
-            $("#type").val('');
+            $("#status").val('');
         }
 
         // console.log('type : ', type);
@@ -132,14 +135,14 @@
     ajax: {
       url: "{{ route('admin.extra.index') }}",
       data: {
-        'type': $("#type").val(),
+        'status': $("#status").val(),
       },
       dataType: "JSON"
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
-        { data: 'staff_name', name: 'staff_name' },
+        { data: 'DT_RowIndex', name: 'no', searchable : false },
+        { data: 'staff_name', name: 'staffs.name' },
         { data: 'category', name: 'category' },
         { data: 'type', name: 'type' },
         { data: 'start', name: 'start' },

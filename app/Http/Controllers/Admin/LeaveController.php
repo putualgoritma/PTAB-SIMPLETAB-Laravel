@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\AbsenceRequest;
+use App\AbsenceRequestLogs;
+use App\Holiday;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
@@ -20,6 +24,7 @@ class LeaveController extends Controller
         abort_unless(\Gate::allows('leave_access'), 403);
         $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'leave')
+            ->FilterStatus($request->status)
             ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
@@ -30,7 +35,7 @@ class LeaveController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'duty_access';
                 $editGate = '';
                 $deleteGate = 'leave_delete';
                 $crudRoutePart = 'leave';
@@ -112,6 +117,19 @@ class LeaveController extends Controller
         return redirect()->route('admin.leave.index');
     }
 
+    public function show($id)
+    {
+        abort_unless(\Gate::allows('leave_access'), 403);
+        $leave = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+            ->where('absence_requests.id', $id)->first();
+
+        $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
+
+        // dd($leave, $file);
+        return view('admin.leave.show', compact('leave', 'file'));
+    }
+
     public function edit($id)
     {
         abort_unless(\Gate::allows('leave_edit'), 403);
@@ -152,6 +170,44 @@ class LeaveController extends Controller
             ->update(['status' => 'approve']);
 
         $d = AbsenceRequest::where('id', $id)->first();
+
+        // buat absence log start
+
+        $absenceRequest =  AbsenceRequest::where('id', $id)->first();
+
+        if (date('Y-m-d') > $absenceRequest->start) {
+            $begin = strtotime($absenceRequest->start);
+            $end   = strtotime($absenceRequest->end);
+
+            for ($i = $begin; $i < $end; $i = $i + 86400) {
+                $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                if (!$holiday) {
+                    if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                        $ab_id = Absence::create([
+                            'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                            'staff_id' => $absenceRequest->staff_id,
+                            'created_at' => date('Y-m-d H:i:s', $i),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        AbsenceLog::create([
+                            'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                            'lat' => '',
+                            'lng' => '',
+                            'absence_request_id' => $absenceRequest->id,
+                            'register' => date('Y-m-d', $i),
+                            'absence_id' => $ab_id->id,
+                            'duration' => '',
+                            'status' => ''
+                        ]);
+                    }
+                }
+            }
+        }
+        // buat absence log end
+
+
+
         MessageLog::create([
             'staff_id' => $d->staff_id,
             'memo' => "permisi anda tanggal " . $d->start . " disetujui",

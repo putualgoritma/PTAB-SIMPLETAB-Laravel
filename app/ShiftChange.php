@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ShiftChange extends Model
 {
@@ -17,4 +18,28 @@ class ShiftChange extends Model
         'updated_at',
         'status'
     ];
+    public function scopeFilterDate($query, $from, $to)
+    {
+        if (!empty(request()->input('from')) && !empty(request()->input('to'))) {
+            $from = request()->input('from');
+            $to =  request()->input('to');
+            // $from = '2021-09-01';
+            // $to = '2021-09-20';
+            //return $query->whereBetween('lock_action.created_at', [$from, $to]);
+            return $query->whereBetween(DB::raw('DATE(shift_changes.created_at)'), [$from, $to]);
+            // return $query->where('froms_id', $from);
+            // dd(request()->input('from'));
+
+        } else {
+            if (date('d') > 20) {
+                $from = date("Y-m-d", strtotime(date('Y-m') . "-21"));
+                $to = date("Y-m-d", strtotime('+1 month', strtotime(date('Y-m') . "-20")));
+            } else {
+                $from = date("Y-m-d", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
+                $to = date("Y-m-d", strtotime('0 month', strtotime(date('Y-m') . "-20")));
+            }
+
+            return $query->whereBetween(DB::raw('DATE(shift_changes.created_at)'), [$from, $to]);
+        }
+    }
 }

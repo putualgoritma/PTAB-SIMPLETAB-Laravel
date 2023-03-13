@@ -70,15 +70,15 @@ class SealApiController extends Controller
                     if (count($data) > 0) {
 
                         $qry->where(function ($query) use ($data) {
-                                //$query->where('tblpelanggan.idareal', $data[0]->area_id);
-                                for ($i = 0; $i < count($data); $i++) {
-                                    if ($i == 0) {
-                                        $query->where('tblpelanggan.idareal', $data[$i]->area_id);
-                                    } else {
-                                        $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
-                                    }
+                            //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
                                 }
-                            });
+                            }
+                        });
 
                         $qry->where('tblpelanggan.status', 1)
                             ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
@@ -100,15 +100,15 @@ class SealApiController extends Controller
                     if (count($data) > 0) {
 
                         $qry->where(function ($query) use ($data) {
-                                // $query->where('tblpelanggan.idareal', 'K010107')->orWhere('tblpelanggan.idareal', 'K010108')->orWhere('tblpelanggan.idareal', 'K010109');
-                                for ($i = 0; $i < count($data); $i++) {
-                                    if ($i == 0) {
-                                        $query->where('tblpelanggan.idareal', $data[$i]->area_id);
-                                    } else {
-                                        $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
-                                    }
+                            // $query->where('tblpelanggan.idareal', 'K010107')->orWhere('tblpelanggan.idareal', 'K010108')->orWhere('tblpelanggan.idareal', 'K010109');
+                            for ($i = 0; $i < count($data); $i++) {
+                                if ($i == 0) {
+                                    $query->where('tblpelanggan.idareal', $data[$i]->area_id);
+                                } else {
+                                    $query->orWhere('tblpelanggan.idareal', $data[$i]->area_id);
                                 }
-                            });
+                            }
+                        });
 
                         $qry->where('tblpelanggan.status', 1)
                             ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
@@ -133,7 +133,7 @@ class SealApiController extends Controller
                     ->having('jumlahtunggakan', '>', 1)
                     ->FilterStatusNew($request->status)
                     ->FilterKeyword($request->search)
-                // ->having('jumlahtunggakan', '>', '1')
+                    // ->having('jumlahtunggakan', '>', '1')
                     ->groupBy('tblpembayaran.nomorrekening')
                     ->paginate(10, ['*'], 'page', $request->page);
             } else {
@@ -146,7 +146,7 @@ class SealApiController extends Controller
                     ->having('jumlahtunggakan', '>', 1)
                     ->FilterStatusNew($request->status)
                     ->FilterKeyword($request->search)
-                // ->having('jumlahtunggakan', '>', '1')
+                    // ->having('jumlahtunggakan', '>', '1')
                     ->groupBy('tblpembayaran.nomorrekening')
                     ->paginate(10, ['*'], 'page', $request->page);
             }
@@ -288,7 +288,7 @@ class SealApiController extends Controller
                         'id' => 'resist',
                         'name' => 'Segel',
                     ];
-                }else{
+                } else {
                     $input_Status = 1;
                 }
             } else {
@@ -378,7 +378,7 @@ class SealApiController extends Controller
             $inputStatus = ["inputStatus" => "sudah"];
         } else {
             $inputStatus = ["inputStatus" => "belum"];
-        }        
+        }
 
         $recap = [
             'tagihan' => $tagihan,

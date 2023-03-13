@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AbsenceRequest;
+use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
@@ -20,6 +21,7 @@ class WorkPermitController extends Controller
         abort_unless(\Gate::allows('workpermit_access'), 403);
         $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'permission')
+            ->FilterStatus($request->status)
             ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
@@ -30,7 +32,7 @@ class WorkPermitController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'duty_access';
                 $editGate = '';
                 $deleteGate = 'workpermit_delete';
                 $crudRoutePart = 'workPermit';
@@ -110,6 +112,19 @@ class WorkPermitController extends Controller
         ];
         $workPermit = AbsenceRequest::create($data);
         return redirect()->route('admin.workPermit.index');
+    }
+
+    public function show($id)
+    {
+        abort_unless(\Gate::allows('workpermit_access'), 403);
+        $workPermit = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+            ->where('absence_requests.id', $id)->first();
+
+        $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
+
+        // dd($workPermit, $file);
+        return view('admin.workPermit.show', compact('workPermit', 'file'));
     }
 
     public function edit($id)

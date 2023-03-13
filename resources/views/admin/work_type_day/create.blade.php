@@ -44,6 +44,7 @@
                     </em>
                 @endif
             </div> --}}
+            <input type="hidden" name="work_type_id" value="{{ $work_type_id }}">
 
             <div class="form-group {{ $errors->has('day_id') ? 'has-error' : '' }}">
                 <label for="day_id">{{ trans('global.work_type_day.fields.day') }}*</label>

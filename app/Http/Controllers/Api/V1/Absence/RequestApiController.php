@@ -183,6 +183,7 @@ class RequestApiController extends Controller
     public function history(Request $request)
     {
         $requests = AbsenceRequest::where('staff_id', $request->staff_id)
+            ->FilterDate($request->from, $request->to)
             ->paginate(3, ['*'], 'page', $request->page);
         return response()->json([
             'message' => 'Pengajuan Terkirim',

@@ -827,6 +827,22 @@ return [
             'updated_at_helper' => '',
             'deleted_at' => 'Deleted at',
             'deleted_at_helper' => '',
+            // tambahan untuk laporan
+            'staff_code' => 'Kode',
+            'staff_name' => 'Nama',
+            'job_name' => 'Jabatan',
+            'abtotal' => 'Total Hari',
+            'jumlah_sabtuminggu' => 'Jumlah Sabtu Minggu',
+            'total_efektif_kerja' => 'efektif_kerja',
+            'hadir' => 'Hadir',
+            'izin' => 'Izin',
+            'dinas_luar' => 'Dinas Luar',
+            'cuti' => 'Cuti',
+            'jam_hadir' => 'Jam Hadir',
+            'jam_istirahat' => 'Jam Istirahat',
+            'jam_lembur' => 'Jam Lembur',
+            'jam_dinas_dalam' => 'Jam Dinas Dalam'
+
         ],
     ],
 
@@ -901,6 +917,8 @@ return [
             'end_helper' => '',
             'time' => 'Jam',
             'time_helper' => '',
+            'file' => 'File',
+            'file_helper' => '',
             'description' => 'Deskripsi',
             'description_helper' => '',
             'status' => 'Status',
@@ -1157,8 +1175,16 @@ return [
             'day_helper' => '',
             'duration' => 'Durasi Kerja',
             'duration_helper' => '',
-            'duration_exp' => 'Durasi Kerja',
-            'duration_exp_helper' => ''
+            'duration_exp' => 'Toleransi',
+            'duration_exp_helper' => '',
+            'time_in' => 'Masuk',
+            'time_in_helper' => '',
+            'time_out' => 'Pulang',
+            'time_out_helper' => '',
+            'time_breakin' => 'Istirahat Mulai',
+            'time_breakin_helper' => '',
+            'time_breakout' => 'Istirahat Selesai',
+            'time_breakout_helper' => ''
         ]
     ],
 

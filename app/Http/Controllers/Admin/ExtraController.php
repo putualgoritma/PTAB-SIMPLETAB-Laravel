@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AbsenceRequest;
+use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
@@ -19,6 +20,7 @@ class ExtraController extends Controller
         abort_unless(\Gate::allows('extra_access'), 403);
         $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'extra')
+            ->FilterStatus($request->status)
             ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
@@ -29,7 +31,7 @@ class ExtraController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = '';
+                $viewGate = 'duty_access';
                 $editGate = '';
                 $deleteGate = 'extra_delete';
                 $crudRoutePart = 'extra';
@@ -109,6 +111,19 @@ class ExtraController extends Controller
         ];
         $extra = AbsenceRequest::create($data);
         return redirect()->route('admin.extra.index');
+    }
+
+    public function show($id)
+    {
+        abort_unless(\Gate::allows('extra_access'), 403);
+        $extra = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+            ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+            ->where('absence_requests.id', $id)->first();
+
+        $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
+
+        // dd($extra, $file);
+        return view('admin.extra.show', compact('extra', 'file'));
     }
 
     public function edit($id)

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class AbsenceRequest extends Model
 {
@@ -24,4 +25,45 @@ class AbsenceRequest extends Model
         'attendance'
 
     ];
+
+    public function scopeFilterCategory($query, $category)
+    {
+        if ($category != '') {
+            $query->where('absence_requests.category', $category);
+        }
+        return $query;
+    }
+
+    public function scopeFilterStatus($query, $status)
+    {
+        if ($status != '') {
+            $query->where('absence_requests.status', $status);
+        }
+        return $query;
+    }
+
+    public function scopeFilterDate($query, $from, $to)
+    {
+        if (!empty(request()->input('from')) && !empty(request()->input('to'))) {
+            $from = request()->input('from');
+            $to =  request()->input('to');
+            // $from = '2021-09-01';
+            // $to = '2021-09-20';
+            //return $query->whereBetween('lock_action.created_at', [$from, $to]);
+            return $query->whereBetween(DB::raw('DATE(created_at)'), [$from, $to]);
+            // return $query->where('froms_id', $from);
+            // dd(request()->input('from'));
+
+        } else {
+            if (date('d') > 20) {
+                $from = date("Y-m-d", strtotime(date('Y-m') . "-21"));
+                $to = date("Y-m-d", strtotime('+1 month', strtotime(date('Y-m') . "-20")));
+            } else {
+                $from = date("Y-m-d", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
+                $to = date("Y-m-d", strtotime('0 month', strtotime(date('Y-m') . "-20")));
+            }
+
+            return $query->whereBetween(DB::raw('DATE(created_at)'), [$from, $to]);
+        }
+    }
 }
