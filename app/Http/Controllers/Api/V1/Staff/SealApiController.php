@@ -130,6 +130,7 @@ class SealApiController extends Controller
                     ->where('tblpelanggan.status', 1)
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                    ->having('jumlahtunggakan', '>', 1)
                     ->FilterStatusNew($request->status)
                     ->FilterKeyword($request->search)
                 // ->having('jumlahtunggakan', '>', '1')
@@ -142,6 +143,7 @@ class SealApiController extends Controller
                     ->where('tblpelanggan.status', 1)
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                     ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
+                    ->having('jumlahtunggakan', '>', 1)
                     ->FilterStatusNew($request->status)
                     ->FilterKeyword($request->search)
                 // ->having('jumlahtunggakan', '>', '1')
@@ -158,8 +160,6 @@ class SealApiController extends Controller
                     // 'data2' => $data,
                     'data3' => $staffPbk,
                     'user' => $user,
-                    'tes' => $tes,
-                    'data_area' => $data_area,
                 ]);
             }
         } catch (QueryException $ex) {

@@ -63,6 +63,7 @@ class actionWmApiController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->FilterKeyword($request->search)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             } else {
                 $proposal_wms = actionWmStaff::selectRaw('proposal_wms.status_wm,
@@ -92,6 +93,7 @@ class actionWmApiController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->FilterKeyword($request->search)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             }
         }
@@ -136,6 +138,7 @@ class actionWmApiController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->FilterKeyword($request->search)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             } else {
                 $proposal_wms = actionWmStaff::selectRaw('proposal_wms.status_wm,
@@ -168,6 +171,7 @@ class actionWmApiController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->FilterKeyword($request->search)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             }
         } else {
@@ -205,6 +209,7 @@ class actionWmApiController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->FilterKeyword($request->search)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             } else { {
                     $proposal_wms = actionWmStaff::selectRaw('proposal_wms.status_wm,
@@ -235,6 +240,7 @@ class actionWmApiController extends Controller
                         ->FilterStatus($request->status)
                         ->FilterStatusWM($request->statussm)
                         ->FilterAreas($request->areas)
+                        ->FilterKeyword($request->search)
                         ->FilterDate(request()->input('from'), request()->input('to'));
                 }
             }

@@ -14,6 +14,14 @@ class actionWmStaff extends Model
         'action_wm_id',
     ];
 
+    public function scopeFilterKeyword($query, $keyword)
+    {
+        if ($keyword != '') {
+            $query->where('tblpelanggan.nomorrekening', 'LIKE',  '%' . $keyword . '%')->orWhere('tblpelanggan.namapelanggan', 'LIKE',  '%' . $keyword . '%');
+        }
+        return $query;
+    }
+    
     public function scopeFilterStatusWM($query, $ststussm)
     {
         if ($ststussm != '') {
