@@ -175,7 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+	  Intervention\Image\ImageServiceProvider::class,
 
     ],
 
@@ -230,6 +230,7 @@ return [
         'Bugsnag'      => Bugsnag\BugsnagLaravel\Facades\Bugsnag::class,
         'Hashids'      => Vinkla\Hashids\Facades\Hashids::class,
         'PDF' => Barryvdh\DomPDF\Facade::class,
+	  'Image' => Intervention\Image\Facades\Image::class,
 
     ],
 

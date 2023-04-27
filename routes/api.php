@@ -256,6 +256,18 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('history', 'AbsenceApiController@history');
     Route::get('requests/listFile', 'RequestApiController@listFile');
     Route::get('requests/history', 'RequestApiController@history');
+
+    // admin start
+
+    Route::post('loginAdmin', 'UserApiController@loginAdmin');
+    Route::get('requests/requestApprove', 'RequestApiController@requestApprove');
+    Route::get('requests/show', 'RequestApiController@show');
+    Route::post('requests/approve', 'RequestApiController@approve');
+    Route::post('requests/reject', 'RequestApiController@reject');
+
+    // admin end
+
+    Route::get('historyExtra', 'AbsenceApiController@historyExtra');
     Route::delete('requests/imageDelete/{id}', 'RequestApiController@imageDelete');
     Route::get('absence/schedule', 'AbsenceApiController@schedule');
 
@@ -263,6 +275,8 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('requests/absenceList', 'RequestApiController@absenceList');
     Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
     Route::get('menu', 'MenuApiController@index');
+    Route::get('menu/graphic', 'MenuApiController@graphic');
+
     Route::get('shift', 'ShiftApiController@index');
     Route::get('shift/listChange', 'ShiftApiController@listChange');
     Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
@@ -286,6 +300,8 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::post('shift/update', 'ShiftApiController@update');
     Route::post('shift/approve', 'ShiftApiController@approve');
     Route::post('login', 'UserApiController@login');
+
+
     Route::post('user/update', 'UserApiController@update');
     Route::get('shift/myShift', 'ShiftApiController@myShift');
     Route::get('shiftChange', 'ShiftChangeApiController@index');
@@ -298,6 +314,15 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
 
     Route::get('holiday', 'AbsenceApiController@holiday');
 });
+
+// cronjob absen
+Route::group(['prefix' => 'close/cronjob', 'namespace' => 'Api\V1\CronJob'], function () {
+    Route::get('cronjob', 'AbsenceCronJobApiController@index');
+    Route::get('cronjob/problem', 'AbsenceCronJobApiController@problemRemainer');
+});
+
+
+
 
 // sementara
 Route::group(['prefix' => 'close/visit', 'namespace' => 'Api\V1\Visit'], function () {

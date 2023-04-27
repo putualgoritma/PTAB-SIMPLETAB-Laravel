@@ -17,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use App\Subdapertement;
 
 class TicketsController extends Controller
 {
@@ -30,7 +29,6 @@ class TicketsController extends Controller
         abort_unless(\Gate::allows('ticket_access'), 403);
 
         $departementlist = Dapertement::all();
-        $subdepartementlist = array();
 
         $ticket = Ticket::all();
 
@@ -43,7 +41,7 @@ class TicketsController extends Controller
         $staff = 0;
         $test_val = 0;
 
-        if (isset($user_id) && $user_id != '') {
+        if(isset($user_id) && $user_id != '') {
 
             $admin = User::with('roles')->find($user_id);
 
@@ -53,7 +51,7 @@ class TicketsController extends Controller
 
             $permission = json_decode($role->permissions->pluck('title'));
 
-            if (!in_array("ticket_all_access", $permission)) {
+            if(!in_array("ticket_all_access", $permission)) {
 
                 $department = $admin->dapertement_id;
 
@@ -61,7 +59,7 @@ class TicketsController extends Controller
 
                 $staff = $admin->staff_id;
 
-                $departementlist = Dapertement::where('id', $department)->get();                
+                $departementlist = Dapertement::where('id', $department)->get();
 
                 // ->get();
 
@@ -69,31 +67,29 @@ class TicketsController extends Controller
 
         }
 
-        if (Auth::user()->email == "pengamatmeter@ptab-vps.com") {
+        if(Auth::user()->email == "pengamatmeter@ptab-vps.com") {
 
             $department = $request->departement;
 
         }
 
-        if ($request->departement != "") {
+        if($request->departement != "") {
 
             $department = $request->departement;
 
         }
-        
-        if ($request->subdepartement != "") {
 
-            $subdepartement = $request->subdepartement;
+        if($request->subdepartement != "") {
 
-        }else{
-            $subdepartement = "";
+            $subdepartment = $request->subdepartement;
+
         }
 
         $statusn = ['pending', 'active', 'close'];
 
         // set query
 
-        if (Auth::user()->email == "pengamatmeter@ptab-vps.com") {
+        if(Auth::user()->email == "pengamatmeter@ptab-vps.com") {
 
             $test_val = 1;
             $departementlist = Dapertement::all();
@@ -115,14 +111,12 @@ class TicketsController extends Controller
                 ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
 
                 ->orderBy('created_at', 'DESC');
-        } else {
+        }else{
+        if($subdepartment == 0) {
             $test_val = 2;
-            $qry = Ticket::selectRaw('DISTINCT tickets.*')
-                ->FilterStatus(request()->input('status'))
+            $qry = Ticket::FilterStatus(request()->input('status'))            
 
                 ->FilterDepartment($department)
-                ->FilterStaff($staff)
-                ->FilterSubDepartment($subdepartement)                
 
                 ->with('department')
 
@@ -137,11 +131,99 @@ class TicketsController extends Controller
                 ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
 
                 ->orderBy('created_at', 'DESC');
-        }
+
+            // ->orderByRaw("case tickets.status when 'edit' then 1 when 'active' then 2 when 'pending' then close end")
+
+            // ->limit(3)
+
+            // ->get();
+
+        } else if($subdepartment > 0 && $staff > 0) {
+            $test_val = 3;
+
+            $qry = Ticket::selectRaw('DISTINCT tickets.*')
+
+                ->join('actions', function ($join) use ($subdepartment) {
+
+                    $join->on('actions.ticket_id', '=', 'tickets.id')
+
+                        ->where('actions.subdapertement_id', '=', $subdepartment);
+
+                })
+
+                ->join('action_staff', function ($join) use ($staff) {
+
+                    $join->on('action_staff.action_id', '=', 'actions.id')
+
+                        ->where('action_staff.staff_id', '=', $staff);
+
+                })
+
+                ->FilterJoinStatus(request()->input('status'))
+
+                ->with('department')
+
+                ->with('customer')
+
+                ->with('category')
+
+                ->with('ticket_image')
+
+                ->with('action')
+
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+
+                ->orderBy('created_at', 'DESC');
+
+            // ->limit(3)
+
+            // ->get();
+
+        } else {
+            $test_val = 4;
+            $qry = Ticket::selectRaw('DISTINCT tickets.*')
+
+                ->join('actions', function ($join) use ($subdepartment) {
+
+                    $join->on('actions.ticket_id', '=', 'tickets.id')
+
+                        ->where('actions.subdapertementk_id', '=', $subdepartment);
+
+                })
+
+                //->join('actions', 'actions.ticket9_id', '=', 'tickets.id')
+                ->FilterJoinStatus(request()->input('status'))
+
+                ->with('department')
+
+                ->with('customer')
+
+                ->with('category')
+
+                ->with('ticket_image')
+
+                ->with('action')
+                //->where('actions.subdapertementk_id', '=', $subdepartment)
+
+                ->orderBy(DB::raw("FIELD(tickets.status , \"pending\", \"active\", \"close\" )"))
+
+                ->orderBy('created_at', 'DESC');
+
+            // ->sortBy(function ($model) use ($statusn) {
+
+            //     return array_search($model->getKey(), $statusn);
+
+            // });
+
+            // ->limit(3)
+
+            // ->get();
+
+        }}
 
         // dd($qry);
 
-        if ($request->ajax()) {
+        if($request->ajax()) {
 
             $table = Datatables::of($qry);
 
@@ -221,7 +303,7 @@ class TicketsController extends Controller
 
             $table->editColumn('address', function ($row) {
 
-                if ($row->address != "") {
+                if($row->address != "") {
 
                     return $row->address != "" ? $row->address : "";
 
@@ -235,15 +317,15 @@ class TicketsController extends Controller
 
             $table->editColumn('status', function ($row) {
 
-                if ($row->print_report_status == "1") {
+                if($row->print_report_status == "1") {
 
                     return "close2";
 
-                } else if ($row->status == "pending" && count($row->action) > 0) {
+                } else if($row->status == "pending" && count($row->action) > 0) {
 
                     return "pending2";
 
-                } else if (Auth::user()->dapertement_id === 1 && $row->status == 'pending' && $row->dapertement_id > 1 && count($row->action) < 1) {
+                } else if(Auth::user()->dapertement_id === 1 && $row->status == 'pending' && $row->dapertement_id > 1 && count($row->action) < 1) {
 
                     return "pending2";
 
@@ -283,11 +365,7 @@ class TicketsController extends Controller
 
         //default view
         echo $test_val;
-        if($department>0){
-            $subdepartementlist = Subdapertement::where('dapertement_id', $department)->get();
-        }
-        //return $subdepartementlist;
-        return view('admin.tickets.index', compact('departementlist','subdepartementlist'));
+        return view('admin.tickets.index', compact('departementlist'));
 
     }
 
@@ -317,7 +395,7 @@ class TicketsController extends Controller
 
         // dd($customer_id);
 
-        if (count($customer_id) < 1) {
+        if(count($customer_id) < 1) {
 
             return back()->withError('No.SBG tidak ada !')->withInput();
 
@@ -331,7 +409,7 @@ class TicketsController extends Controller
 
             // upload image
 
-            if ($request->file('image')) {
+            if($request->file('image')) {
 
                 foreach ($request->file('image') as $key => $image) {
 
@@ -355,7 +433,7 @@ class TicketsController extends Controller
 
             // video
 
-            if ($request->file('video')) {
+            if($request->file('video')) {
 
                 $video_path = "/videos/complaint";
 
@@ -415,7 +493,7 @@ class TicketsController extends Controller
 
                 $ticket = Ticket::create($data);
 
-                if ($ticket) {
+                if($ticket) {
 
                     $upload_image = new Ticket_Image;
 
@@ -450,7 +528,7 @@ class TicketsController extends Controller
 
         $staffs = [];
 
-        if (!empty($ticket->action[0])) {
+        if(!empty($ticket->action[0])) {
 
             $subdapertement = $ticket->action[0]->subdapertement;
 
@@ -473,7 +551,7 @@ class TicketsController extends Controller
 
         $department = '';
 
-        if (isset($user_id) && $user_id != '') {
+        if(isset($user_id) && $user_id != '') {
 
             $admin = User::with('roles')->find($user_id);
 
@@ -483,7 +561,7 @@ class TicketsController extends Controller
 
             $permission = json_decode($role->permissions->pluck('title'));
 
-            if (!in_array("ticket_all_access", $permission)) {
+            if(!in_array("ticket_all_access", $permission)) {
 
                 $department = $admin->dapertement_id;
 
@@ -491,7 +569,7 @@ class TicketsController extends Controller
 
         }
 
-        if ($department != '') {
+        if($department != '') {
 
             $dapertements = Dapertement::where('id', $department)->get();
 
@@ -516,7 +594,7 @@ class TicketsController extends Controller
 
         // dd($customer_id);
 
-        if (count($customer_id) < 1) {
+        if(count($customer_id) < 1) {
 
             return back()->withError('No.SBG tidak ada !')->withInput();
 
@@ -524,7 +602,7 @@ class TicketsController extends Controller
 
             $data = $request->all();
 
-            if ($ticket->dapertement_id != $request->dapertement_id) {
+            if($ticket->dapertement_id != $request->dapertement_id) {
 
                 //set SPK
 
@@ -585,7 +663,7 @@ class TicketsController extends Controller
 
                     $file_path = $basepath . $img_name;
 
-                    if (trim($img_name) != '' && file_exists($file_path)) {
+                    if(trim($img_name) != '' && file_exists($file_path)) {
 
                         unlink($file_path);
 
@@ -667,7 +745,7 @@ class TicketsController extends Controller
 
         $staffs = [];
 
-        if (!empty($ticket->action[0])) {
+        if(!empty($ticket->action[0])) {
 
             $subdapertement = $ticket->action[0]->subdapertement;
 

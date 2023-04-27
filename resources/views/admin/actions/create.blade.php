@@ -44,6 +44,21 @@
                     </em>
                 @endif
             </div>
+
+            <div class="form-group {{ $errors->has('todo') ? 'has-error' : '' }}">
+                <label for="todo">Dikerjakan Oleh: *</label>
+                <select id="todo" name="todo" class="form-control" value="{{ old('todo', isset($user) ? $user->subdapertement : '') }}" required>
+                    <option value="">--Pilih Dikerjakan Oleh--</option>   
+                    <option value="Internal">Internal</option>  
+                    <option value="Pihak ke-3">Pihak ke-3</option>               
+                </select>
+                @if($errors->has('todo'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('todo') }}
+                    </em>
+                @endif
+            </div>
+
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

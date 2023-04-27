@@ -27,7 +27,7 @@ class Ticket extends Model
         'print_status',
         'print_spk_status',
         'print_report_status',
-        'creator'
+        'creator',
     ];
 
     public function dapertementReceive()
@@ -72,7 +72,6 @@ class Ticket extends Model
         return $query;
     }
 
-
     public function scopeFilterDepartment($query, $department)
     {
         if ($department != '') {
@@ -101,6 +100,28 @@ class Ticket extends Model
     {
         if ($subdepartment != '') {
             $query->where('actions.subdapertement_id', $subdepartment);
+        }
+        return $query;
+    }
+
+    public function scopeFilterSubDepartment($query, $subdepartment)
+    {
+        if ($subdepartment != '') {
+            $query->join('actions', function ($join) use ($subdepartment) {
+                $join->on('actions.ticket_id', '=', 'tickets.id')
+                    ->where('actions.subdapertement_id', '=', $subdepartment);
+            });
+        }
+        return $query;
+    }
+
+    public function scopeFilterStaff($query, $staff)
+    {
+        if ($staff != '') {
+            $query->join('action_staff', function ($join) use ($staff) {
+                $join->on('action_staff.action_id', '=', 'actions.id')
+                    ->where('action_staff.staff_id', '=', $staff);
+            });
         }
         return $query;
     }
