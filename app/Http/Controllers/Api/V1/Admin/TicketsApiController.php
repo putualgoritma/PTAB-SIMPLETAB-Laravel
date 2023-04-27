@@ -26,7 +26,7 @@ class TicketsApiController extends Controller
     use TraitModel;
     use WablasTrait;
 
-    public function tickets1(Request $request)
+    public function tickets(Request $request)
     {
         $department = '';
         $subdepartment = 0;

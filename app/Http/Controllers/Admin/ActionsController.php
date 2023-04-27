@@ -107,6 +107,7 @@ class ActionsController extends Controller
             'ticket_id' => $request->ticket_id,
             'start' => $dateNow,
             'subdapertement_id' => $request->subdapertement_id,
+            'todo' => $request->todo,
         );
 
         $action = Action::create($data);

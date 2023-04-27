@@ -84,6 +84,7 @@ class AbsenceCronJobApiController extends Controller
 
             if ($start < $time && $time < $end) {
                 $data1[] = ['name' => $reguler[$i]->name, 'time' => $reguler[$i]->time, '_id_onesignal' => $reguler[$i]->_id_onesignal];
+
             }
         }
 
@@ -105,6 +106,7 @@ class AbsenceCronJobApiController extends Controller
         for ($i = 0; $i < count($shift); $i++) {
             $time = date("Y-m-d H:i:s",  strtotime(date('Y-m-d ' . $shift[0]->time)));
 
+
             $start = date("Y-m-d H:i:s", strtotime('- ' . 300 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
             $end = date("Y-m-d H:i:s", strtotime('+ ' . 300 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
 
@@ -120,6 +122,7 @@ class AbsenceCronJobApiController extends Controller
                 OneSignal::sendNotificationToUser(
                     $message,
                     $data1[$n]['_id_onesignal'],
+
                     $url = null,
                     $data = null,
                     $buttons = null,
