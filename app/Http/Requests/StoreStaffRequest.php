@@ -27,7 +27,7 @@ class StoreStaffRequest extends FormRequest
             'code' => [
                 'required'
             ],
-            'name' =>[
+            'name' => [
                 'required'
             ],
             'phone' => [

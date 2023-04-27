@@ -433,6 +433,7 @@ class ReportsController extends Controller
         $proposalWm = proposalWms::selectRaw('tblopp.operator as operator,
         proposal_wms.code,
         proposal_wms.queue,
+        proposal_wms.close_queue,
         proposal_wms.customer_id,
         proposal_wms.status,
         proposal_wms.status_wm,
@@ -450,7 +451,7 @@ class ReportsController extends Controller
             ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
             ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
             ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
-        // ->where('proposal_wms.created_at', 'like', date('Y-m-1', strtotime('-1 month', strtotime($request->monthyear))) . '%')
+            // ->where('proposal_wms.created_at', 'like', date('Y-m-1', strtotime('-1 month', strtotime($request->monthyear))) . '%')
             ->where('tblopp.status', '=', '1')
             ->FilterAreas($request->areas);
         // ->where('proposal_wms.status', 'close');
@@ -487,7 +488,9 @@ class ReportsController extends Controller
             }
 
             $proposalWm->where('tblwilayah.group_unit', $group_unit);
-            $proposalWm = $proposalWm->get();
+            // $proposalWm = $proposalWm->get();
+            $proposalWm = $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
+
             // dd($proposalWm);
             // dd($proposalWm->get());
             // else {
@@ -622,12 +625,22 @@ class ReportsController extends Controller
         action_wm_staff.created_at as dikeluarkan
         ')
             ->rightJoin('proposal_wms', 'action_wms.proposal_wm_id', '=', 'proposal_wms.id')
-            ->join('action_wm_staff', 'action_wm_staff.action_wm_id', '=', 'action_wms.id')
+
             ->leftJoin('subdapertements', 'subdapertements.id', '=', 'action_wms.subdapertement_id')
             ->join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
             ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
-            ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
-        // ->where('proposal_wms.created_at', 'like', date('Y-m-1', strtotime('-1 month', strtotime($request->monthyear))) . '%')
+            ->leftJoin('action_wm_staff', 'action_wm_staff.action_wm_id', '=', 'action_wms.id')
+            // ->where('proposal_wms.created_at', 'like', $request->monthyear . '%')
+            //  ->whereBetween('proposal_wms.created_at', [date('Y-m-01', strtotime('0 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('0 month', strtotime($request->monthyear)))])
+            // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('1 month', strtotime($request->monthyear)))])
+            // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime($request->monthyear))), date('Y-m-20', strtotime('1 month', strtotime($request->monthyear)))])
+            // ->whereMonth('proposal_wms.created_at', '=', date('m', strtotime('0 month', strtotime($request->monthyear))))
+            // ->whereYear('proposal_wms.created_at', '=', date('Y', strtotime('0 month', strtotime($request->monthyear))))
+
+
+            // ->where('action_wm_staff.created_at', 'like', date('Y-m', strtotime('0 month', strtotime($request->monthyear))) . '%')
+            ->where('action_wms.created_at', 'like', date('Y-m', strtotime('0 month', strtotime($request->monthyear))) . '%')
+
             ->where('proposal_wms.status', 'close')
             ->FilterAreas($request->areas);
 

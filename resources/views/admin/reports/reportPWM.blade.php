@@ -97,6 +97,7 @@
         <table class="table">
         <tr>
             <th>NO.</th>
+            <th>KODE</th>
             <th>NO.SBG.</th>            
             <th>NAMA PELANGGAN</th>
             <th>ALAMAT</th>
@@ -111,6 +112,7 @@
         @foreach ($proposalWm as $d1)
         <tr>
             <td class="text-center"><?php echo "".$no?></td>
+            <td >{{ $d1->close_queue }}{{ $d1->code }}</td>
             <td>{{ $d1->nomorrekening }}</td>
             
             <td>{{ $d1->namapelanggan }}</td>

@@ -72,6 +72,7 @@ class ShiftPlannerStaffController extends Controller
         //     ->FilterWorkUnit($ShiftGroup->work_unit_id)
         //     // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
         //     ->get();
+        // // $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
         // $data = ShiftPlannerStaffs::select('shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
         //     ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
         //     ->join('shift_parents', 'shift_parents.id', '=', 'shift_groups.shift_parent_id')
@@ -80,7 +81,7 @@ class ShiftPlannerStaffController extends Controller
         //     ->where('shift_parents.id', $request->id)
         //     ->FilterJob($shift_parent->job_id)
         //     ->FilterWorkUnit($shift_parent->work_unit_id)
-        //     // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
+        //     ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
         //     ->get();
         // dd($data);
 
@@ -96,6 +97,7 @@ class ShiftPlannerStaffController extends Controller
                 ->where('shift_parents.id', $request->id)
                 ->FilterJob($shift_parent->job_id)
                 ->FilterWorkUnit($shift_parent->work_unit_id)
+                ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
                 // ->where('shift_groups.job_id', '=', $ShiftGroup->job_id)
                 ->get();
             // } else if ($ShiftGroup->work_unit_id != "") {
@@ -127,7 +129,8 @@ class ShiftPlannerStaffController extends Controller
             return response()->json($data);
         }
         $pgw = Staff::FilterJob($shift_parent->job_id)
-            ->FilterWorkUnit($shift_parent->work_unit_id)->get();
+            ->FilterWorkUnit($shift_parent->work_unit_id)
+            ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)->get();
         $sg = ShiftGroups::where('shift_parent_id', $request->id)->get();
         $id = $shift_parent->job_id;
 
@@ -164,15 +167,16 @@ class ShiftPlannerStaffController extends Controller
             $data = [];
             $staff = "";
 
-            $requests = ShiftPlannerStaffs::select('shift_groups.job_id', 'shift_parent_id', 'shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
+            $requests = ShiftPlannerStaffs::select('shift_groups.job_id', 'shift_parent_id', 'shift_planner_staffs.staff_id', 'shift_planner_staffs.id', 'start', 'end', DB::raw("CONCAT(shift_groups.title,'-',staffs.name) as title"))
                 ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
                 ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
                 ->where('shift_planner_staffs.id', $request->id)->first();
             $shift_parent = ShiftParent::where('id', $requests->shift_parent_id)->first();
-            $pgw = Staff::FilterJob($shift_parent->job_id)
-                ->FilterWorkUnit($shift_parent->work_unit_id)->get();
+            $pgw = Staff::select('staffs.*')->FilterJob($shift_parent->job_id)
+                ->FilterWorkUnit($shift_parent->work_unit_id)
+                ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)->get();
             foreach ($pgw as $value) {
-                if ($requests->user_id === $value->id) {
+                if ($requests->staff_id == $value->id) {
                     $select = "selected";
                 } else {
                     $select = "";

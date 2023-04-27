@@ -50,6 +50,9 @@
                             No.
                         </th>
                         <th>
+                            {{ trans('global.staff.fields.NIK') }}
+                        </th>
+                        <th>
                             {{ trans('global.staff.fields.code') }}
                         </th>
                         <th>
@@ -64,6 +67,7 @@
                         <th>
                             {{ trans('global.staff.fields.phone') }}
                         </th>
+                    
                         <th>
                             &nbsp;
                         </th>
@@ -136,11 +140,13 @@
     columns: [
         { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no' },
+        { data: 'NIK', name: 'NIK' },
         { data: 'code', name: 'code' },
         { data: 'name', name: 'name' },
         { data: 'dapertement', name: 'dapertement' },
         { data: 'subdapertement', name: 'subdapertement' },
         { data: 'phone', name: 'phone' },
+      
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     order: [[ 2, 'asc' ]],

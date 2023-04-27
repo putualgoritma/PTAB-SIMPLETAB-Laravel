@@ -95,6 +95,9 @@
             </p>
         </div>
 
+        <div id="center"></div>
+        {{-- <div id="radius"></div> --}}
+        <div id="map"></div>
 
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
@@ -111,69 +114,20 @@
 
 <script type="text/javascript">
 
-
 function initMap() {
-    var cityCircle = [];
-if (navigator.geolocation) {
-navigator.geolocation.getCurrentPosition(showPosition);
+  // Create the map.
+  const lat = parseFloat(document.getElementById("lat").value)
+      const lng = parseFloat(document.getElementById("lng").value)
+      console.log(lng,lat)
+      const myLatlng = { lat: lat, lng: lng };
+  const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 4,
+    center: myLatlng,
+    mapTypeId: 'hybrid',
+  });
+  map.circles = [];
 
-} else {
-x.innerHTML = "Geolocation is not supported by this browser.";
-// const myLatlng = { lat: -8.459556, lng: 115.046600 };
-
-}
-function showPosition(position) {
-      console.log(position.coords.latitude)
-      const myLatlng = { lat: position.coords.latitude, lng: position.coords.longitude };
-
-      const map = new google.maps.Map(document.getElementById("map"), {
-zoom: 14,
-center: myLatlng,
-});
-
-function addCircle(location) {    
-  // Add the circle for this city to the map.    
-    cityCircle = new google.maps.Circle({    
-      strokeColor: '#FF0000',    
-      strokeOpacity: 0.8,    
-      strokeWeight: 2,    
-      fillColor: '#FF0000',    
-      fillOpacity: 0.35,    
-      map: map,    
-      center: location,    
-      radius: parseFloat(document.getElementById("radius").value),  
-      draggable:false  
-    });  
-} 
-
-// const input = document.getElementById("pac-input") as HTMLInputElement;
-// const searchBox = new google.maps.places.SearchBox(input);
-
-// Create the initial InfoWindow.
-// let infoWindow = new google.maps.InfoWindow({
-// content: "Posisi anda sekarang",
-// position: myLatlng,
-// });
-
-// infoWindow.open(map);
-// Configure the click listener.
-// map.addListener("click", (mapsMouseEvent) => {
-// document.getElementById("lat").value = mapsMouseEvent.latLng.toJSON().lat;
-// document.getElementById("lng").value = mapsMouseEvent.latLng.toJSON().lng;
-// // console.log(mapsMouseEvent.latLng.toJSON().lat);
-// // Close the current InfoWindow.
-// infoWindow.close();
-// // Create a new InfoWindow.
-// infoWindow = new google.maps.InfoWindow({
-//   position: mapsMouseEvent.latLng,
-// });
-// infoWindow.setContent(
-//   JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
-// );
-// infoWindow.open(map);
-// });
-
-
+// search start
 
  // Create the search box and link it to the UI element.
  const input = document.getElementById("pac-input");
@@ -185,10 +139,7 @@ function addCircle(location) {
     searchBox.setBounds(map.getBounds());
   });
 
-  let markers = [];
 
-  // Listen for the event fired when the user selects a prediction and retrieve
-  // more details for that place.
   searchBox.addListener("places_changed", () => {
     const places = searchBox.getPlaces();
 
@@ -196,15 +147,8 @@ function addCircle(location) {
       return;
     }
 
-    // Clear out the old markers.
-    markers.forEach((marker) => {
-      marker.setMap(null);
-    });
-    markers = [];
 
-    // marker.setMap(null);
 
-    // For each place, get the icon, name and location.
     const bounds = new google.maps.LatLngBounds();
 
     places.forEach((place) => {
@@ -212,34 +156,20 @@ function addCircle(location) {
         console.log("Returned place contains no geometry");
         return;
       }
-console.log('sss',place.geometry.location.lat())
-
-// if (marker && marker.setMap) {
-//                     marker.setMap(null);
-//                 }
-
-// hideMarkers();
-
-
-// const marker = new google.maps.Marker({
-//     position: {lat : place.geometry.location.lat(), lng : place.geometry.location.lng()},
-//     map: map,
-//     draggable:true,
-// });
-marker.setPosition({lat : place.geometry.location.lat(), lng : place.geometry.location.lng()});
-
-const d = {lat : place.geometry.location.lat(), lng : place.geometry.location.lng()} 
-                if (cityCircle && cityCircle.setMap) {
-                    cityCircle.setMap(null);
-                }
-               
-                addCircle(d)
-
-document.getElementById("lat").value = place.geometry.location.lat();
-                document.getElementById("lng").value = place.geometry.location.lng();
-// marker.setMap(null);
-
-console.log('tess marker', marker)
+      marker.setPosition({lat : place.geometry.location.lat(), lng : place.geometry.location.lng()})
+      console.log('tfddfd', place.geometry.location.lat(), place.geometry.location.lng())
+      marker.Circle.bindTo('center', marker, 'position');
+  marker.Circle.addListener('center_changed', function() {
+    // document.getElementById('center').innerHTML = "center=" + marker.getPosition().toUrlValue(6);
+    console.log(place.geometry.location.lat())
+    document.getElementById('lat').value = place.geometry.location.lat();
+    document.getElementById('lng').value = place.geometry.location.lng();
+  });
+  marker.Circle.addListener('radius_changed', function() {
+    // document.getElementById('radius').innerHTML = "radius=" + marker.Circle.getRadius().toFixed(2);
+    document.getElementById("radius").value = marker.Circle.getRadius().toFixed(0)
+    console.log(marker.Circle.getRadius().toFixed(2))
+  })
 // marker = [];
 
       const icon = {
@@ -271,72 +201,48 @@ console.log('tess marker', marker)
     map.fitBounds(bounds);
   });
 
+// search end
 
-const marker = new google.maps.Marker({
-  position: myLatlng,
-  map: map,
-   draggable:true,
-});
 
-                if (cityCircle && cityCircle.setMap) {
-                    cityCircle.setMap(null);
-                }
-               
-                addCircle(myLatlng)
-
-// marker.setMap(null);
-
-google.maps.event.addListener(marker, 'dragend', function() 
-{
-    geocodePosition(marker.getPosition());
-});
-
-radius.addEventListener("input", function (e) {
-     cityCircle.setRadius(parseFloat(document.getElementById("radius").value))
+  radius.addEventListener("input", function (e) {
+    marker.Circle.setRadius(parseFloat(document.getElementById("radius").value))
     // alert('tess')
 });
 
-function geocodePosition(pos) 
-{
-   geocoder = new google.maps.Geocoder();
-   geocoder.geocode
-    ({
-        latLng: pos
-    }, 
-        function(results, status) 
-        {
-            if (status == google.maps.GeocoderStatus.OK) 
-            {
-                console.log(results[0].geometry.location.lat())
-                document.getElementById("lat").value = results[0].geometry.location.lat();
-                document.getElementById("lng").value = results[0].geometry.location.lng();
-                
-                const d = {lat :results[0].geometry.location.lat(), lng : results[0].geometry.location.lng()} 
-                if (cityCircle && cityCircle.setMap) {
-                    cityCircle.setMap(null);
-                }
-               
-                addCircle(d)
-               
-                console.log(cityCircle)
-                // $("#mapSearchInput").val(myLatln);
-                // $("#mapErrorMsg").hide(100);
-            } 
-            else 
-            {
-                $("#mapErrorMsg").html('Cannot determine address at this location.'+status).show(100);
-            }
-        }
-    );
+  let marker = new google.maps.Marker({
+    position: map.getCenter(),
+    label: "Pusat",
+    map: map,
+    draggable: true
+  });
+  console.log('kkk',marker.position.lat())
+  marker.Circle = new google.maps.Circle({
+    center: marker.getPosition(),
+    strokeColor: '#FF0000',    
+      strokeOpacity: 0.8,    
+      strokeWeight: 2,    
+      fillColor: '#FF0000',    
+      fillOpacity: 0.35,  
+    radius: parseFloat(document.getElementById("radius").value),
+    map: map,
+    editable: true
+  })
+  marker.Circle.bindTo('center', marker, 'position');
+  marker.Circle.addListener('center_changed', function() {
+    // document.getElementById('center').innerHTML = "center=" + marker.getPosition().toUrlValue(6);
+    console.log(marker.position.lat())
+    document.getElementById('lat').value = marker.position.lat();
+    document.getElementById('lng').value = marker.position.lng();
+  });
+  marker.Circle.addListener('radius_changed', function() {
+    document.getElementById('radius').innerHTML = "radius=" + marker.Circle.getRadius().toFixed(2);
+    console.log(marker.Circle.getRadius().toFixed(2))
+  })
+
+
+  map.circles.push(marker)
+  map.fitBounds(marker.Circle.getBounds())
 }
-
-
-}
-// x.innerHTML = "Latitude: " + position.coords.latitude + 
-// "<br>Longitude: " + position.coords.longitude;
-}
-
-
 
 </script>
 

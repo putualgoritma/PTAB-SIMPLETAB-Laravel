@@ -62,7 +62,19 @@ class StatusWmController extends Controller
                     // ->orWhere('statussm', 102)->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
                     ->where('statussm', '<=', 103)
                     ->where('statussm', '>=', 101)
-                    ->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    ->where(function ($query) use ($request) {
+                        //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                        $query->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
+                            ->orWhere('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    })
+                    ->orderBy('tahun', 'DESC')
+                    ->orderBy('bulan', 'DESC');
+
+                // dd('tesss');
                 // ->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))
                 // ->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))
             } else {
@@ -77,7 +89,18 @@ class StatusWmController extends Controller
                         $join->on('proposal_wms.year', '=', 'tblstatussmpelanggan.tahun');
                     })
                     ->where('statussm', '<=', 103)
-                    ->where('statussm', '>=', 101);
+                    ->where('statussm', '>=', 101)
+                    ->where(function ($query) use ($request) {
+                        //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                        $query->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
+                            ->orWhere('tahun', date('Y', strtotime('+1 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('+1 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    })
+                    ->orderBy('tahun', 'DESC')
+                    ->orderBy('bulan', 'DESC');
                 // ->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
                 // ->orWhere('statussm', 102)->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
                 // ->orWhere('statussm', 103)->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
@@ -105,8 +128,19 @@ class StatusWmController extends Controller
                     ->where('tblwilayah.group_unit', $group_unit)
                     ->where('statussm', '<=', 103)
                     ->where('statussm', '>=', 101)
-                    ->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))
-                    ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    ->where(function ($query) use ($request) {
+                        //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                        $query->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
+                            ->orWhere('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    })
+                    ->orderBy('tahun', 'DESC')
+                    ->orderBy('bulan', 'DESC');
+                // ->where('tahun', date('Y', strtotime('-1 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('-1 month', strtotime(date('Y-m-d')))))
+                // ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
             } else {
 
                 // $cek = proposalWms::join('ptabroot_ctm.tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'proposal_wms.customer_id')
@@ -125,8 +159,19 @@ class StatusWmController extends Controller
                     ->where('tblwilayah.group_unit', $group_unit)
                     ->where('statussm', '<=', 103)
                     ->where('statussm', '>=', 101)
-                    ->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
-                    ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    ->where(function ($query) use ($request) {
+                        //$query->where('tblpelanggan.idareal', $data[0]->area_id);
+                        $query->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
+                            ->orWhere('tahun', date('Y', strtotime('+1 month', strtotime(date('Y-m-d')))))
+                            ->where('bulan', date('m', strtotime('+1 month', strtotime(date('Y-m-d')))))
+                            ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
+                    })
+                    ->orderBy('tahun', 'DESC')
+                    ->orderBy('bulan', 'DESC');
+                // ->where('tahun', date('Y', strtotime('0 month', strtotime(date('Y-m-d')))))->where('bulan', date('m', strtotime('0 month', strtotime(date('Y-m-d')))))->FilterStatusWM($request->statussm)->FilterAreas($request->areas)
+                // ->FilterStatusWM($request->statussm)->FilterAreas($request->areas);
             }
 
             // $data = CtmWilayah::select('id as code', 'NamaWilayah')->where('group_unit', $group_unit)->get();

@@ -29,8 +29,6 @@ class WorkTypeController extends Controller
 
         $code = acc_code_generate($last_code, 8, 3);
 
-
-
         return view('admin.work_type.create', compact('code'));
     }
     public function store(Request $request)

@@ -12,20 +12,62 @@ use App\MessageLog;
 use App\Requests;
 use App\Requests_file;
 use App\Staff;
+use OneSignal;
+use App\Traits\WablasTrait;
+use App\wa_history;
 use App\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
+    use WablasTrait;
     public function index(Request $request)
     {
+        // $start = date('Y-m-d');
+        // $end = date('Y-m-d');
+        // $cek = AbsenceRequest::where('staff_id', '404')
+        //     ->where(function ($query) use ($start, $end) {
+        //         $query->where('category', 'visit')
+        //             ->orWhere('category', 'visit')
+        //             ->orWhere('category', 'leave')
+        //             ->orWhere('category', 'permission')
+        //             ->orWhere('category', 'extra')
+        //             ->orWhere('category', 'geolocation_off')
+        //             ->orWhere('category', 'excuse');
 
+        //         // ->orWhere('status', 'close');
+        //     })
+        //     ->where(function ($query)  use ($start, $end) {
+        //         $query->where(DB::raw('DATE(absence_requests.start)'), '<=', $start)
+        //             ->where(DB::raw('DATE(absence_requests.end)'), '>=', $end)
+        //             ->where(function ($query)  use ($start, $end) {
+        //                 $query->where('status', '=', 'active')
+        //                     ->orWhere('status', '=', 'pending')
+        //                     ->orWhere('status', '=', 'approve');
+        //                 // ->orWhere('status', 'close');
+        //             })
+        //             ->orWhere(DB::raw('DATE(absence_requests.start)'), '<=', $end)
+        //             ->where(DB::raw('DATE(absence_requests.end)'), '>=', $start)
+        //             ->where(function ($query)  use ($start, $end) {
+        //                 $query->where('status', '=', 'active')
+        //                     ->orWhere('status', '=', 'pending')
+        //                     ->orWhere('status', '=', 'approve');
+        //                 // ->orWhere('status', 'close');
+        //             });
+        //         // ->orWhere('status', 'close');
+        //     })
+
+        //     ->first();
+        // dd($cek);
         abort_unless(\Gate::allows('leave_access'), 403);
         $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'leave')
             ->FilterStatus($request->status)
-            ->orderBy('absence_requests.created_at', 'DESC');
+            ->FilterDateStart($request->from, $request->to);
+        // ->orderBy('staffs.NIK')
+        // ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
             //set query
@@ -154,12 +196,72 @@ class LeaveController extends Controller
             ->update(['status' => 'reject']);
 
         $d = AbsenceRequest::where('id', $id)->first();
+
+        $absenceLog = AbsenceLog::where('absence_request_id', $id)->get();
+        foreach ($absenceLog as $d) {
+            $deleteAbsence = Absence::where('id', $d->id)->first();
+            if ($deleteAbsence) {
+                Absence::where('id', $d->id)->delete();
+            }
+        }
+        AbsenceLog::where('absence_request_id', $id)->delete();
+        $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "permisi anda tanggal " . $d->start . " disetujui",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
+
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // untuk notif end
 
         return redirect()->back();
     }
@@ -174,12 +276,12 @@ class LeaveController extends Controller
         // buat absence log start
 
         $absenceRequest =  AbsenceRequest::where('id', $id)->first();
-
+        $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
         if (date('Y-m-d') > $absenceRequest->start) {
             $begin = strtotime($absenceRequest->start);
             $end   = strtotime($absenceRequest->end);
 
-            for ($i = $begin; $i < $end; $i = $i + 86400) {
+            for ($i = $begin; $i <= $end; $i = $i + 86400) {
                 $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
                 if (!$holiday) {
                     if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
@@ -210,10 +312,61 @@ class LeaveController extends Controller
 
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "permisi anda tanggal " . $d->start . " disetujui",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
+
+
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // untuk notif end
 
         return redirect()->back();
     }

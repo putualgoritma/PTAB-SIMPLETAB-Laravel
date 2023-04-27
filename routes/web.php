@@ -9,7 +9,15 @@ Route::redirect('/home', '/admin');
 
 Auth::routes(['register' => false]);
 
+
+
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
+
+    Route::get('watermark', 'AddImageController@index');
+
+    Route::post('add-watermark', 'AddImageController@imageFileUpload')->name('image.watermark');
+
+
     Route::get('/', 'HomeController@index')->name('home');
 
     Route::post('permissions/destroy', 'PermissionsController@massDestroy')->name('permissions.massDestroy');
@@ -327,7 +335,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // sementara
     Route::get('actions/ubahData', 'ActionsController@ubahData')->name('actions.ubahData');
-
+    Route::delete('staffSpecials/destroy', 'StaffSpecialController@massDestroy')->name('staffSpecials.massDestroy');
+    Route::resource('staffSpecials', 'StaffSpecialController');
 
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
@@ -419,6 +428,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::post('workPermit/{id}/approve', 'WorkPermitController@approve')->name('workPermit.approve');
     Route::post('workPermit/{id}/reject', 'WorkPermitController@reject')->name('workPermit.reject');
+    Route::post('workPermit/{id}/sickProof', 'WorkPermitController@sickProof')->name('workPermit.sickProof');
+
     Route::resource('workPermit', 'WorkPermitController');
 
     Route::post('extra/{id}/approve', 'ExtraController@approve')->name('extra.approve');
@@ -434,8 +445,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('geolocation_off', 'GeolocationOffController');
 
 
+    Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
+    Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
 
     Route::get('cronjob', 'CronJobController@index');
+    Route::get('cronjob/problem', 'CronJobController@problemRemainer');
+    Route::post('gawatdarurat/import', 'GawatDaruratController@import')->name('gawatdarurat.import');
+    Route::get('gawatdarurat', 'GawatDaruratController@index');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

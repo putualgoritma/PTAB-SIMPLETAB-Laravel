@@ -8,12 +8,17 @@ use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
 use App\Staff;
+use OneSignal;
+use App\Traits\WablasTrait;
+use App\wa_history;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class DutyController extends Controller
 {
+    use WablasTrait;
     public function index(Request $request)
     {
 
@@ -25,7 +30,10 @@ class DutyController extends Controller
                     ->orWhere('absence_requests.category', 'visit');
             })
             ->FilterCategory($request->category)->FilterStatus($request->status)
-            ->FilterCategory($request->category)->FilterStatus($request->status);
+            ->FilterCategory($request->category)->FilterStatus($request->status)
+            ->FilterDateStart($request->from, $request->to);
+        // ->orderBy('staffs.NIK');
+        // ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
             //set query
@@ -147,29 +155,134 @@ class DutyController extends Controller
             ->update(['status' => 'reject']);
 
         $d = AbsenceRequest::where('id', $id)->first();
+        $message = "Dinas anda tanggal " . $d->start . " sampai dengan " . $d->end . " ditolak";
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "Dinas Luar anda tanggal " . $d->start . " sampai dengan " . $d->end . " ditolak",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // untuk notif end
 
 
         return redirect()->route('admin.duty.index');
     }
     public function approve($id)
     {
+        // $d = AbsenceRequest::where('id', $id)->first();
+        // $test = User::where('staff_id', $d->staff_id)->first();
+        // $test2 = User::where('dapertement_id', $test->dapertement_id)->first();
+        // dd($test2);
         abort_unless(\Gate::allows('duty_edit'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
 
         $d = AbsenceRequest::where('id', $id)->first();
+        $message = "Dinas anda tanggal " . $d->start . " sampai dengan " . $d->end . " Disetujui";
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "Dinas Luar anda tanggal " . $d->start . " ditolak",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
+
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // untuk notif end
 
 
         return redirect()->back();

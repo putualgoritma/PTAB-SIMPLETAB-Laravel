@@ -47,7 +47,7 @@ class AbsenceCronJobApiController extends Controller
         //     ->first();
 
         // dd($cek);
-        $data = [];
+        $data1 = [];
         if (date('w') == '0') {
             $day = '7';
         } else {
@@ -83,7 +83,8 @@ class AbsenceCronJobApiController extends Controller
             // dd($start, $end, $time);
 
             if ($start < $time && $time < $end) {
-                $data[] = ['name' => $reguler[0]->name, 'time' => $reguler[0]->time, '_id_onesignal' => $reguler[0]->_id_onesignal];
+                $data1[] = ['name' => $reguler[$i]->name, 'time' => $reguler[$i]->time, '_id_onesignal' => $reguler[$i]->_id_onesignal];
+
             }
         }
 
@@ -105,21 +106,23 @@ class AbsenceCronJobApiController extends Controller
         for ($i = 0; $i < count($shift); $i++) {
             $time = date("Y-m-d H:i:s",  strtotime(date('Y-m-d ' . $shift[0]->time)));
 
-            $start = date("Y-m-d H:i:s", strtotime('- ' . 2 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
-            $end = date("Y-m-d H:i:s", strtotime('+ ' . 3 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
+
+            $start = date("Y-m-d H:i:s", strtotime('- ' . 300 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
+            $end = date("Y-m-d H:i:s", strtotime('+ ' . 300 . ' minutes', strtotime(date('Y-m-d H:i:s'))));
 
             if ($start < $time && $time < $end) {
-                $data[] = ['name' => $shift[0]->name, 'time' => $shift[0]->time, '_id_onesignal' => $shift[0]->_id_onesignal];
+                $data1[] = ['name' => $shift[$i]->name, 'time' => $shift[$i]->time, '_id_onesignal' => $shift[$i]->_id_onesignal];
             }
         }
         // dd($shift);
-        // dd($data);
-        for ($n = 0; $n < count($data); $n++) {
-            $message = $data[$n]['name'] . " jangan lupa absen";
-            if (!empty($data[$n]['_id_onesignal'])) {
+        // dd(count($data));
+        for ($n = 0; $n < count($data1); $n++) {
+            $message = $data1[$n]['name'] . " jangan lupa absen";
+            if (!empty($data1[$n]['_id_onesignal'])) {
                 OneSignal::sendNotificationToUser(
                     $message,
-                    $data[$n]['_id_onesignal'],
+                    $data1[$n]['_id_onesignal'],
+
                     $url = null,
                     $data = null,
                     $buttons = null,

@@ -15,12 +15,13 @@ class MessageLog extends Model
         'type',
         'status',
         'lat',
-        'lng'
+        'lng',
+        'created_at',
     ];
 
     public function getCreatedAtAttribute()
     {
-        $timeStamp = date("Y-m-d h:i:s", strtotime($this->attributes['created_at']));
+        $timeStamp = date("Y-m-d H:i:s", strtotime($this->attributes['created_at']));
         return $timeStamp;
     }
 }

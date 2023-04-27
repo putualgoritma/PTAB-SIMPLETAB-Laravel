@@ -30,7 +30,7 @@ class UpdateStaffRequest extends FormRequest
             'name' => [
                 'required'
             ],
-            'phone' =>[
+            'phone' => [
                 'required'
             ],
             'dapertement_id' => [

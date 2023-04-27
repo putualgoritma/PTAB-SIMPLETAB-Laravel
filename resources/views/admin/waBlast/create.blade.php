@@ -19,6 +19,8 @@
                 <label for="message">Pesan</label>
                 {{-- sementara --}}
                 <input type="hidden" value="{{ $data['template_id'] }}" name="template_id">
+                <input type="hidden" value="{{ $file }}" name="file">
+                <input type="hidden" value="{{ $image }}" name="image">
                 <textarea class="form-control" name="message" id="message" rows="3">{{ $data['message'] }} </textarea>
               </div>
               {{-- table bantu --}}
@@ -157,7 +159,7 @@
                  
                     <li class="page-item"><a class="page-link" href="#">2</a></li>
                   </nav> --}}
-                  {{ $customers->appends(['message' => $data['message'],'takeData'=>$takeData, 'area'=>request()->input('area')])->links() }}
+                  {{ $customers->appends(['message' => $data['message'],'takeData'=>$takeData, 'area'=>request()->input('area'), 'file' => request()->input('file'), 'image' =>request()->input('image')])->links() }}
                 <input class="btn btn-danger" name="send" type="submit">
             </div>
         </form>

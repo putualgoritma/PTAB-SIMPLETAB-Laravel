@@ -77,7 +77,7 @@
 
             <div class="form-group {{ $errors->has('work_unit') ? 'has-error' : '' }}">
                 <label for="work_unit_id">{{ trans('global.staff.fields.work_unit') }}*</label>
-                <select id="work_unit_id" name="work_unit_id" class="form-control" value="{{ old('work_unit', isset($customer) ? $customer->work_unit : '') }}">
+                <select id="work_unit_id" name="work_unit_id" class="form-control" value="{{ old('work_unit', isset($customer) ? $customer->work_unit : '') }}" required>
                     <option value="">--Pilih work_unit--</option>
                     @foreach ($work_units as $key=>$work_unit )
                         <option value="{{$work_unit->id}}" {{$work_unit->id == $staff->work_unit_id ? 'selected' : ''}} >{{$work_unit->name}}</option>
@@ -106,8 +106,8 @@
             </div>
 
             <div class="form-group {{ $errors->has('work_type_id') ? 'has-error' : '' }}">
-                <label for="work_type_id">{{ trans('global.staff.fields.work_type') }}*</label>
-                <select id="work_type_id" name="work_type_id" class="form-control" value="{{ old('work_type_id', isset($customer) ? $customer->work_unit : '') }}">
+                <label for="work_type_id">Work Type*</label>
+                <select id="work_type_id" name="work_type_id" class="form-control" value="{{ old('work_type_id', isset($customer) ? $customer->work_unit : '') }}" required>
                     <option value="">--Pilih work_type--</option>
                     @foreach ($work_types as $key=>$work_type )
                         <option value="{{$work_type->id}}" {{$work_type->id == $staff->work_type_id ? 'selected' : ''}}>{{$work_type->title}}</option>
@@ -134,6 +134,37 @@
                 @endif
             </div>
 
+            <div class="form-group {{ $errors->has('fingerprint') ? 'has-error' : '' }}">
+                <label for="fingerprint">Fingerprint*</label>
+                <select id="fingerprint" name="fingerprint" class="form-control" value="{{ old('fingerprint', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih Status--</option>
+                    {{-- @foreach ($jobs as $key=>$job ) --}}
+                        <option value="ON" {{$staff->fingerprint == "ON" ? 'selected' : ''}}>ON</option>
+                        <option value="OFF" {{$staff->fingerprint == "OFF" ? 'selected' : ''}}>OFF</option>
+                        {{-- @endforeach --}}
+                </select>
+                @if($errors->has('fingerprint'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('fingerprint') }}
+                    </em>
+                @endif
+            </div>
+
+            {{-- <div class="form-group {{ $errors->has('selfie') ? 'has-error' : '' }}">
+                <label for="selfie">{{ trans('global.staff.fields.job') }}*</label>
+                <select id="selfie" name="selfie" class="form-control" value="{{ old('selfie', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih Status--</option>
+                        <option value="ON" {{$staff->selfie == "ON" ? 'selected' : ''}}>ON</option>
+                        <option value="OFF" {{$staff->selfie == "OFF" ? 'selected' : ''}}>OFF</option>
+                     
+                </select>
+                @if($errors->has('selfie'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('selfie') }}
+                    </em>
+                @endif
+            </div> --}}
+
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>
                 <select name="area[]" id="area" class="form-control select2" multiple="multiple">
@@ -150,6 +181,9 @@
                     </em>
                 @endif
             </div>
+
+
+
                 
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">

@@ -833,7 +833,7 @@ return [
             'job_name' => 'Jabatan',
             'abtotal' => 'Total Hari',
             'jumlah_sabtuminggu' => 'Jumlah Sabtu Minggu',
-            'total_efektif_kerja' => 'efektif_kerja',
+            'total_efektif_kerja' => 'Efektif Kerja',
             'hadir' => 'Hadir',
             'izin' => 'Izin',
             'dinas_luar' => 'Dinas Luar',
@@ -841,7 +841,15 @@ return [
             'jam_hadir' => 'Jam Hadir',
             'jam_istirahat' => 'Jam Istirahat',
             'jam_lembur' => 'Jam Lembur',
-            'jam_dinas_dalam' => 'Jam Dinas Dalam'
+            'jam_dinas_dalam' => 'Jam Dinas Dalam',
+            'subdapertement' => 'Sub Bagian',
+            'jumlah_libur' => 'Jumlah Libur',
+            'alfa' => 'Jumlah Alfa',
+            'dinas_dalam'  => 'Jumlah Dinas Dalam',
+            'jam_terlambat' => 'Total Jam Terlambat',
+            'terlambat' => 'Jumlah Terlambat',
+            'jam_permisi' => 'Total Jam Permisi',
+            'permisi' => 'Jumlah Permisi',
 
         ],
     ],
@@ -934,10 +942,10 @@ return [
         ],
     ],
 
-    'extra' => 'Dinas',
+    'extra' => 'Lembur',
     'extra' => [
-        'title' => 'Dinas',
-        'title_singular' => 'Dinas',
+        'title' => 'Lembur',
+        'title_singular' => 'Lembur',
         'fields' => [
             'id' => 'ID',
             'id_helper' => '',
@@ -1206,6 +1214,31 @@ return [
             'status' => 'Status',
             'status_helper' => '',
 
+        ],
+    ],
+
+
+    'staffSpecial' => 'Staff Spesial',
+    'staffSpecial' => [
+        'title' => 'Staff Spesial',
+        'title_singular' => 'Staff Spesial',
+        'fields' => [
+            'id' => 'ID',
+            'id_helper' => '',
+            'name' => 'Nama',
+            'name_helper' => '',
+            'expired_date' => 'Batas Waktu',
+            'expired_date_helper' => '',
+            'fingerprint' => 'Fingerprint',
+            'fingerprint_helper' => '',
+            'camera' => 'Kamera',
+            'camera_helper' => '',
+            'gps' => 'GPS',
+            'gps_helper' => '',
+            'staff' => 'Staff',
+            'staff_helper' => '',
+            'phone' => 'Telepon',
+            'phone_helper' => '',
         ],
     ],
 

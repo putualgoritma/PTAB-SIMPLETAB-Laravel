@@ -109,7 +109,7 @@
  <th rowspan="3">JML HARI</th>
 <th colspan="3">WATER METER LAMA</th>
 <th colspan="3">WATER METER BARU</th>
-<th rowspan="3">DIKERJAKAN OLEH</th>
+{{-- <th rowspan="3">DIKERJAKAN OLEH</th> --}}
 <th rowspan="3">KET</th>
 
         </tr>
@@ -163,7 +163,7 @@
             {{-- <td>{{ $d1->status_wm }}</td> --}}
 
             <td>{{date('d-m-Y', strtotime('0 month', strtotime( $d1->diterima )))}}</td>
-            <td>{{date('d-m-Y', strtotime('0 month', strtotime( $d1->dikeluarkan )))}}</td>
+            <td>{{ $d1->dikeluarkan ? date('d-m-Y', strtotime('0 month', strtotime( $d1->dikeluarkan ))) : date('d-m-Y', strtotime('0 month', strtotime( $d1->diterima )))}}</td>
 
             {{-- <td>{{ $d1->subdapertement_id === 10? '4' : '3'}}</td> --}}
             {{-- <td>{{ $d1->subdapertement_id === 10? 'Ganti WM.' : 'Perbaikan WM.'}}</td> --}}
@@ -196,7 +196,7 @@
 <td>{{ $d1->noWM2 }}</td>
 <td>{{ $d1->brandWM2 }}</td>
 <td>{{ $d1->standWM2 }}</td>
-<td>KOP.DARMA TIRTA</td>
+{{-- <td>KOP.DARMA TIRTA</td> --}}
 <td></td>
     
 <?php $no++ ?>
@@ -214,7 +214,7 @@
     <div class="baris1">
         <div class="kiri">
             <div class="" style="text-align : center">Mengetahui</div>
-            <div class="jabatan">Ka. {{ $dapertement }}</div>
+            <div class="jabatan" style="text-align : center">Ka. {{ $dapertement }}</div>
             <div class="" style="text-align : center; margin-bottom : 70px;"></div>
     <div class="nama"></div>
     <div class="nip" style = "border-top-style: solid; border-top-width: 1px; "></div>
@@ -222,7 +222,7 @@
     
         <div class="kanan">
             <div class="" style="text-align : center">Tabanan, {{ date('d') }} {{ $month }} {{ date('Y') }}</div>
-            <div class="" style="text-align : center">Ka. {{ $sub_dapertement }}</div>
+            <div class="" style="text-align : center">Ka.subag {{ preg_replace("/SUBAG/", "", $sub_dapertement) }}</div>
             <div class="jabatan" style="margin-bottom : 70px"></div>
     <div class="nama" style = "border-bottom-style: solid; border-top-width: 1px; "></div>
         </div>

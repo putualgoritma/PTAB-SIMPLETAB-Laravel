@@ -348,8 +348,9 @@ class LockController extends Controller
     {
         abort_unless(\Gate::allows('lock_show'), 403);
         // dd($id);
-        $customer = LockAction::selectRaw('lock_action.*')->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
+        $customer = LockAction::selectRaw('staffs.name as staff_name, staffs.code as staff_code, lock_action.*')->join('ptabroot_ctm.tblpelanggan', 'lock_action.customer_id', '=', 'tblpelanggan.nomorrekening')
             ->join('users', 'lock_action.staff_id', '=', 'users.id')
+            ->join('staffs', 'users.staff_id', '=', 'staffs.id')
             ->where('lock_action.id', $id)
             ->with('customer')
             ->first();

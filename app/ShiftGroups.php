@@ -19,6 +19,7 @@ class ShiftGroups extends Model
         'created_at',
         'updated_at',
         'work_type_id',
+        'work_unit_id',
         'queue',
     ];
 }
