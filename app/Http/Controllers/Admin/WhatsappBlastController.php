@@ -16,6 +16,8 @@ use App\wa_history;
 use App\WaTemplate;
 use GuzzleHttp\Promise\Create;
 use App\Traits\TraitModel;
+use App\User;
+use App\wa_template_file;
 use GuzzleHttp\Psr7\Message;
 
 class WhatsappBlastController extends Controller
@@ -25,6 +27,7 @@ class WhatsappBlastController extends Controller
     //tampilan awal WA blast
     public function index(Request $request)
     {
+        // WablasTrait::sendFile();
         abort_unless(\Gate::allows('wablast_access'), 403);
         $categorys = CategoryWa::get();
         return view('admin.waBlast.index', compact('categorys'));
@@ -204,7 +207,7 @@ class WhatsappBlastController extends Controller
                 $data = [
                     'phone' => $this->gantiformat($request->phone[$i]),
                     // test
-                    // 'phone' => '6281916112003',
+                    // 'phone' => '6281236815960',
                     // 'phone' => 'a',
                     'customer_id' => $request->customer_id[$i],
                     'message' => $message,
@@ -258,6 +261,78 @@ class WhatsappBlastController extends Controller
                     $countSend = $countSend + 1;
                 }
             }
+
+            // jika ada file start
+
+            $fileList = wa_template_file::where('template_id', $request->template_id)->get();
+
+            if (count($fileList) > 0) {
+
+                $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                for ($i = 0; $i < count($request->phone); $i++) {
+                    $message = str_replace("@nama", $request->name[$i], $request->message);
+                    $message = str_replace("@sbg", $request->customer_id[$i], $message);
+                    $message = str_replace("@alamat", $request->adress[$i], $message);
+                    $message = str_replace("@waktu", $waktu, $message);
+
+                    $data = [
+                        'phone' => $this->gantiformat($request->phone[$i]),
+                        // test
+                        // 'phone' => '6281236815960',
+                        // 'phone' => 'a',
+                        'customer_id' => $request->customer_id[$i],
+                        'document' => $filename,
+                        'template_id' => $request->template_id,
+                        // 'id_wa' => $request->name[$i],
+                        'status' => 'gagal',
+                        'ref_id' => $code . $request->customer_id[$i]
+                    ];
+
+                    $kumpulan_data[] = $data;
+                }
+                // dd($kumpulan_data);
+                $i = 0;
+                $array_merg = [];
+                $temp = [];
+                foreach (array_chunk($kumpulan_data, 5000) as $key => $smallerArray) {
+                    foreach ($smallerArray as $index => $value) {
+                        // count($kumpulan_data/5000);
+                        $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
+                        // $i = $i + 1;
+
+                    }
+
+                    // $array_merg = array_merge($temp, $array_merg);
+                    DB::table('wa_histories')->insert($temp);
+                    $temp = [];
+                }
+                // dd($temp);
+                // dd($kumpulan_data);
+                // dd($kumpulan_data[65892]);
+                $data2 = [];
+
+                $array_merg = [];
+                // send WA
+                foreach (array_chunk($kumpulan_data, $limit) as $key => $smallerArray) {
+                    foreach ($smallerArray as $index => $value) {
+                        $temp[] = $value;
+                    }
+                    $test1 = WablasTrait::sendFile($temp);
+                    $temp = [];
+                    // dd($test1);
+                    if (!empty(json_decode($test1)->data->messages)) {
+                        $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+                    }
+                }
+
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+            }
+
+            // jika ada file end
             return back()->withInfo('Pesan Diproses Sebanyak ' . $countSend . ' diharapkan memberi jeda untuk pengiriman selanjutnya guna meminimalisir pemblokiran ')->withInput();
         }
     }
@@ -503,7 +578,7 @@ class WhatsappBlastController extends Controller
                 $data = [
                     'phone' => $this->gantiformat($request->phone[$i]),
                     // test
-                    // 'phone' => '6281916112003',
+                    // 'phone' => '6281236815960',
                     // 'phone' => 'a',
                     'customer_id' => $request->customer_id[$i],
                     'message' => $message,
@@ -576,6 +651,7 @@ class WhatsappBlastController extends Controller
     //pembuatan surat(kategori selain tunggakan dan perbaikan)
     public function create(Request $request)
     {
+        // dd($request->all());
         abort_unless(\Gate::allows('wablast_access'), 403);
         // abort_unless(\Gate::allows('account_create'), 403);
         $waTemplate = WaTemplate::get();
@@ -587,12 +663,57 @@ class WhatsappBlastController extends Controller
             'template_id' => $request->template_id,
 
         ];
-        return redirect()->route('admin.wablast.creater', ['message' => $request->message, 'template_id' => $request->template_id, 'takeData' => $request->takeData]);
+        $file = [
+            ['image' => 'image'],
+            ['image' => 'file']
+        ];
+        $fileN = [];
+        $imageN = [];
+        $img_path = "/images/image_wa";
+        $file_path = "/files/pdf_wa";
+
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+
+        // upload image
+        if ($request->file('image')) {
+
+            foreach ($request->file('image') as $key => $image) {
+                $resourceImage = $image;
+                $nameImage = $image->getClientOriginalName();
+                $file_extImage = $image->extension();
+                $nameImage = preg_replace("/[^a-zA-Z.-Z0-9]/", " ", $nameImage);
+                $nameImage = str_replace(" ", "_", $nameImage);
+                // $img_name = 'File' . date('Y-m-d h:i:s') . '.' . $image->extension();
+                // dd($nameImage);
+                $resourceImage->move($basepath . $img_path, $nameImage);
+                $imageN[] = ["https://simpletabadmin.ptab-vps.com/images/image_wa/" . $nameImage];
+            }
+        }
+
+        // upload file
+        if ($request->file('file')) {
+
+            foreach ($request->file('file') as $key => $file) {
+                $resourcefile = $file;
+                $namefile = $file->getClientOriginalName();
+                $file_extfile = $file->extension();
+                $namefile = preg_replace("/[^a-zA-Z.-Z0-9]/", " ", $namefile);
+                $namefile = str_replace(" ", "_", $namefile);
+                // $img_name = 'File' . date('Y-m-d h:i:s') . '.' . $file->extension();
+
+                $resourcefile->move($basepath . $file_path, $namefile);
+                $fileN[] = ["https://simpletabadmin.ptab-vps.com/files/pdf_wa/" . $namefile];
+            }
+        }
+
+        // dd($fileN, $imageN);
+        return redirect()->route('admin.wablast.creater', ['message' => $request->message, 'template_id' => $request->template_id, 'takeData' => $request->takeData, 'file' => $fileN, 'image' => $imageN]);
     }
 
     //untuk menyimpan data hasil dari post create
     public function creater(Request $request)
     {
+        // dd($request->pag);
         abort_unless(\Gate::allows('wablast_access'), 403);
         $waTemplate = WaTemplate::get();
         $customers = Customer::FilterWilayah($request->area)->FilterNomorrekening($request->nomorrekening)->paginate($request->takeData, ['*'], 'page', $request->page);
@@ -607,7 +728,12 @@ class WhatsappBlastController extends Controller
             'type' => $request->type,
             'template_id' => $request->template_id,
         ];
-        return view('admin.waBlast.create', compact('customers', 'data', 'areas', 'takeData'));
+        $file = json_encode($request->file);
+        $image = json_encode($request->image);
+        // dd($file);
+        // $file = json_encode($file);
+        // dd($file);
+        return view('admin.waBlast.create', compact('customers', 'data', 'areas', 'takeData', 'file', 'image'));
     }
 
     //untuk ganti format nomorHp
@@ -644,11 +770,19 @@ class WhatsappBlastController extends Controller
     //simpan data dari katefori selain tunggakan dan perbaikan
     public function store(Request $request)
     {
+        // $result = User::select('email')->orderBy('email')->get();
+        // echo "<pre>";
+        // print_r($result);
+        // dd(User::orderBy('email')->get());
+        // dd(json_decode($request->file));
+        $fileN = json_decode($request->file);
+        $imageN = json_decode($request->image);
+        // dd($fileN, $imageN[0][0]);
         $limit = env('LIMIT_SEND');
         $kumpulan_data = [];
 
         if ($request->filter) {
-            return redirect()->route('admin.wablast.creater', ['area' => $request->area, 'nomorrekening' => $request->nomorrekening, 'takeData' => $request->takeData, 'message' => $request->message]);
+            return redirect()->route('admin.wablast.creater', ['area' => $request->area, 'nomorrekening' => $request->nomorrekening, 'takeData' => $request->takeData, 'message' => $request->message, 'file' => $fileN, 'image' => $imageN]);
         }
         // selected
         else {
@@ -669,70 +803,250 @@ class WhatsappBlastController extends Controller
                 }
                 $cek = [];
                 $data = [];
-                $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                for ($i = 0; $i < count($request->phone); $i++) {
-                    $message = str_replace("@nama", $request->name[$i], $request->message);
-                    $message = str_replace("@sbg", $request->customer_id[$i], $message);
-                    $message = str_replace("@alamat", $request->adress[$i], $message);
-                    $message = str_replace("@waktu", $waktu, $message);
-
-                    $data = [
-                        'phone' => $this->gantiformat($request->phone[$i]),
-                        // test
-                        // 'phone' => '6281261684957',
-                        // 'phone' => 'a',
-                        'customer_id' => $request->customer_id[$i],
-                        'message' => $message,
-                        'template_id' => $request->template_id,
-                        // 'id_wa' => $request->name[$i],
-                        'status' => 'gagal',
-                        'ref_id' => $code . $request->customer_id[$i]
-                    ];
-
-                    $kumpulan_data[] = $data;
-                }
-                // dd($kumpulan_data);
-                $i = 0;
-                $array_merg = [];
-                $temp = [];
-                foreach (array_chunk($kumpulan_data, 5000) as $key => $smallerArray) {
-                    foreach ($smallerArray as $index => $value) {
-                        // count($kumpulan_data/5000);
-                        $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
-                        // $i = $i + 1;
-
-                    }
-
-                    // $array_merg = array_merge($temp, $array_merg);
-                    DB::table('wa_histories')->insert($temp);
-                    $temp = [];
-                }
-                // dd($temp);
-                // dd($kumpulan_data);
-                // dd($kumpulan_data[65892]);
-                $data2 = [];
-
-                $array_merg = [];
-                // send WA
-                foreach (array_chunk($kumpulan_data, $limit) as $key => $smallerArray) {
-                    foreach ($smallerArray as $index => $value) {
-                        $temp[] = $value;
-                    }
-                    $test1 = WablasTrait::sendText($temp);
-                    $temp = [];
-                    // dd($test1);
-                    if (!empty(json_decode($test1)->data->messages)) {
-                        $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
-                    }
-                }
-
                 $countSend = 0;
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                        $countSend = $countSend + 1;
+                // jika ada pesan
+                if ($request->message != "") {
+                    $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    // dd($request->phone);
+                    for ($i = 0; $i < count($request->phone); $i++) {
+                        $message = str_replace("@nama", $request->name[$i], $request->message);
+                        $message = str_replace("@sbg", $request->customer_id[$i], $message);
+                        $message = str_replace("@alamat", $request->adress[$i], $message);
+                        $message = str_replace("@waktu", $waktu, $message);
+
+                        $data = [
+                            'phone' => $this->gantiformat($request->phone[$i]),
+                            // test
+                            // 'phone' => '6281236815960',
+                            // 'phone' => 'a',
+                            'customer_id' => $request->customer_id[$i],
+                            'message' => $message,
+                            'template_id' => $request->template_id,
+                            // 'id_wa' => $request->name[$i],
+                            'status' => 'gagal',
+                            'ref_id' => $code . $request->customer_id[$i]
+                        ];
+
+                        $kumpulan_data[] = $data;
+                    }
+                    // dd($kumpulan_data);
+                    $i = 0;
+                    $array_merg = [];
+                    $temp = [];
+                    foreach (array_chunk($kumpulan_data, 5000) as $key => $smallerArray) {
+                        foreach ($smallerArray as $index => $value) {
+                            // count($kumpulan_data/5000);
+                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
+                            // $i = $i + 1;
+
+                        }
+
+                        // $array_merg = array_merge($temp, $array_merg);
+                        DB::table('wa_histories')->insert($temp);
+                        $temp = [];
+                    }
+                    // dd($temp);
+                    // dd($kumpulan_data);
+                    // dd($kumpulan_data[65892]);
+                    $data2 = [];
+
+                    $array_merg = [];
+                    // // send WA
+                    // foreach (array_chunk($kumpulan_data, $limit) as $key => $smallerArray) {
+                    //     foreach ($smallerArray as $index => $value) {
+                    //         $temp[] = $value;
+                    //     }
+                    //     $test1 = WablasTrait::sendText($temp);
+                    //     $temp = [];
+                    //     // dd($test1);
+                    //     if (!empty(json_decode($test1)->data->messages)) {
+                    //         $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+                    //     }
+                    // }
+
+
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                            $countSend = $countSend + 1;
+                        }
                     }
                 }
+
+                // dd(json_decode($request->file));
+                // jika ada file start
+                // dd('tes');
+                if ($fileN) {
+                    if (count($fileN) > 0) {
+                        for ($fn = 0; $fn < count($fileN); $fn++) {
+                            $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+
+                            for ($i = 0; $i < count($request->phone); $i++) {
+                                $message = str_replace("@nama", $request->name[$i], $request->message);
+                                $message = str_replace("@sbg", $request->customer_id[$i], $message);
+                                $message = str_replace("@alamat", $request->adress[$i], $message);
+                                $message = str_replace("@waktu", $waktu, $message);
+                                // dd($request->name[$i]);
+                                $data3 = [
+                                    'phone' => $this->gantiformat($request->phone[$i]),
+                                    // test
+                                    // 'phone' => '6282147860693',
+                                    // 'phone' => '6281236815960',
+                                    // 'phone' => 'a',
+                                    'customer_id' => $request->customer_id[$i],
+                                    // 'document' => 'https://simpletabadmin.ptab-vps.com/images/pdf_wa/' . $f->file,
+                                    'document' => $fileN[$fn][0],
+                                    // 'caption' => 'tess',
+                                    'template_id' => "0",
+                                    // 'id_wa' => $request->name[$i],
+                                    'status' => 'gagal',
+                                    'ref_id' => $code . $request->customer_id[$i]
+                                ];
+
+                                $kumpulan_data3[] = $data3;
+                            }
+                            // dd($kumpulan_data3);
+                            $i = 0;
+                            $array_merg = [];
+                            $temp = [];
+                            foreach (array_chunk($kumpulan_data3, 1) as $key => $smallerArray) {
+                                $c = 0;
+                                foreach ($smallerArray as $index => $value) {
+                                    // dd($value);
+                                    // count($kumpulan_data/5000);
+                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value['document']]);
+                                    // $i = $i + 1;
+                                    unset($temp[$c]["document"]);
+                                    $c++;
+                                }
+
+
+
+                                // dd($temp);
+
+                                // $array_merg = array_merge($temp, $array_merg);
+                                DB::table('wa_histories')->insert($temp);
+                                $temp = [];
+                            }
+                            // dd($temp);
+                            // dd($kumpulan_data);
+                            // dd($kumpulan_data[65892]);
+                            $data2 = [];
+
+                            $array_merg = [];
+                            // send WA
+                            foreach (array_chunk($kumpulan_data3, $limit) as $key => $smallerArray) {
+                                foreach ($smallerArray as $index => $value) {
+                                    $temp[] = $value;
+                                }
+                                // dd($temp);
+                                $test1 = WablasTrait::sendFile($temp);
+                                $temp = [];
+                                // dd($test1);
+                                if (!empty(json_decode($test1)->data->messages)) {
+                                    $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+                                }
+                            }
+
+                            // dd($array_merg);
+                            foreach ($array_merg as $key => $value) {
+                                if (!empty($value->ref_id)) {
+                                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                                    $countSend = $countSend + 1;
+                                }
+                            }
+                            $kumpulan_data3 = [];
+                        }
+                    }
+                }
+                // jika ada image end
+
+
+                // jika ada image start
+                if ($imageN) {
+                    // dd($imageN);
+                    if (count($imageN) > 0) {
+                        for ($in = 0; $in < count($imageN); $in++) {
+                            $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+
+                            for ($i = 0; $i < count($request->phone); $i++) {
+                                $message = str_replace("@nama", $request->name[$i], $request->message);
+                                $message = str_replace("@sbg", $request->customer_id[$i], $message);
+                                $message = str_replace("@alamat", $request->adress[$i], $message);
+                                $message = str_replace("@waktu", $waktu, $message);
+                                // dd($request->name[$i]);
+                                $data4 = [
+                                    'phone' => $this->gantiformat($request->phone[$i]),
+                                    // test
+                                    // 'phone' => '6281236815960',
+                                    // 'phone' => '6282147860693',
+                                    // 'phone' => 'a',
+                                    'customer_id' => $request->customer_id[$i],
+                                    // 'document' => 'https://simpletabadmin.ptab-vps.com/images/pdf_wa/' . $f->file,
+                                    'image' => $imageN[$in][0],
+                                    'caption' => '',
+                                    'template_id' => "0",
+                                    // 'id_wa' => $request->name[$i],
+                                    'status' => 'gagal',
+                                    'ref_id' => $code . $request->customer_id[$i]
+                                ];
+
+                                $kumpulan_data4[] = $data4;
+                            }
+                            // dd($kumpulan_data4);
+                            $i = 0;
+                            $array_merg = [];
+                            $temp = [];
+                            foreach (array_chunk($kumpulan_data4, 5000) as $key => $smallerArray) {
+                                $d = 0;
+                                foreach ($smallerArray as $index => $value) {
+                                    // count($kumpulan_data/5000);
+                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value["image"]]);
+                                    // $i = $i + 1;
+                                    unset($temp[$d]["image"]);
+                                    unset($temp[$d]["caption"]);
+                                    $d++;
+                                }
+
+                                // $array_merg = array_merge($temp, $array_merg);
+                                DB::table('wa_histories')->insert($temp);
+                                $temp = [];
+                            }
+                            // dd($temp);
+                            // dd($kumpulan_data4);
+                            // dd($kumpulan_data[65892]);
+                            $data2 = [];
+
+                            $array_merg = [];
+                            // send WA
+                            foreach (array_chunk($kumpulan_data4, $limit) as $key => $smallerArray) {
+                                foreach ($smallerArray as $index => $value) {
+                                    $temp[] = $value;
+                                }
+                                // dd($temp);
+                                $test1 = WablasTrait::sendImage($temp);
+                                $temp = [];
+                                // dd($test1);
+                                if (!empty(json_decode($test1)->data->messages)) {
+                                    $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+                                }
+                            }
+
+                            // dd($array_merg);
+                            foreach ($array_merg as $key => $value) {
+                                if (!empty($value->ref_id)) {
+                                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                                    $countSend = $countSend + 1;
+                                }
+                            }
+                            $kumpulan_data4 = [];
+                        }
+                    }
+                }
+
+                // jika ada image end
+
+
                 return back()->withInfo('Pesan Diproses Sebanyak ' . $countSend . ' diharapkan memberi jeda untuk pengiriman selanjutnya guna meminimalisir pemblokiran')->withInput();
             }
         }

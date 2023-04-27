@@ -36,7 +36,7 @@ class WorkUnitController extends Controller
     public function show($id)
     {
         abort_unless(\Gate::allows('workUnit_show'), 403);
-        abort_unless(\Gate::allows('permission_show'), 403);
+        // abort_unless(\Gate::allows('permission_show'), 403);
         $work_unit = WorkUnit::where('id', $id)->first();
         return view('admin.workUnit.show', compact('work_unit'));
     }

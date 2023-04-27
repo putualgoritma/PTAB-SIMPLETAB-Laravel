@@ -8,9 +8,11 @@ use App\Dapertement;
 use App\Day;
 use App\Http\Controllers\Controller;
 use App\Job;
+use App\ShiftGroups;
 use Illuminate\Http\Request;
 use App\Traits\TraitModel;
 use App\ShiftParent;
+use App\Subdapertement;
 use App\WorkUnit;
 
 class ShiftParentController extends Controller
@@ -54,16 +56,29 @@ class ShiftParentController extends Controller
     public function edit($id)
     {
         // dd($id);
+        $dapertements = Dapertement::all();
+        $work_units = WorkUnit::all();
+        $jobs = Job::all();
         $shift_parent = ShiftParent::where('id', $id)->first();
+        $subdapertements = Subdapertement::where('dapertement_id',  $shift_parent->dapertement_id)->get();
         // $dapertements = Dapertement::all();
         // $subdapertements = Subdapertement::where('dapertement_id', $shift_parent->dapertement_id)->get();
 
-        return view('admin.shift_parent.edit', compact('shift_parent'));
+        return view('admin.shift_parent.edit', compact('shift_parent', 'dapertements', 'work_units', 'jobs', 'subdapertements'));
     }
     public function update($id, Request $request)
     {
         $shift_parent = ShiftParent::where('id', $id)->first();
         $shift_parent->update($request->all());
+        // $shift_group = ShiftGroups::where('shift_parent_id')->get();
+        // foreach ($shift_group as $value) {
+        # code...
+        ShiftGroups::where('shift_parent_id', $id)->update([
+            'subdapertement_id' => $request->subdapertement_id,
+            'work_unit_id' => $request->work_unit_id,
+            'job_id' => $request->job_id,
+        ]);
+        // }
         return redirect()->route('admin.shift_parent.index', ['id' => $shift_parent->work_type_id]);
     }
     public function destroy($id)

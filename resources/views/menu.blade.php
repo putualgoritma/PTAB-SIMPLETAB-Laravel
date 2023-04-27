@@ -343,6 +343,18 @@
                     </li>
                     @endcan
 
+                    
+
+                    @can('staff_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.staffSpecials.index') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-calendar"></i>
+                       Staff Spesial
+                        </a>
+                    </li>
+                    @endcan
+
                     @can('absence_report')
                     <li class="nav-item">
                         <a href="{{ route('admin.schedule.test') }}" class="nav-link">

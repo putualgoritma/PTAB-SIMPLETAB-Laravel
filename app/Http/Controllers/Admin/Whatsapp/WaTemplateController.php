@@ -6,6 +6,7 @@ use App\CategoryWa;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyWaTemplateRequest;
 use App\Traits\TraitModel;
+use App\wa_template_file;
 use App\WaTemplate;
 use Illuminate\Http\Request;
 
@@ -44,11 +45,42 @@ class WaTemplateController extends Controller
     {
         $categorys = CategoryWa::get();
         $WaTemplate = WaTemplate::where('id', $id)->first();
+
+
+
+
         return view('admin.whatsapp.template.edit', compact('WaTemplate', 'categorys'));
     }
     public function update($id, Request $request)
     {
         $WaTemplate = WaTemplate::where('id', $id)->first();
+
+        $img_path = "/images/pdf_wa";
+        $video_path = "/videos/pdf_wa";
+
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+
+        // upload image
+        if ($request->file('image')) {
+
+            foreach ($request->file('image') as $key => $image) {
+                $resourceImage = $image;
+                $nameImage = strtolower($request->code);
+                $file_extImage = $image->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = 'File' . date('Y-m-d h:i:s') . '.' . $image->extension();
+
+                $resourceImage->move($basepath . $img_path, $img_name);
+                $dataImageName[] = $img_name;
+                wa_template_file::create([
+                    'file' => $img_name,
+                    'wa_template_id' => $WaTemplate->id
+                ]);
+            }
+        }
+
+
+
         $WaTemplate->update($request->all());
         return redirect()->route('admin.WaTemplate.index');
     }

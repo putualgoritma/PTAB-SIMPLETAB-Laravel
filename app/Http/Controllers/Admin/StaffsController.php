@@ -106,6 +106,9 @@ class StaffsController extends Controller
             $table->editColumn('phone', function ($row) {
                 return $row->phone ? $row->phone : "";
             });
+            $table->editColumn('NIK', function ($row) {
+                return $row->NIK ? $row->NIK : "";
+            });
 
             $table->rawColumns(['actions', 'placeholder']);
 
@@ -146,7 +149,10 @@ class StaffsController extends Controller
                 $staff = $admin->staff_id;
             }
         }
-        if ($department > 0) {
+        // dd()
+        if ($department === 5 && $subdepartment === 0) {
+            $dapertements = Dapertement::all();
+        } else if ($department > 0) {
             $dapertements = Dapertement::where('id', $department)->get();
         } else {
             $dapertements = Dapertement::all();
@@ -159,6 +165,11 @@ class StaffsController extends Controller
 
     public function store(StoreStaffRequest $request)
     {
+        $validated = $request->validate([
+            'phone' => 'required|unique:staffs|max:255',
+            'NIK' => 'required|unique:staffs|max:255',
+            // 'body' => 'required',
+        ]);
         $staff = Staff::create($request->all());
         $areas = $request->input('area', []);
         for ($area = 0; $area < count($areas); $area++) {
@@ -194,7 +205,9 @@ class StaffsController extends Controller
                 $subdepartment = $admin->subdapertement_id;
             }
         }
-        if ($department > 0) {
+        if ($department === 5 && $subdepartment === 0) {
+            $dapertements = Dapertement::all();
+        } else if ($department > 0) {
             $dapertements = Dapertement::where('id', $department)->get();
         } else {
             $dapertements = Dapertement::all();
@@ -210,6 +223,14 @@ class StaffsController extends Controller
     public function update(UpdateStaffRequest $request, Staff $staff)
     {
         abort_unless(\Gate::allows('staff_edit'), 403);
+
+        $validated = $request->validate([
+            'phone' => 'required|unique:staffs,phone,' . $staff->id . ',id',
+            'NIK' => 'required|unique:staffs,NIK,' . $staff->id . ',id',
+            // 'body' => 'required',
+        ]);
+
+
         $staff->update($request->all());
         $areas = $request->input('area', []);
         $staff->area()->detach();

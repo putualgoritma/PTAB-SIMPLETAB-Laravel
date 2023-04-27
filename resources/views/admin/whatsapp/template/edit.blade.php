@@ -37,6 +37,15 @@
                     </em>
                 @endif
 
+
+                <div class="form-group">
+                  <button type="button" class="btn btn-primary image" name="add" id="image"><i class="fas fa-plus"> Tambah Foto Laporan</i></button>
+                  <label>File</label>
+                  
+                  <div id="loan_image" class="p-3 mb-2">
+                     </div>
+                </div>
+
             <div class="form-group {{ $errors->has('message') ? 'has-error' : '' }}">
                 <label for="message">{{ trans('global.WaTemplate.fields.message') }}*</label>
                 <textArea id="message" name="message" class="form-control" required>{{ old('name', isset($WaTemplate) ? $WaTemplate->message : '') }}</textArea>
@@ -88,7 +97,31 @@
 
 @endsection
 @section('scripts')
+
 <script type="text/javascript">
+
+var i=1; 
+              $('#image').click(function(){   
+              
+                // alert(i)
+                if(i <= 4){
+                    i++;  
+                $('#loan_image').append(' <div id="loan_image'+i+'" ><div class="form-group {{ $errors->has('img') ? 'has-error' : '' }}"><label for="image_file">Foto Pengerjaan</label><div class="custom-file"><input id="image_file" name="image[]" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_removeimage"><i class="fas fa-minus"> hapus</i></button></div>');                
+                   $(".custom-file-input").on("change", function() {
+var fileName = $(this).val().split("\\").pop();
+$(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
+                }
+
+                });
+
+                $(document).on('click','.btn_removeimage', function(){ 
+                var button_id = $(this).attr("id"); 
+                i--;
+                   $('#loan_image'+button_id+'').remove();  
+              });  
+
+
     $(document).ready(function() {
       $("#message").emojioneArea();
     });

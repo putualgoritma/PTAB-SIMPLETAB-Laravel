@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Staff extends Model
 {
@@ -18,6 +19,7 @@ class Staff extends Model
         'work_type_id',
         'job_id',
         'NIK',
+        'fingerprint',
         'image'
     ];
 
@@ -62,5 +64,38 @@ class Staff extends Model
             $query->where('work_unit_id', $work_unit);
         }
         return $query;
+    }
+
+    public function scopeFilterSubdapertement($query, $subdapertement, $job)
+    {
+        if ($job == '' || $job == '0' || $job == null) {
+            if ($subdapertement != '' && $subdapertement != '') {
+                $query->where('subdapertement_id', $subdapertement);
+            }
+            return $query;
+        }
+    }
+
+    public function scopeFilterDateWeb($query, $from, $to)
+    {
+        if (!empty(request()->input('from')) && !empty(request()->input('to'))) {
+            $from = request()->input('from');
+            $to = request()->input('to');
+            //return $query->whereBetween('lock_action.created_at', [$from, $to]);
+            return $query->whereBetween(DB::raw('DATE(absences.created_at)'), [$from, $to]);
+            // return $query->where('froms_id', $from);
+            // dd(request()->input('from'));
+
+        } else {
+            if (date('d') > 20) {
+                $from = date("Y-m-d", strtotime(date('Y-m') . "-21"));
+                $to = date("Y-m-d", strtotime('+1 month', strtotime(date('Y-m') . "-20")));
+            } else {
+                $from = date("Y-m-d", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
+                $to = date("Y-m-d", strtotime('0 month', strtotime(date('Y-m') . "-20")));
+            }
+
+            return $query->whereBetween(DB::raw('DATE(absences.created_at)'), [$from, $to]);
+        }
     }
 }

@@ -28,19 +28,19 @@
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">{{ trans('global.lock.fields.noSbg') }}</h5>
-            <p>{{$customer->nomorrekening}}</p>
+            <p>{{$customer->customer->nomorrekening}}</p>
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">{{ trans('global.lock.fields.customer') }}</h5>
-            <p>{{$customer->namapelanggan}}</p>
+            <p>{{$customer->customer->namapelanggan}}</p>
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
-            <h5 style="font-weight:bold">{{ trans('global.lock.fields.staff_id') }}</h5>
-            <p>{{$customer->id}}</p>
+            <h5 style="font-weight:bold">Code Staff</h5>
+            <p>{{$customer->staff_code}}</p>
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">{{ trans('global.lock.fields.staff_name') }}</h5>
-            <p>{{$customer->name}}</p>
+            <p>{{$customer->staff_name}}</p>
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">Lihat Peta</h5>

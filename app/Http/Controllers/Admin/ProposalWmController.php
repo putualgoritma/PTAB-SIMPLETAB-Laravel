@@ -42,7 +42,7 @@ class ProposalWmController extends Controller
         $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
         if (in_array('8', $roles)) {
             if (date('d') > 20) {
-                $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+                $statussm = proposalWms::selectRaw('proposal_wms.close_queue, print_status,queue, alamat,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
                     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
                     // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
@@ -51,7 +51,7 @@ class ProposalWmController extends Controller
                     ->FilterAreas($request->areas)
                     ->FilterDate(request()->input('from'), request()->input('to'));
             } else {
-                $statussm = proposalWms::selectRaw('print_status,queue,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
+                $statussm = proposalWms::selectRaw('proposal_wms.close_queue, print_status,queue, alamat,tblpelanggan.idareal, proposal_wms.code, proposal_wms.customer_id, proposal_wms.status_wm, proposal_wms.priority, proposal_wms.year, proposal_wms.month, proposal_wms.id, proposal_wms.created_at, proposal_wms.updated_at, proposal_wms.status')
                     ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')
                     // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('-1 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('0 month', strtotime(date('Y-m-d'))))])
                     ->FilterPriority($request->priority)
@@ -71,6 +71,7 @@ class ProposalWmController extends Controller
             $statussm = actionWmStaff::selectRaw('proposal_wms.status_wm,
             queue,
                 proposal_wms.code,
+                proposal_wms.close_queue,
             proposal_wms.priority,
             proposal_wms.status,
             proposal_wms.id as id,
@@ -142,7 +143,7 @@ class ProposalWmController extends Controller
 
         if ($request->ajax()) {
             //set query
-            $qry = $statussm->orderBy('proposal_wms.updated_at', 'desc');
+            $qry = $statussm;
 
             $table = Datatables::of($qry);
 
@@ -165,7 +166,7 @@ class ProposalWmController extends Controller
             });
 
             $table->editColumn('code', function ($row) {
-                return $row->code ? $row->queue . $row->code : "";
+                return $row->code ? $row->close_queue . $row->code : "";
             });
 
             $table->editColumn('customer_id', function ($row) {
@@ -217,6 +218,10 @@ class ProposalWmController extends Controller
 
             $table->editColumn('idareal', function ($row) {
                 return $row->idareal ? $row->idareal : "";
+            });
+
+            $table->editColumn('alamat', function ($row) {
+                return $row->alamat ? $row->alamat : "";
             });
 
             $table->rawColumns(['actions', 'placeholder']);
@@ -449,6 +454,7 @@ class ProposalWmController extends Controller
                 ->join('ptabroot_ctm.tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
                 // ->whereBetween('proposal_wms.created_at', [date('Y-m-21', strtotime('0 month', strtotime(date('Y-m-d')))), date('Y-m-20', strtotime('+1 month', strtotime(date('Y-m-d'))))])
                 ->where('action_wms.id', '=', null)
+                ->where('proposal_wms.status', '=', 'pending')
                 ->FilterPriority($request->priority)
                 ->FilterStatus($request->status)
                 ->FilterStatusWM($request->statussm)
@@ -499,6 +505,7 @@ class ProposalWmController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->where('proposal_wms.status', '=', 'pending')
                     ->FilterDate(request()->input('from'), request()->input('to'));
 
                 // $data2 = $data2 . ' where idareal = ' . $data[$i]->area_id;
@@ -511,12 +518,14 @@ class ProposalWmController extends Controller
                     ->FilterStatus($request->status)
                     ->FilterStatusWM($request->statussm)
                     ->FilterAreas($request->areas)
+                    ->where('proposal_wms.status', '=', 'pending')
                     ->FilterDate(request()->input('from'), request()->input('to'));
             }
         }
 
         $subdapertement = "";
         $test = [];
+        // dd($proposalWm->get());
         foreach ($proposalWm->get() as $key => $data) {
             // dd($data->group_unit);
             if ($data->group_unit == "1") {
@@ -781,7 +790,8 @@ class ProposalWmController extends Controller
         tblpelanggan.telp,
         tblpelanggan.idareal,
         subdapertements.name,
-        dapertements.name as dapertement_name
+        dapertements.name as dapertement_name,
+        dapertements.id as dapertement_id
         ')
             ->with('staff')->join('proposal_wms', 'proposal_wms.id', '=', 'action_wms.proposal_wm_id')
             ->join('ptabroot_ctm.tblpelanggan', 'proposal_wms.customer_id', '=', 'tblpelanggan.nomorrekening')

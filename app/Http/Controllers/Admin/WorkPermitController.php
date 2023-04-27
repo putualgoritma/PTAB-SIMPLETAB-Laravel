@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\AbsenceRequest;
 use App\AbsenceRequestLogs;
+use App\Holiday;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
 use App\Requests_file;
 use App\Staff;
 use App\User;
+use OneSignal;
+use App\Traits\WablasTrait;
+use App\wa_history;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\DB;
 
 class WorkPermitController extends Controller
 {
+    use WablasTrait;
     public function index(Request $request)
     {
 
@@ -22,7 +30,9 @@ class WorkPermitController extends Controller
         $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.category', 'permission')
             ->FilterStatus($request->status)
-            ->orderBy('absence_requests.created_at', 'DESC');
+            ->FilterDateStart($request->from, $request->to);
+        // ->orderBy('staffs.NIK')
+        // ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());
         if ($request->ajax()) {
             //set query
@@ -65,7 +75,15 @@ class WorkPermitController extends Controller
                 return $row->end ? $row->end : "";
             });
             $table->editColumn('type', function ($row) {
-                return $row->type ? $row->type : "";
+                if ($row->type == "sick") {
+                    return "sakit";
+                } else if ($row->type == "sick_proof") {
+                    return "sakit dengan keterang";
+                } else if ($row->type == "other") {
+                    return "Izin";
+                } else {
+                    return "-";
+                }
             });
             $table->editColumn('status', function ($row) {
                 return $row->status ? $row->status : "";
@@ -150,12 +168,73 @@ class WorkPermitController extends Controller
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'reject']);
         $d = AbsenceRequest::where('id', $id)->first();
+        $absenceLog = AbsenceLog::where('absence_request_id', $id)->get();
+        foreach ($absenceLog as $d) {
+            $deleteAbsence = Absence::where('id', $d->id)->first();
+            if ($deleteAbsence) {
+                Absence::where('id', $d->id)->delete();
+            }
+        }
+        AbsenceLog::where('absence_request_id', $id)->delete();
+        $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " ditolak";
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "permisi anda tanggal " . $d->start . " disetujui",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
+
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // untuk notif end
+
+
         return redirect()->back();
     }
     public function approve($id)
@@ -164,15 +243,114 @@ class WorkPermitController extends Controller
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
         $d = AbsenceRequest::where('id', $id)->first();
+
+        // buat absence log start
+
+        $absenceRequest =  AbsenceRequest::where('id', $id)->first();
+        // dd($absenceRequest);
+        $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " disetujui";
+        // if (date('Y-m-d') >= $absenceRequest->start) {
+        $begin = strtotime($absenceRequest->start);
+        $end   = strtotime($absenceRequest->end);
+        // dd($begin, $end);
+        for ($i = $begin; $i <= $end; $i = $i + 86400) {
+            $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+            if ($holiday) {
+                if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+                    // dd('test');
+                    $ab_id = Absence::create([
+                        'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                        'staff_id' => $absenceRequest->staff_id,
+                        'created_at' => date('Y-m-d H:i:s', $i),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    AbsenceLog::create([
+                        'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                        'lat' => '',
+                        'lng' => '',
+                        'absence_request_id' => $absenceRequest->id,
+                        'register' => date('Y-m-d', $i),
+                        'absence_id' => $ab_id->id,
+                        'duration' => '',
+                        'status' => ''
+                    ]);
+                }
+            }
+            // dd($holiday);
+            // }
+        }
+        // dd('hhh');
+        // buat absence log end
+        $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
         MessageLog::create([
             'staff_id' => $d->staff_id,
-            'memo' => "permisi anda tanggal " . $d->start . " disetujui",
+            'memo' => $message,
             'type' => 'message',
             'status' => 'pending',
         ]);
 
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        if ($d->staff_id > 0) {
+            $staff = Staff::where('id', $d->staff_id)->first();
+            $phone_no = $staff->phone;
+        } else {
+            $phone_no = $admin->phone;
+        }
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        // DB::table('wa_histories')->insert($wa_data);
+        // $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        // if (!empty(json_decode($wa_sent)->data->messages)) {
+        //     $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        // }
+        // foreach ($array_merg as $key => $value) {
+        //     if (!empty($value->ref_id)) {
+        //         wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+        //     }
+        // }
+
+        //onesignal notif                                
+        // if (!empty($id_onesignal)) {
+        //     OneSignal::sendNotificationToUser(
+        //         $message,
+        //         $id_onesignal,
+        //         $url = null,
+        //         $data = null,
+        //         $buttons = null,
+        //         $schedule = null
+        //     );
+        // }
+        // untuk notif end
+
+
         return redirect()->back();
     }
+
+    public function sickProof($id)
+    {
+        $absenceRequest =  AbsenceRequest::where('id', $id)
+            ->update(['type' => 'sick_proof']);
+
+        return redirect()->back();
+    }
+
     public function destroy($id)
     {
         abort_unless(\Gate::allows('workpermit_delete'), 403);

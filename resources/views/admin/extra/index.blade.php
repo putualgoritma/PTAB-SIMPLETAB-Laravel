@@ -3,7 +3,7 @@
 {{-- @can('extra_create') --}}
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-3">
-            <a class="btn btn-success" href="{{ route('admin.extra.create',['type'=>'extraIn']) }}">
+            <a class="btn btn-success" href="{{ route('admin.extra.create') }}">
                 {{ trans('global.add') }} {{ trans('global.extra.title_singular') }}
             </a>
         </div>
@@ -16,25 +16,55 @@
         {{ trans('global.extra.title_singular') }} {{ trans('global.list') }}
     </div>
     <div class="card-body">
-    <div class="form-group">
-        <div class="col-md-6">
-             <form action="" id="filtersForm">
-                <div class="input-group">
-                    <select id="status" name="status" class="form-control">
-                        <option value="">== Semua Status ==</option>
-                        <option value="pending">pending</option>
-                        <option value="approve">approve</option>
-                        <option value="active">active</option>
-                        <option value="reject">reject</option>
-                        <option value="close">close</option>
-                    </select>
-                    <span class="input-group-btn">
-                    &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
-                    </span>
-                </div>                
-             </form>
-             </div> 
-        </div>
+        <div class="form-group">
+            <div class="col-md-12">
+                 <form action="" id="filtersForm">
+                    <div class="input-group">
+                    <div class="col-md-6">
+                  
+                    <label for="">Status</label>  
+                       
+                        <select id="status" name="status" class="form-control">
+                            <option value="">== Semua Status ==</option>
+                            <option value="pending">pending</option>
+                            <option value="approve">approve</option>
+                            <option value="active">active</option>
+                            <option value="reject">reject</option>
+                            <option value="close">close</option>
+                        </select>
+                    </div>   
+              
+    
+    
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Dari Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="from" placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from" value = "{{request()->input('from') ? request()->input('from') : ""}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sampai Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="to" placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{request()->input('to') ? request()->input('to') :  date('Y-m-d')}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+                        <span class="input-group-btn">
+                        &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
+                        </span>
+                                
+                 </form>
+                 </div> 
+            </div>
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-extra">
                 <thead>
@@ -66,6 +96,9 @@
                         </th>
                         <th>
                             {{ trans('global.extra.fields.status') }}
+                        </th>
+                        <th>
+                            {{ trans('global.extra.fields.created_at') }}
                         </th>
                    
                         {{-- <th>
@@ -136,6 +169,8 @@
       url: "{{ route('admin.extra.index') }}",
       data: {
         'status': $("#status").val(),
+        'from': $("#from").val(),
+        'to': $("#to").val(),
       },
       dataType: "JSON"
     },
@@ -148,10 +183,13 @@
         { data: 'start', name: 'start' },
         { data: 'description', name: 'description' },
         { data: 'status', name: 'status' },
+        { data: 'created_at', name: 'created_at' },
         // { data: 'updated_at', name: 'updated_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,
+    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    "order": [[ 8, "desc" ]]
   };
 
   $('.datatable-extra').DataTable(dtOverrideGlobals);

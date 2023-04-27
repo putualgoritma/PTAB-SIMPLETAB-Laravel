@@ -21,11 +21,20 @@
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
                 <?php 
-                $mulai  = date_create($ticket->created_at);
-                $selesai = $ticket->delegated_at != null ? date_create($ticket->delegated_at) : date_create($ticket->created_at);
-                $hasil  = date_diff( $mulai, $selesai );
+
+$awal  = strtotime($ticket->action[0]->start);
+$akhir = strtotime($ticket->action[0]->end);
+$diff  = $akhir - $awal;
+$jam = floor($diff  / (60 * 60));
+$menit = $diff - ( $jam * (60 * 60) );
+$detik = $diff % 60;
+
+//                 $mulai  = date_create();
+//                 $selesai = $ticket->action[0]->start != null ? date_create() : date('Y-m-d H:i:s');
+//                 $hasil  = date_diff( $mulai, $selesai );
+                $hasil = sprintf("%02d",$jam).':'.sprintf("%02d", floor( $menit / 60 )).':'.sprintf("%02d",$detik);
             ?>
-                <span class="v103_249">{{$hasil->format('%H:%I:%S')}}</span>
+                <span class="v103_249">{{$hasil}}</span>
                 <span class="v103_250"></span>
                 <span class="v103_251"></span>
                 <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
@@ -62,7 +71,7 @@
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
-                <span class="v103_249">{{$hasil->format('%H:%I:%S')}}</span>
+                <span class="v103_249">{{$hasil}}</span>
                 <span class="v103_250"></span>
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
@@ -99,7 +108,7 @@
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
-                <span class="v103_249">{{$hasil->format('%H:%I:%S')}}</span>
+                <span class="v103_249">{{$hasil}}</span>
                 <span class="v103_250"></span>
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
@@ -136,7 +145,7 @@
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
-                <span class="v103_249">{{$hasil->format('%H:%I:%S')}}</span>
+                <span class="v103_249">{{$hasil}}</span>
                 <span class="v103_250"></span>
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>

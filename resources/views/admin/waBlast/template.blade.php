@@ -35,6 +35,23 @@
                 @endif
             </div>   
 
+            <div class="form-group">
+                <button type="button" class="btn btn-primary image_group" name="add" id="image_group"><i class="fas fa-plus"> Tambah File</i></button>
+                <label>Gambar</label>
+                
+                <div id="image" class="p-3 mb-2">
+                   </div>
+              </div>
+
+              
+            <div class="form-group">
+                <button type="button" class="btn btn-primary file_group" name="add" id="file_group"><i class="fas fa-plus"> Tambah File</i></button>
+                <label>File</label>
+                
+                <div id="file" class="p-3 mb-2">
+                   </div>
+              </div>
+
             <div class="row">
         @php
             $n = 1;
@@ -160,4 +177,58 @@
 // }
 
 </script>
+
+
+<script type="text/javascript">
+
+    var i=1; 
+                  $('#image_group').click(function(){   
+                  
+                    // alert(i)
+                    if(i <= 3){
+                        i++;  
+                    $('#image').append('<div id="image'+i+'" ><div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}"><label for="image">Gambar</label><div class="custom-file"><input id="image" name="image[]" accept="image/png, image/jpeg,, image/jpg" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" idi="'+i+'" class="btn btn-danger btn_removeimage"><i class="fas fa-minus"> hapus</i></button></div>');                
+                       $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+                    }
+    
+                    });
+    
+                    $(document).on('click','.btn_removeimage', function(){ 
+                    var button_id = $(this).attr("idi"); 
+                    i--;
+                       $('#image'+button_id+'').remove();  
+                  });  
+    
+
+                  var f=1; 
+                  $('#file_group').click(function(){   
+                  
+                    // alert(i)
+                    if(f <= 3){
+                        f++;  
+                    $('#file').append('<div id="file'+i+'" ><div class="form-group {{ $errors->has('file') ? 'has-error' : '' }}"><label for="file">File(Seperti Pdf, Excel, ataupun Word)</label><div class="custom-file"><input id="file" name="file[]" type="file" class="custom-file-input" id="customFile" required><label class="custom-file-label" for="customFile">Choose file</label></div></div><button type="button" name="remove" idi="'+i+'" class="btn btn-danger btn_removefile"><i class="fas fa-minus"> hapus</i></button></div>');                
+                       $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+                    }
+    
+                    });
+    
+                    $(document).on('click','.btn_removefile', function(){ 
+                    var button_id = $(this).attr("idi"); 
+                    f--;
+                       $('#file'+button_id+'').remove();  
+                  });  
+    
+    
+    
+        $(document).ready(function() {
+          $("#message").emojioneArea();
+        });
+      </script>
+
 @endsection

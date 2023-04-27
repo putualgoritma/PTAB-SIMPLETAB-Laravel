@@ -15,7 +15,7 @@
         }
 .kiri {
             margin-left: 30px;
-            width: 25%;
+            width: 30%;
             /* background-color: rgb(5, 0, 69); */
             align-items: left;
             /* text-align: center; */
@@ -90,7 +90,7 @@
 <body onload="onload()" >
     {{-- <img src="{{ "https://simpletabadmin.ptab-vps.com/images/QRCodeSimTab.png" }}" alt="" style="height: 100px; margin-left: 800px; ">
     <br> --}}
-    @for ($i = 0; $i < 5 ; $i++)
+    {{-- @for ($i = 0; $i < 5 ; $i++) --}}
     <div class="" style="page-break-inside: avoid; ">
     <img src="{{ "https://simpletabadmin.ptab-vps.com/images/kopSuratPDAM.PNG" }}" alt="" style="width: 800px; height: 200px; ">
     {{-- <div class="title" style="border-bottom : 1px">
@@ -142,6 +142,17 @@
 <div class="grid-item">
     : {{ $proposalWm->nomorrekening }}
 </div>
+
+<div class="grid-item">
+    Area
+</div>
+
+
+<div class="grid-item">
+    : {{ $proposalWm->idareal }}
+</div>
+
+
 <div class="grid-item">
     No. Water Meter Lama
 </div>
@@ -183,6 +194,8 @@ Merk Water Meter Lama
     <div class="grid-item">
         : {{ $proposalWm->standWM2 }}
     </div>
+
+  
     </div>
 
     <p>Pergantian Water Meter dilaksanakan karena : @if ($proposalWm->status_wm == "101")
@@ -202,23 +215,46 @@ Water Meter mati
             <div class="kiri">
                 <div class="" style="text-align : center">Pengawas</div>
                 <div class="jabatan"></div>
-                <div class="" style="text-align : center; margin-bottom : 70px;"></div>
-        <div class="nama">{{ $staffs[count($staffs)-1]->staff_name }}</div>
+               
+                @if($proposalWm->dapertement_id == "2")
+                <div class="" style="text-align : center; margin-bottom : 10px;"></div>
+                <img src="{{ "https://simpletabadmin.ptab-vps.com/ttd/pengawas.png" }}" alt="" style="height: 80px; margin-left : 80px">
+               @else
+               <div class="" style="text-align : center; margin-bottom : 80px;"></div>
+                @endif
+                <div class="nama">{{ count($staffs) > 0 ? $staffs[count($staffs)-1]->staff_name : "" }}</div>
+        <div class="jabatan" style="margin-bottom : 10px"></div>
+
         <div class="nip" style = "border-top-style: solid; "></div>
             </div>
         
             <div class="kanan">
                 {{-- <div class="" style="text-align : center">Tabanan,</div> --}}
-                <div class="" style="text-align : center">Dilaksanakan oleh</div>
+                <div class="" style="text-align : center">Dikerjakan Oleh</div>
+               
+                
+                @if($proposalWm->dapertement_id == "2")
+                <div class="jabatan" style="margin-bottom : 10px"></div>
+                <img src="{{ "https://simpletabadmin.ptab-vps.com/ttd/pihak%20ketiga.png" }}" alt="" style="height: 80px; margin-left : 80px">
+                @else
                 <div class="jabatan" style="margin-bottom : 80px"></div>
-        <div class="nama" style = "border-bottom-style: solid; "></div>
+                @endif
+                <div class="nama" style = "border-bottom-style: solid; ">Pihak Ketiga</div>
+        
             </div>
         </div>
         <div class="tengah">
             <div class="" style="text-align : center">Mengetahui</div>
-            <div class="jabatan" style="margin-bottom : 80px; text-align : center"></div>
+            {{-- <div class="jabatan" style="margin-bottom : 80px; text-align : center"></div> --}}
+            <div class="jabatan" style="margin-bottom : 10px; text-align : center"></div>
         <div class="nama"></div>
-
+        @if($proposalWm->dapertement_id == "2")
+        <div class="jabatan" style="margin-bottom : 10px; text-align : center"></div>
+            <img src="{{ "https://simpletabadmin.ptab-vps.com/ttd/distribusi.png" }}" alt="" style="height: 80px; margin-left : 80px">
+      @else
+      <div class="jabatan" style="margin-bottom : 80px; text-align : center"></div>
+            @endif
+      
         <div class="nama" style = "border-bottom-style: solid; ">{{ $proposalWm->dapertement_name }}</div>
         {{-- <div class="nip" style = "border-top-style: solid; ">NIK.</div> --}}
         </div>
@@ -234,7 +270,7 @@ Water Meter mati
     <p>&nbsp &nbsp &nbsp &nbsp 4. Bag. SPI</p> --}}
     <img src="{{ "https://simpletabadmin.ptab-vps.com/images/QRCodeSimTab.png" }}" alt="" style="height: 80px; margin-left: 700px;">
 </div>
-    @endfor
+    {{-- @endfor --}}
 <script>
     onload = function (){
         window.print();

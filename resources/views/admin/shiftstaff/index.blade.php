@@ -108,7 +108,7 @@ $(document).ready(function () {
                 '</div>'+
 
                 '<div class="form-group">'+
-                    '<label for="shift_group_id">Staff*</label>'+
+                    '<label for="shift_group_id">Shift*</label>'+
                     '<select id="shift_group_id" name="shift_group_id" class="form-control">'+
                         '@foreach ($sg as $data)'+
             '<option value="{{$data->id}}"> {{$data->title}} </option>'+  

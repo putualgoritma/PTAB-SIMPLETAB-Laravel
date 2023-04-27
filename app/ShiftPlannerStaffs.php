@@ -21,7 +21,7 @@ class ShiftPlannerStaffs extends Model
 
     public function scopeFilterJob($query, $job)
     {
-        if ($job != '' && $job != '0') {
+        if ($job != '' && $job != '0' && $job != null) {
             $query->where('shift_groups.job_id', '=', $job);
         }
         return $query;
@@ -33,5 +33,14 @@ class ShiftPlannerStaffs extends Model
             $query->where('shift_groups.work_unit_id', '=', $WorkUnit);
         }
         return $query;
+    }
+    public function scopeFilterSubdapertement($query, $subdapertement, $job)
+    {
+        if ($job == '' || $job == '0' || $job == null) {
+            if ($subdapertement != '' && $subdapertement != '') {
+                $query->where('shift_groups.subdapertement_id', $subdapertement);
+            }
+            return $query;
+        }
     }
 }

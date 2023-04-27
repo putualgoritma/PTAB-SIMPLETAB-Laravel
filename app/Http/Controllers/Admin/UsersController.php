@@ -30,12 +30,17 @@ class UsersController extends Controller
         $roles = Role::all()->pluck('title', 'id');
         $dapertements = Dapertement::all();
 
-        return view('admin.users.create', compact('roles','dapertements'));
+        return view('admin.users.create', compact('roles', 'dapertements'));
     }
 
     public function store(StoreUserRequest $request)
     {
         abort_unless(\Gate::allows('user_create'), 403);
+        $validated = $request->validate([
+            'email' => 'required|unique:users|max:255'
+            // 'body' => 'required',
+        ]);
+
 
         $user = User::create($request->all());
         $user->roles()->sync($request->input('roles', []));
@@ -59,7 +64,12 @@ class UsersController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
+
         abort_unless(\Gate::allows('user_edit'), 403);
+        $validated = $request->validate([
+            'email' => 'required|unique:users,email,' . $user->id . ',id',
+            // 'body' => 'required',
+        ]);
 
         $user->update($request->all());
         $user->roles()->sync($request->input('roles', []));

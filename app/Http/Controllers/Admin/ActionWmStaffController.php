@@ -61,12 +61,13 @@ class ActionWmStaffController extends Controller
         // $staffs = Staff::where('dapertement_id', $action->dapertement_id)->with('action')->get();
 
         $action_staffs_list = DB::table('staffs')
-            ->join('action_wm_staff', function ($join) {
+            ->join('action_wm_staff', function ($join) use ($id) {
                 $join->on('action_wm_staff.staff_id', '=', 'staffs.id')
                     ->join('action_wms', 'action_wm_staff.action_wm_id', '=', 'action_wms.id')
                     ->join('proposal_wms', 'proposal_wms.id', '=', 'action_wms.proposal_wm_id')
                     ->where('proposal_wms.status', '!=', 'close')
-                    ->Where('proposal_wms.status', '!=', 'reject');
+                    ->Where('proposal_wms.status', '!=', 'reject')
+                    ->where('action_wms.id', '=', $id);
             })
 
             ->get();

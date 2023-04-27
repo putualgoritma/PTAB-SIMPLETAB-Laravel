@@ -75,6 +75,23 @@
 
                 <tr>
                     <th>
+                        {{ trans('global.workPermit.fields.type') }}
+                    </th>
+                    <td>
+                        @if ($workPermit->type == "sick")
+                            sakit;
+                        @elseif ($workPermit->type == "sick_proof") 
+                            sakit dengan keterang
+                        @elseif ($workPermit->type == "other") 
+                            Izin
+                        @else 
+                            -
+                        @endif
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>
                         {{ trans('global.workPermit.fields.file') }}
                     </th>
                     <th>
@@ -82,12 +99,21 @@
                         @foreach ($file as $item)
                             {{-- @foreach (json_decode($image->image) as $item) --}}
                             <div class="col-md-5">
-                                <img  height="250px" width="350px"  src="{{"https://simpletabadmin.ptab-vps.com/$item->image"}}" alt="">
+                                <img  height="250px" width="350px"  src="{{"https://simpletabadmin.ptab-vps.com/images/RequestFile/$item->image"}}" alt="">
                                 <p>{{ $item->type == "request_log_in" ? "Bukti Check In" : "Bukti Check Out" }}</p>
-                                <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/$item->image"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                                <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/images/RequestFile/$item->image"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
                             </div>
                             {{-- @endforeach --}}
                         @endforeach
+
+                        @if ($workPermit->type == 'sick' && $workPermit->status != 'pending' && $workPermit->status != 'reject')
+<form action="{{ route('admin.workPermit.sickProof', $workPermit->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+    <input type="hidden" name="_method" value="POST">
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <input type="submit" class="btn btn-xs btn-primary" value="Sakit Dengan Keterangan">
+</form>
+    
+@endif
                     {{-- </div> --}}
                 </th>
                 </tr>

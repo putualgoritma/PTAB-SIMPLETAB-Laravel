@@ -36,6 +36,8 @@ class AbsenceExport implements FromCollection, WithHeadings
             'Off_Duty',
             'Clock_in',
             'Clock_out',
+            'Keterangan',
+            'Memo'
         ];
     }
 }

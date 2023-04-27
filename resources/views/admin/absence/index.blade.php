@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 @section('content')
 {{-- @can('absence_create') --}}
-    <div style="margin-bottom: 10px;" class="row">
+    {{-- <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route('admin.absence.create') }}">
                 {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}
             </a>
         </div>
-    </div>
+    </div> --}}
     
 {{-- @endcan --}}
 <div class="card">
@@ -17,18 +17,66 @@
     </div>
     <div class="card-body">
     <div class="form-group">
-        <div class="col-md-6">
+        <div class="col-md-12">
              <form action="" id="filtersForm">
                 <div class="input-group">
-                    <select id="type" name="type" class="form-control">
-                        <option value="">== Semua Tipe ==</option>
-                        <option value="absence">Pelanggan</option>
-                        <option value="public">Umum</option>
-                    </select>
-                    <span class="input-group-btn">
+               
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Dari Tanggal</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                                <input id="from" placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from" value = "{{request()->input('from') ? request()->input('from') : date('Y-m-d')}}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Sampai Tanggal</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                                <input id="to" placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{request()->input('to') ? request()->input('to') :"" }}">
+                            </div>
+                        </div>
+                     
+                </div> 
+
+                <div class="col-md-6">
+                <label>Staff</label>
+                <select id="staff_id" name="staff_id" class="form-control">
+                    <option value="">== Semua Staff ==</option>
+                    @foreach ($staffs as $staff )
+                    <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                    @endforeach
+                   
+                </select> 
+
+                <label>Dapertement</label>
+                <select id="dapertement" name="dapertement" class="form-control">
+                    <option value="">== Semua dapertement ==</option>
+                    @foreach ($dapertements as $dapertement )
+                    <option value="{{ $dapertement->id }}">{{ $dapertement->name }}</option>
+                    @endforeach
+                   
+                </select> 
+
+                <label>Categori</label>
+                <select id="absence_category_id" name="absence_category_id" class="form-control">
+                    <option value="">== Semua categori ==</option>
+                    @foreach ($absence_categories as $absence_category )
+                    <option value="{{ $absence_category->id }}">{{ $absence_category->title }}</option>
+                    @endforeach
+                   
+                </select> 
+            </div> 
+                 
+                </div>  
+                <span class="input-group-btn">
                     &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
-                    </span>
-                </div>                
+                    </span>              
              </form>
              </div> 
         </div>
@@ -46,8 +94,12 @@
                             {{ trans('global.absence.fields.id') }}
                         </th> --}}
                         <th>
+                            NIK
+                        </th>
+                        <th>
                             {{ trans('global.absence.fields.day') }}
                         </th>
+                       
                         <th>
                             {{ trans('global.absence.fields.staff') }}
                         </th>
@@ -63,11 +115,14 @@
                         <th>
                             {{ trans('global.absence.fields.absence_category') }}
                         </th>
-                        <th>
+                        {{-- <th>
                             {{ trans('global.absence.fields.value') }}
-                        </th>
+                        </th> --}}
                         <th>
                             {{ trans('global.absence.fields.late') }}
+                        </th>
+                        <th>
+                            Work Type
                         </th>
                         <th>
                             {{ trans('global.absence.fields.image') }}
@@ -90,11 +145,39 @@
 <script>
     $(function () {
         let searchParams = new URLSearchParams(window.location.search)
-        let type = searchParams.get('type')
-        if (type) {
-            $("#type").val(type);
+        let staff_id = searchParams.get('staff_id')
+        if (staff_id) {
+            $("#staff_id").val(staff_id);
         }else{
-            $("#type").val('');
+            $("#staff_id").val('');
+        }
+
+        let absence_category_id = searchParams.get('absence_category_id')
+        if (absence_category_id) {
+            $("#absence_category_id").val(absence_category_id);
+        }else{
+            $("#absence_category_id").val('');
+        }
+
+        let dapertement = searchParams.get('dapertement')
+        if (dapertement) {
+            $("#dapertement").val(dapertement);
+        }else{
+            $("#dapertement").val('');
+        }
+
+        let from = searchParams.get('from')
+        if (from) {
+            $("#from").val(from);
+        }else{
+            $("#from").val('');
+        }
+
+        let to = searchParams.get('to')
+        if (to) {
+            $("#to").val(to);
+        }else{
+            $("#to").val('');
         }
 
         // console.log('type : ', type);
@@ -139,27 +222,34 @@
     ajax: {
       url: "{{ route('admin.absence.index') }}",
       data: {
-        'type': $("#type").val(),
+        'staff_id': $("#staff_id").val(),
+        'from': $("#from").val(),
+        'to': $("#to").val(),
+        'dapertement': $("#dapertement").val(),
+        'absence_category_id' : $("#absence_category_id").val(),
       },
       dataType: "JSON"
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
-        { data: 'day', name: 'day' },
-        { data: 'staff', name: 'staff' },
+        { data: 'DT_RowIndex', name: 'no', searchable : false },
+        { data: 'NIK', name: 'NIK', searchable : false  },
+        { data: 'day', name: 'days.name' },
+        { data: 'staff', name: 'staffs.name' },
         { data: 'lat', name: 'lat' },
         { data: 'lng', name: 'lng' },
         { data: 'register', name: 'register' },
-        { data: 'absence_category', name: 'absence_category' },
-        { data: 'value', name: 'value' },
+        { data: 'absence_category', name: 'absence_category_id' },
+        // { data: 'value', name: 'value' },
         { data: 'late', name: 'late' },
+        { data: 'work_type', name: 'work_types.type' },
+        
         { data: 'image', name: 'image' ,  render: function( data, type, full, meta ) {
                         return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
-                    }},
+                    }, searchable : false},
         { data: 'staff_image', name: 'staff_image' ,  render: function( data, type, full, meta ) {
                         return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
-                    }},
+                    }, searchable : false},
         // { data: 'updated_at', name: 'updated_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],

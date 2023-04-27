@@ -13,6 +13,7 @@
                 {{-- get lnglat --}}
                 <input type="hidden" id="lat" value="{{ $work_unit->lat }}">
                 <input type="hidden" id="lng" value="{{ $work_unit->lng }}">
+                <input type="hidden" id="radius" value="{{ $work_unit->radius }}">
 
                 <tr>
                     <th>
@@ -92,11 +93,23 @@ function initMap() {
       center: myLatLng,
     });
   
-    new google.maps.Marker({
+    let marker =   new google.maps.Marker({
       position: myLatLng,
       map,
-      title: "Hello World!",
+      title: "",
     });
+
+    marker.Circle = new google.maps.Circle({
+    center: marker.getPosition(),
+    strokeColor: '#FF0000',    
+      strokeOpacity: 0.8,    
+      strokeWeight: 2,    
+      fillColor: '#FF0000',    
+      fillOpacity: 0.35, 
+    radius: parseFloat(document.getElementById("radius").value),
+    map: map,
+    editable: false
+  })
     console.log(parseFloat(document.getElementById("lng").value))
   }
 

@@ -144,6 +144,9 @@
                             No SBG
                         </th>
                         <th>
+                            Alamat
+                        </th>
+                        <th>
                             Status WM
                         </th>
                         <th>
@@ -274,20 +277,23 @@
       }
     },
     columns: [
-        { data: 'code', name: 'code',searchable : false  },
-        { data: 'idareal', name: 'idareal', searchable : false },
+        { data: 'code', name: 'proposal_wms.close_queue', searchable : false, sortable : false   },
+        { data: 'idareal', name: 'tblpelanggan.idareal' },
         { data: 'customer_id', name: 'proposal_wms.customer_id' },
-        { data: 'status_wm', name: 'status_wm', searchable : false  },
-        { data: 'priority', name: 'priority', searchable : false  },
-        { data: 'periode', name: 'periode', searchable : false  },
-        { data: 'created_at', name: 'created_at' },
-        { data: 'updated_at', name: 'updated_at' },
+        { data: 'alamat', name: 'tblpelanggan.alamat' },
+        { data: 'status_wm', name: 'proposal_wms.status_wm'  },
+        { data: 'priority', name: 'proposal_wms.priority'  },
+        { data: 'periode', name: 'proposal_wms.periode', searchable : false, sortable : false  },
+        { data: 'created_at', name: 'proposal_wms.created_at' },
+        { data: 'updated_at', name: 'proposal_wms.updated_at' },
         // { data: 'status', name: 'status' },
         { data: 'status', render: function (dataField) { return dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled>' +dataField+ '</button>' : dataField === 'close2' ?'<button type="button" class="btn btn-secondary btn-sm" disabled>' +'close'+ '</button>' : dataField === 'active' ?
         '<button type="button" class="btn btn-success btn-sm" disabled> active </button>': dataField === 'close' ?'<button type="button" class="btn btn-primary btn-sm" disabled> close </button>': '<button type="button" class="btn btn-secondary btn-sm" disabled>' +dataField+ '</button>'; }, searchable : false  },
         { data: 'actions', name: '{{ trans('global.actions') }}', searchable : false  }
     ],
     pageLength: 100,
+    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    "order": [[ 8, "desc" ]]
   };
 
   $('.datatable-customer').DataTable(dtOverrideGlobals);

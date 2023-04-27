@@ -16,25 +16,55 @@
         {{ trans('global.workPermit.title_singular') }} {{ trans('global.list') }}
     </div>
     <div class="card-body">
-    <div class="form-group">
-        <div class="col-md-6">
-             <form action="" id="filtersForm">
-                <div class="input-group">
-                    <select id="status" name="status" class="form-control">
-                        <option value="">== Semua Status ==</option>
-                        <option value="pending">pending</option>
-                        <option value="approve">approve</option>
-                        <option value="active">active</option>
-                        <option value="reject">reject</option>
-                        <option value="close">close</option>
-                    </select>
-                    <span class="input-group-btn">
-                    &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
-                    </span>
-                </div>                
-             </form>
-             </div> 
-        </div>
+        <div class="form-group">
+            <div class="col-md-12">
+                 <form action="" id="filtersForm">
+                    <div class="input-group">
+                    <div class="col-md-6">
+                  
+                    <label for="">Status</label>  
+                       
+                        <select id="status" name="status" class="form-control">
+                            <option value="">== Semua Status ==</option>
+                            <option value="pending">pending</option>
+                            <option value="approve">approve</option>
+                            <option value="active">active</option>
+                            <option value="reject">reject</option>
+                            <option value="close">close</option>
+                        </select>
+                    </div>   
+              
+    
+    
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Dari Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="from" placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from" value = "{{request()->input('from') ? request()->input('from') : ""}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sampai Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="to" placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{request()->input('to') ? request()->input('to') :  date('Y-m-d')}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+                        <span class="input-group-btn">
+                        &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
+                        </span>
+                                
+                 </form>
+                 </div> 
+            </div>
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-workPermit">
                 <thead>
@@ -66,8 +96,16 @@
                             {{ trans('global.workPermit.fields.description') }}
                         </th>
                         <th>
+                            {{ trans('global.workPermit.fields.type') }}
+                        </th>
+                        <th>
                             {{ trans('global.workPermit.fields.status') }}
                         </th>
+
+                        <th>
+                            {{ trans('global.workPermit.fields.created_at') }}
+                        </th>
+                        
                    
                         {{-- <th>
                             {{ trans('global.workPermit.fields.upstartd_at') }}
@@ -137,6 +175,8 @@
       url: "{{ route('admin.workPermit.index') }}",
       data: {
         'status': $("#status").val(),
+        'from': $("#from").val(),
+        'to': $("#to").val(),
       },
       dataType: "JSON"
     },
@@ -148,11 +188,16 @@
         { data: 'start', name: 'start' },
         { data: 'end', name: 'end' },
         { data: 'description', name: 'description' },
+        { data: 'type', name: 'type' },
         { data: 'status', name: 'status' },
+        { data: 'created_at', name: 'created_at' },
+       
         // { data: 'upstartd_at', name: 'upstartd_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,
+    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    "order": [[ 8, "desc" ]]
   };
 
   $('.datatable-workPermit').DataTable(dtOverrideGlobals);
