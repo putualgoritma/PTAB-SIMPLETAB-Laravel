@@ -131,8 +131,9 @@ echo "<script> alert('{$errors->first()}')</script>";
 
 
                     </select>
+                </div>
 
-
+                <div class="input-group">
 
                     <select id="departement" name="departement" class="form-control">
 
@@ -156,6 +157,11 @@ echo "<script> alert('{$errors->first()}')</script>";
 
                     </select>
 
+
+                </div>
+
+                <div class="input-group">
+
                     <select id="subdepartement" name="subdepartement" class="form-control">
 
 
@@ -174,7 +180,20 @@ echo "<script> alert('{$errors->first()}')</script>";
 
                     </select>
 
+                </div>
 
+
+                <div class="input-group">
+
+                   <input class="form-control" id="from" type="date" name="from" value="{{ request()->input('from') }}">
+
+                </div>
+
+                <div class="input-group">
+
+                    <input class="form-control" id="to" type="date" name="to" value="{{ request()->input('to') }}">
+ 
+                 </div>
 
                     <span class="input-group-btn">
 
@@ -699,7 +718,8 @@ echo "<script> alert('{$errors->first()}')</script>";
 
 
         'status': $("#status").val(),
-
+        'from' : $("#from").val(),
+'to' : $("#to").val(),
 
 
         'departement': $("#departement").val(),
