@@ -302,144 +302,152 @@ class actionWmApiController extends Controller
     // *untuk Bukti Sebelum Pengerjaan
     public function actionWmNewImageUpdate(Request $request)
     {
-        $img_path = "/images/WaterMeter";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         $dataForm = json_decode($request->form);
-        $responseImage = '';
-        $code = date('y') . date('d');
-        $dataQtyImagePreWork = json_decode($request->qtyImagePreWork);
-        for ($i = 1; $i <= $dataQtyImagePreWork; $i++) {
-            if ($request->file('imagePreWork' . $i)) {
-                $resourceImage = $request->file('imagePreWork' . $i);
-                $nameImage = $request->file('imagePreWork' . $i)->getClientOriginalName();
-                $file_extImage = $request->file('imagePreWork' . $i)->extension();
-                $nameImage = str_replace(" ", "-", $nameImage);
 
-                $img_name = $img_path . "/" . $nameImage . "-" . $i . "." . $file_extImage;
-                $folder_upload = 'images/WaterMeter';
-                $resourceImage->move($folder_upload, $img_name);
+        if ($dataForm->noWM1 != "" && $dataForm->brandWM1 != "" && $dataForm->standWM1 != "" && $dataForm->noWM2 != "" && $dataForm->brandWM2 != "" && $dataForm->standWM2 != "" && $request->qtyImageTool != "" && $request->qtyImagePreWork != "") {
+            $img_path = "/images/WaterMeter";
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            // $dataForm = json_decode($request->form);
+            $responseImage = '';
+            $code = date('y') . date('d');
+            $dataQtyImagePreWork = json_decode($request->qtyImagePreWork);
+            for ($i = 1; $i <= $dataQtyImagePreWork; $i++) {
+                if ($request->file('imagePreWork' . $i)) {
+                    $resourceImage = $request->file('imagePreWork' . $i);
+                    $nameImage = $request->file('imagePreWork' . $i)->getClientOriginalName();
+                    $file_extImage = $request->file('imagePreWork' . $i)->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
 
-                $dataImageNamePreWork[] = $img_name;
-            } else {
-                $responseImage = 'Image tidak di dukung';
-                break;
-            }
-        }
+                    $img_name = $img_path . "/" . $nameImage . "-" . $i . "." . $file_extImage;
+                    $folder_upload = 'images/WaterMeter';
+                    $resourceImage->move($folder_upload, $img_name);
 
-        $dataQtyImageTool = json_decode($request->qtyImageTool);
-        for ($i = 1; $i <= $dataQtyImageTool; $i++) {
-            if ($request->file('imageTool' . $i)) {
-                $resourceImage = $request->file('imageTool' . $i);
-                $nameImage = $request->file('imageTool' . $i)->getClientOriginalName();
-                $file_extImage = $request->file('imageTool' . $i)->extension();
-                $nameImage = str_replace(" ", "-", $nameImage);
-
-                $img_name = $img_path . "/" . $nameImage . "-" . $i . "." . $file_extImage;
-                $folder_upload = 'images/WaterMeter';
-                $resourceImage->move($folder_upload, $img_name);
-
-                $dataImageNameTool[] = $img_name;
-            } else {
-                $responseImage = 'Image tidak di dukung';
-                break;
-            }
-        }
-
-        if ($responseImage != '') {
-            return response()->json([
-                'message' => $responseImage,
-            ]);
-        }
-
-        try {
-
-            // $ticket = LockAction::create($data);
-            // if ($ticket) {
-
-            $actionWm = actionWms::where('id', $dataForm->id)->first();
-            $actionWm->old_image = str_replace("\/", "/", json_encode($dataImageNamePreWork));
-            $actionWm->new_image = str_replace("\/", "/", json_encode($dataImageNameTool));
-            $actionWm->noWM1 = $dataForm->noWM1;
-            $actionWm->brandWM1 = $dataForm->brandWM1;
-            $actionWm->standWM1 = $dataForm->standWM1;
-            $actionWm->noWM2 = $dataForm->noWM2;
-            $actionWm->brandWM2 = $dataForm->brandWM2;
-            $actionWm->standWM2 = $dataForm->standWM2;
-            $actionWm->lat = $dataForm->lat;
-            $actionWm->lng = $dataForm->lng;
-            $actionWm->status = 'active';
-            $actionWm->update();
-
-            $proposal_wms = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
-            $proposalWm = $proposal_wms;
-            $customer_id =  $proposal_wms->customer_id;
-            $proposal_wms->where('id', $proposal_wms->proposal_wm_id);
-            $proposal_wms->status = 'work';
-            $proposal_wms->update();
-
-            $group_unit = Customer::join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
-                ->where('nomorrekening', $customer_id)->first()->group_unit;
-            // Wa Blast
-
-            $admin_arr = User::selectRaw('users.*, dapertements.*')
-                ->leftJoin('dapertements', 'users.dapertement_id', '=', 'dapertements.id')
-                ->join('role_user', 'users.id', '=', 'role_user.user_id')
-                ->where('group_unit', $group_unit)->where('role_user.role_id', 17)
-                ->orWhere('role_user.role_id', 14)->where('group_unit', $group_unit)
-                ->orWhere('group_unit', $group_unit)->where('role_user.role_id', 18)
-                ->orWhere('role_user.role_id', 15)->where('group_unit', $group_unit)
-                ->orWhere('group_unit', $group_unit)->where('role_user.role_id', 16)
-
-                // ->orwhere('dapertement_id', '2')->where('subdapertement_id', '0')->where('staff_id', '0')->where('group_unit', $group_unit)
-                ->get();
-            // dd($admin_arr);
-            foreach ($admin_arr as $key => $admin) {
-                $message = 'Test: ' . $admin->id . ' sedang dikerjakan';
-                //wa notif                
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($admin->staff_id > 0) {
-                    $staff = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff->phone;
+                    $dataImageNamePreWork[] = $img_name;
                 } else {
-                    $phone_no = $admin->phone;
+                    $responseImage = 'Image tidak di dukung';
+                    break;
                 }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa')
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+
+            $dataQtyImageTool = json_decode($request->qtyImageTool);
+            for ($i = 1; $i <= $dataQtyImageTool; $i++) {
+                if ($request->file('imageTool' . $i)) {
+                    $resourceImage = $request->file('imageTool' . $i);
+                    $nameImage = $request->file('imageTool' . $i)->getClientOriginalName();
+                    $file_extImage = $request->file('imageTool' . $i)->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
+
+                    $img_name = $img_path . "/" . $nameImage . "-" . $i . "." . $file_extImage;
+                    $folder_upload = 'images/WaterMeter';
+                    $resourceImage->move($folder_upload, $img_name);
+
+                    $dataImageNameTool[] = $img_name;
+                } else {
+                    $responseImage = 'Image tidak di dukung';
+                    break;
                 }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+
+            if ($responseImage != '') {
+                return response()->json([
+                    'message' => $responseImage,
+                ]);
+            }
+
+            try {
+
+                // $ticket = LockAction::create($data);
+                // if ($ticket) {
+
+                $actionWm = actionWms::where('id', $dataForm->id)->first();
+                $actionWm->old_image = str_replace("\/", "/", json_encode($dataImageNamePreWork));
+                $actionWm->new_image = str_replace("\/", "/", json_encode($dataImageNameTool));
+                $actionWm->noWM1 = $dataForm->noWM1;
+                $actionWm->brandWM1 = $dataForm->brandWM1;
+                $actionWm->standWM1 = $dataForm->standWM1;
+                $actionWm->noWM2 = $dataForm->noWM2;
+                $actionWm->brandWM2 = $dataForm->brandWM2;
+                $actionWm->standWM2 = $dataForm->standWM2;
+                $actionWm->lat = $dataForm->lat;
+                $actionWm->lng = $dataForm->lng;
+                $actionWm->status = 'active';
+                $actionWm->update();
+
+                $proposal_wms = proposalWms::where('id', $actionWm->proposal_wm_id)->first();
+                $proposalWm = $proposal_wms;
+                $customer_id =  $proposal_wms->customer_id;
+                $proposal_wms->where('id', $proposal_wms->proposal_wm_id);
+                $proposal_wms->status = 'work';
+                $proposal_wms->update();
+
+                $group_unit = Customer::join('tblwilayah', 'tblwilayah.id', '=', 'tblpelanggan.idareal')
+                    ->where('nomorrekening', $customer_id)->first()->group_unit;
+                // Wa Blast
+
+                $admin_arr = User::selectRaw('users.*, dapertements.*')
+                    ->leftJoin('dapertements', 'users.dapertement_id', '=', 'dapertements.id')
+                    ->join('role_user', 'users.id', '=', 'role_user.user_id')
+                    ->where('group_unit', $group_unit)->where('role_user.role_id', 17)
+                    ->orWhere('role_user.role_id', 14)->where('group_unit', $group_unit)
+                    ->orWhere('group_unit', $group_unit)->where('role_user.role_id', 18)
+                    ->orWhere('role_user.role_id', 15)->where('group_unit', $group_unit)
+                    ->orWhere('group_unit', $group_unit)->where('role_user.role_id', 16)
+
+                    // ->orwhere('dapertement_id', '2')->where('subdapertement_id', '0')->where('staff_id', '0')->where('group_unit', $group_unit)
+                    ->get();
+                // dd($admin_arr);
+                foreach ($admin_arr as $key => $admin) {
+                    $message = 'Test: ' . $admin->id . ' sedang dikerjakan';
+                    //wa notif                
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($admin->staff_id > 0) {
+                        $staff = StaffApi::where('id', $admin->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
+                    }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa')
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
                     }
                 }
+
+
+
+                // send notif to end
+
+                return response()->json([
+                    'message' => 'Data Water Meter Terkirim',
+                    'data' => $proposal_wms
+                ]);
+            } catch (QueryException $ex) {
+                return response()->json([
+                    'message' => 'gagal',
+                ]);
             }
-
-
-
-            // send notif to end
-
+        } else {
             return response()->json([
-                'message' => 'Data Water Meter Terkirim',
-                'data' => $proposal_wms
-            ]);
-        } catch (QueryException $ex) {
-            return response()->json([
-                'message' => 'gagal',
+                'message' => 'Mohon lengkapi data terlebih dahulu',
             ]);
         }
     }
