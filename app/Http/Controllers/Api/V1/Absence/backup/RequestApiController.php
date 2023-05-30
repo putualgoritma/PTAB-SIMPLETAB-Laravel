@@ -754,32 +754,29 @@ class RequestApiController extends Controller
 
                     if (!$holiday) {
                         if ((!in_array(date('w', $i), $jadwallibur))) {
-                            $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
-                            if (!$check_empty) {
-                                // dd('test');
-                                // $ab_id[] = [
-                                //     'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                //     'staff_id' => $absenceRequest->staff_id,
-                                //     'created_at' => date('Y-m-d H:i:s', $i),
-                                //     'updated_at' => date('Y-m-d H:i:s')
-                                // ];
-                                $ab_id = Absence::create([
-                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                    'staff_id' => $absenceRequest->staff_id,
-                                    'created_at' => date('Y-m-d H:i:s', $i),
-                                    'updated_at' => date('Y-m-d H:i:s')
-                                ]);
-                                AbsenceLog::create([
-                                    'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                                    'lat' => '',
-                                    'lng' => '',
-                                    'absence_request_id' => $absenceRequest->id,
-                                    'register' => date('Y-m-d', $i),
-                                    'absence_id' => $ab_id->id,
-                                    'duration' => '',
-                                    'status' => ''
-                                ]);
-                            }
+                            // dd('test');
+                            // $ab_id[] = [
+                            //     'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                            //     'staff_id' => $absenceRequest->staff_id,
+                            //     'created_at' => date('Y-m-d H:i:s', $i),
+                            //     'updated_at' => date('Y-m-d H:i:s')
+                            // ];
+                            $ab_id = Absence::create([
+                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                'staff_id' => $absenceRequest->staff_id,
+                                'created_at' => date('Y-m-d H:i:s', $i),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                            AbsenceLog::create([
+                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                                'lat' => '',
+                                'lng' => '',
+                                'absence_request_id' => $absenceRequest->id,
+                                'register' => date('Y-m-d', $i),
+                                'absence_id' => $ab_id->id,
+                                'duration' => '',
+                                'status' => ''
+                            ]);
                         }
                         // dd($holiday);
 
@@ -810,26 +807,22 @@ class RequestApiController extends Controller
                     // if (!$holiday) {
                     if ((in_array(date("Y-m-d", strtotime(date('Y-m-d', $i))), $jadwalmasuk))) {
                         // dd('test');
-                        $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
-                        if (!$check_empty) {
-                            $ab_id = Absence::create([
-                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                'staff_id' => $absenceRequest->staff_id,
-                                'created_at' => date('Y-m-d H:i:s', $i),
-                                'updated_at' => date('Y-m-d H:i:s')
-                            ]);
-                            AbsenceLog::create([
-                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                                'lat' => '',
-                                'lng' => '',
-                                'absence_request_id' => $absenceRequest->id,
-                                'register' => date('Y-m-d', $i),
-                                'absence_id' => $ab_id->id,
-                                'duration' => '',
-                                'status' => ''
-                            ]);
-                        }
-
+                        $ab_id = Absence::create([
+                            'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                            'staff_id' => $absenceRequest->staff_id,
+                            'created_at' => date('Y-m-d H:i:s', $i),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        AbsenceLog::create([
+                            'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                            'lat' => '',
+                            'lng' => '',
+                            'absence_request_id' => $absenceRequest->id,
+                            'register' => date('Y-m-d', $i),
+                            'absence_id' => $ab_id->id,
+                            'duration' => '',
+                            'status' => ''
+                        ]);
                         // }
                     }
                     // dd($holiday);

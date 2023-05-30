@@ -125,4 +125,20 @@ class Ticket extends Model
         }
         return $query;
     }
+
+    public function scopeFilterDate($query, $from, $to)
+    {
+        if (!empty(request()->input('from')) && !empty(request()->input('to'))) {
+            $from = request()->input('from');
+            $to =  request()->input('to');
+            // $from = '2021-09-01';
+            // $to = '2021-09-20';
+            return $query->whereBetween('tickets.created_at', [$from, $to]);
+            // return $query->where('froms_id', $from);
+            // dd(request()->input('from'));
+
+        } else {
+            return;
+        }
+    }
 }

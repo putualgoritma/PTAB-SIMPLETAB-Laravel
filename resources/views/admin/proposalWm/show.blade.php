@@ -9,7 +9,7 @@
     <div class="card-body">
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">{{ trans('global.proposalwm.fields.code') }}</h5>
-            <p>{{ $proposalWm->queue }}{{$proposalWm->code}}</p>
+            <p>{{ $proposalWm->close_queue }}{{$proposalWm->code}}</p>
         </div>
         <div style="border-bottom: 1px solid" class="mt-3" >
             <h5 style="font-weight:bold">{{ trans('global.proposalwm.fields.action') }}</h5>

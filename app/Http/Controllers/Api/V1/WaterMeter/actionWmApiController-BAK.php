@@ -303,11 +303,10 @@ class actionWmApiController extends Controller
     public function actionWmNewImageUpdate(Request $request)
     {
         $dataForm = json_decode($request->form);
-
-        if ($dataForm->noWM1 != "" && $dataForm->brandWM1 != "" && $dataForm->standWM1 != "" && $dataForm->noWM2 != "" && $dataForm->brandWM2 != "" && $dataForm->standWM2 != "" && $request->qtyImageTool != "" && $request->qtyImagePreWork != "") {
+        if ($dataForm->noWM1 != "" && $dataForm->brandWM1 != "" && $dataForm->standWM1 != "" && $dataForm->noWM2 != "" && $dataForm->brandWM2 != "" && $dataForm->standWM2 != "" && $request->qtyImageTool != "" && $dataQtyImagePreWork != "") {
             $img_path = "/images/WaterMeter";
             $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-            // $dataForm = json_decode($request->form);
+
             $responseImage = '';
             $code = date('y') . date('d');
             $dataQtyImagePreWork = json_decode($request->qtyImagePreWork);

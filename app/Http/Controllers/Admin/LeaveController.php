@@ -198,10 +198,10 @@ class LeaveController extends Controller
         $d = AbsenceRequest::where('id', $id)->first();
 
         $absenceLog = AbsenceLog::where('absence_request_id', $id)->get();
-        foreach ($absenceLog as $d) {
-            $deleteAbsence = Absence::where('id', $d->id)->first();
+        foreach ($absenceLog as $da) {
+            $deleteAbsence = Absence::where('id', $da->absence_id)->first();
             if ($deleteAbsence) {
-                Absence::where('id', $d->id)->delete();
+                Absence::where('id', $da->absence_id)->delete();
             }
         }
         AbsenceLog::where('absence_request_id', $id)->delete();
@@ -268,6 +268,7 @@ class LeaveController extends Controller
     public function approve($id)
     {
         abort_unless(\Gate::allows('leave_delete'), 403);
+
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
 
@@ -277,31 +278,43 @@ class LeaveController extends Controller
 
         $absenceRequest =  AbsenceRequest::where('id', $id)->first();
         $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
-        if (date('Y-m-d') > $absenceRequest->start) {
+        // if ($absenceRequest->end > $absenceRequest->start) {
+        //     dd("shshsh");
+        // } else {
+        //     dd(date('Y-m-d'), $absenceRequest->start);
+        // }
+        // dd($absenceRequest->start);
+        // if (date('Y-m-d') > $absenceRequest->start) {
+        if ($absenceRequest->end > $absenceRequest->start) {
             $begin = strtotime($absenceRequest->start);
             $end   = strtotime($absenceRequest->end);
 
             for ($i = $begin; $i <= $end; $i = $i + 86400) {
-                $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
-                if (!$holiday) {
-                    if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+                // dd(date('Y-m-d', $i));
+                $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                // dd($check_empty);
+                if (!$check_empty) {
+                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                    if (!$holiday) {
+                        if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
 
-                        $ab_id = Absence::create([
-                            'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                            'staff_id' => $absenceRequest->staff_id,
-                            'created_at' => date('Y-m-d H:i:s', $i),
-                            'updated_at' => date('Y-m-d H:i:s')
-                        ]);
-                        AbsenceLog::create([
-                            'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                            'lat' => '',
-                            'lng' => '',
-                            'absence_request_id' => $absenceRequest->id,
-                            'register' => date('Y-m-d', $i),
-                            'absence_id' => $ab_id->id,
-                            'duration' => '',
-                            'status' => ''
-                        ]);
+                            $ab_id = Absence::create([
+                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                'staff_id' => $absenceRequest->staff_id,
+                                'created_at' => date('Y-m-d H:i:s', $i),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                            AbsenceLog::create([
+                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                                'lat' => '',
+                                'lng' => '',
+                                'absence_request_id' => $absenceRequest->id,
+                                'register' => date('Y-m-d', $i),
+                                'absence_id' => $ab_id->id,
+                                'duration' => '',
+                                'status' => ''
+                            ]);
+                        }
                     }
                 }
             }

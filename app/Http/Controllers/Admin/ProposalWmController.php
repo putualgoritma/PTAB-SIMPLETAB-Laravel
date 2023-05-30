@@ -586,6 +586,7 @@ class ProposalWmController extends Controller
         action_wms.subdapertement_id,
         proposal_wms.code,
         proposal_wms.queue,
+        proposal_wms.close_queue,
         proposal_wms.customer_id,
         proposal_wms.status,
         proposal_wms.priority,
@@ -664,6 +665,8 @@ class ProposalWmController extends Controller
         proposal_wms.priority,
         proposal_wms.created_at,
         proposal_wms.updated_at,
+        proposal_wms.queue,
+        proposal_wms.close_queue,
         tblpelanggan.namapelanggan,
         tblpelanggan.nomorrekening,
         tblpelanggan.alamat,
@@ -783,7 +786,7 @@ class ProposalWmController extends Controller
         proposal_wms.status_wm,
         proposal_wms.priority,
         proposal_wms.created_at,
-        proposal_wms.updated_at,
+        action_wms.updated_at,
         tblpelanggan.namapelanggan,
         tblpelanggan.nomorrekening,
         tblpelanggan.alamat,
@@ -805,10 +808,10 @@ class ProposalWmController extends Controller
             ->where('action_wms.id', $proposalWm->id)
             ->get();
 
-        $dayName = $dayList[date('D', strtotime($proposalWm->created_at))];
-        $monthName =  $monthList[date('n', strtotime($proposalWm->created_at))];
-        $date = date('d', strtotime($proposalWm->created_at));
-        $year = date('Y', strtotime($proposalWm->created_at));
+        $dayName = $dayList[date('D', strtotime($proposalWm->updated_at))];
+        $monthName =  $monthList[date('n', strtotime($proposalWm->updated_at))];
+        $date = date('d', strtotime($proposalWm->updated_at));
+        $year = date('Y', strtotime($proposalWm->updated_at));
 
         $proposal = proposalWms::where('id', $id)->first();
         $proposal->print_status = 1;
@@ -1100,6 +1103,7 @@ class ProposalWmController extends Controller
                 proposal_wms.priority,
                 proposal_wms.created_at,
                 proposal_wms.updated_at,
+                proposal_wms.close_queue,
                 tblpelanggan.namapelanggan,
                 tblpelanggan.nomorrekening,
                 tblpelanggan.alamat,
@@ -1136,6 +1140,7 @@ class ProposalWmController extends Controller
                 proposal_wms.priority,
                 proposal_wms.created_at,
                 proposal_wms.updated_at,
+                proposal_wms.close_queue,
                 tblpelanggan.namapelanggan,
                 tblpelanggan.nomorrekening,
                 tblpelanggan.alamat,

@@ -134,21 +134,19 @@
                 @endif
             </div>
 
-            <div class="form-group {{ $errors->has('fingerprint') ? 'has-error' : '' }}">
-                <label for="fingerprint">Fingerprint*</label>
-                <select id="fingerprint" name="fingerprint" class="form-control" value="{{ old('fingerprint', isset($customer) ? $customer->work_unit : '') }}">
-                    <option value="">--Pilih Status--</option>
-                    {{-- @foreach ($jobs as $key=>$job ) --}}
-                        <option value="ON">ON</option>
-                        <option value="OFF">OFF</option>
-                        {{-- @endforeach --}}
-                </select>
-                @if($errors->has('fingerprint'))
-                    <em class="invalid-feedback">
-                        {{ $errors->first('fingerprint') }}
-                    </em>
-                @endif
-            </div>
+        {{-- <div class="form-group {{ $errors->has('fingerprint') ? 'has-error' : '' }}">
+            <label for="fingerprint">Fingerprint*</label>
+            <select id="fingerprint" name="fingerprint" class="form-control" value="{{ old('fingerprint', isset($customer) ? $customer->work_unit : '') }}">
+                <option value="">--Pilih Status--</option>
+                    <option value="ON">ON</option>
+                    <option value="OFF">OFF</option>
+            </select>
+            @if($errors->has('fingerprint'))
+                <em class="invalid-feedback">
+                    {{ $errors->first('fingerprint') }}
+                </em>
+            @endif
+        </div> --}}
 
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>
