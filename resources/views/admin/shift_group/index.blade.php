@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('user_create')
+@can('shift_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route("admin.shift_group.create",['shift_parent_id'=>$shift_parent_id]) }}">
@@ -49,7 +49,7 @@
                             </td>
                        
                             <td>
-                                @can('user_show')
+                                @can('shift_edit')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.shift_group.show', $shift_group->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
@@ -57,19 +57,19 @@
 
                           
 
-                                @can('user_show')
+                                @can('shift_edit')
                                 <a class="btn btn-xs btn-success" href="{{ route('admin.shift_group.schedule', $shift_group->id) }}">
                                    Jadwal
                                 </a>
                             @endcan
                                 {{-- @if ($shift_group->id != 1 && $shift_group->id != 2) --}}
 
-                                @can('user_edit')
+                                @can('shift_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.shift_group.edit', $shift_group->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
-                                @can('user_delete')
+                                @can('shift_delete')
                                     <form action="{{ route('admin.shift_group.destroy', $shift_group->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -118,7 +118,7 @@
     }
   }
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-@can('user_delete')
+@can('shift_delete')
   dtButtons.push(deleteButton)
 @endcan
 

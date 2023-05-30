@@ -30,7 +30,7 @@ class StaffSpecialController extends Controller
     {
         abort_unless(\Gate::allows('staff_create'), 403);
 
-        $staffs = Staff::get();
+        $staffs = Staff::orderBy('name')->get();
 
         return view('admin.staff_specials.create', compact('staffs'));
     }

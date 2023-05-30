@@ -64,7 +64,8 @@
             <hr style="width: 190px;">
         </h3>
         <div class="text-height">
-            Nomor : 
+            {{-- Nomor : {{ $proposalWm->queue }}{{  $proposalWm->code}} --}}
+            Nomor : {{ $proposalWm->status == "close" ? $proposalWm->close_queue : $proposalWm->queue }}{{  $proposalWm->code}}
         </div>
     </div>
     <br>

@@ -58,30 +58,23 @@ class MenuApiController extends Controller
 
 
 
-        if ($request->version) {
-            return response()->json([
-                'message' => 'Success',
-                // 'messageLog' => $messageLogs,
-                'messageCount' => $messageCount,
-                'staff' => $staff,
-                'messageM' => $messageM,
-                'month1' => "50",
-                'month2' => "70",
-                'month3' => "90",
-                'versionNow' => "yes",
-                'version' => 'Versi Baru 23.04.19',
-                'monthName1' => 'Januari',
-                'monthName2' => 'Februari',
-                'monthName3' => 'Maret'
 
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'failed',
-                // 'messageLog' => $messageLogs,
+        return response()->json([
+            'message' => 'Success',
+            // 'messageLog' => $messageLogs,
+            'messageCount' => $messageCount,
+            'staff' => $staff,
+            'messageM' => $messageM,
+            'month1' => "50",
+            'month2' => "70",
+            'month3' => "90",
+            'versionNow' => "yes",
+            'version' => 'Versi Baru 23.04.19',
+            'monthName1' => 'Januari',
+            'monthName2' => 'Februari',
+            'monthName3' => 'Maret'
 
-            ]);
-        }
+        ]);
     }
 
     // untuk nanti di API

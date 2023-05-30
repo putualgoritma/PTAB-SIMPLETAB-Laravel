@@ -182,15 +182,15 @@
       }
     },
     columns: [
-        { data: 'DT_RowIndex', name: 'no' },
-        { data: 'id_wa', name: 'id_wa' },
-        { data: 'customer_id', name: 'customer_id' },
+        { data: 'DT_RowIndex', name: 'no', searchable : false },
+        { data: 'id_wa', name: 'id_wa', searchable : false  },
+        { data: 'customer_id', name: 'customer_id', searchable : false  },
         { data: 'phone', name: 'phone' },
         { data: 'status', render: function (dataField) { return dataField === 'sent' ?'<button type="button" class="btn btn-primary btn-sm" disabled> sent </button>' : dataField === 'read' ?'<button type="button" class="btn btn-success btn-sm" disabled> read </button>': dataField === 'pending' ?'<button type="button" class="btn btn-warning btn-sm" disabled> pending </button>': '<button type="button" class="btn btn-danger btn-sm" disabled>' +dataField+ '</button>'; } },
         { data: 'template_id', name: 'template_id' },
         { data: 'created_at', name: 'created_at', searchable: false },
         { data: 'updated_at', name: 'updated_at', searchable: false },
-        { data: 'actions', name: '{{ trans('global.actions') }}' }
+        { data: 'actions', name: '{{ trans('global.actions') }}', searchable: false  }
     ],
     pageLength: 100,
   };

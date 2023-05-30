@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('user_create')
+@can('shift_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route("admin.shift_parent.create") }}">
@@ -62,32 +62,32 @@
                                     </td>
                        
                             <td>
-                                @can('user_show')
+                                @can('shift_edit')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.shift_parent.show', $shift_parent->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
-                                @can('user_show')
+                                @can('shift_edit')
                                 <a class="btn btn-xs btn-success" href="{{ route('admin.shift_planner_staff.index', ['id'=>$shift_parent->id]) }}">
                                     Jadwal Shift
                                 </a>
                             @endcan
 
-                            @can('user_show')
+                            @can('shift_edit')
                             <a class="btn btn-xs btn-warning" href="{{ route('admin.shift_group.index', ['id'=>$shift_parent->id]) }}">
                                 Shift Group
                             </a>
                         @endcan
 
                                 @if ($shift_parent->type == "shift")
-                                @can('user_show')
+                                @can('shift_edit')
                                 <a class="btn btn-xs btn-success" href="{{ route('admin.shift_planner_staff.index', ['id'=>$shift_parent->id]) }}">
                                     Jadwal Shift
                                 </a>
                             @endcan
 
-                            @can('user_show')
+                            @can('shift_edit')
                             <a class="btn btn-xs btn-warning" href="{{ route('admin.shift_group.index', ['id'=>$shift_parent->id]) }}">
                                 Shift Group
                             </a>
@@ -102,12 +102,12 @@
                    
                                 {{-- @if ($shift_parent->id != 1 && $shift_parent->id != 2) --}}
 
-                                @can('user_edit')
+                                @can('shift_edit')
                                     <a class="btn btn-xs btn-info" href="{{ route('admin.shift_parent.edit', $shift_parent->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcan
-                                @can('user_delete')
+                                @can('shift_delete')
                                     <form action="{{ route('admin.shift_parent.destroy', $shift_parent->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -156,7 +156,7 @@
     }
   }
   let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-@can('user_delete')
+@can('shift_delete')
   dtButtons.push(deleteButton)
 @endcan
 
