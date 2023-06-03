@@ -452,6 +452,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('cronjob/problem', 'CronJobController@problemRemainer');
     Route::post('gawatdarurat/import', 'GawatDaruratController@import')->name('gawatdarurat.import');
     Route::get('gawatdarurat', 'GawatDaruratController@index');
+
+    //virmach
+    Route::get('virmach-image', 'VirmachController@index')->name('virmach.index');
+    Route::post('virmach-image-store', 'VirmachController@store')->name('virmach.store');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

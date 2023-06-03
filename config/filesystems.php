@@ -64,6 +64,40 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'ftp' => [
+            'driver' => 'ftp',
+            'host' => env('FTP_HOST'),
+            'username' => env('FTP_USERNAME'),
+            'password' => env('FTP_PASSWORD'),
+            'root' => env('FTP_ROOT') // for example: /public_html/images
+ 
+            // Optional FTP Settings...
+            // 'port' => env('FTP_PORT', 21),
+            // 'passive' => true,
+            // 'ssl' => true,
+            // 'timeout' => 30,
+        ],
+
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_HOST'),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
+            'root' => env('SFTP_ROOT'),
+          
+            // Settings for SSH key based authentication with encryption password...
+            //'privateKey' => env('SFTP_PRIVATE_KEY'),
+            //'passphrase' => env('SFTP_PASSPHRASE'),
+          
+            // Optional SFTP Settings...
+            // 'hostFingerprint' => env('SFTP_HOST_FINGERPRINT'),
+            // 'maxTries' => 4,
+            // 'passphrase' => env('SFTP_PASSPHRASE'),
+            // 'port' => env('SFTP_PORT', 22),
+            // 'timeout' => 30,
+            // 'useAgent' => true,
+        ],
+
     ],
 
 ];

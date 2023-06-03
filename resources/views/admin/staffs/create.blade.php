@@ -7,7 +7,7 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route('admin.staffs.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.virmach.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.staff.fields.code') }}*</label>
