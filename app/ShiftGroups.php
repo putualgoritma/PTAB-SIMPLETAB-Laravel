@@ -22,4 +22,37 @@ class ShiftGroups extends Model
         'work_unit_id',
         'queue',
     ];
+
+
+    public function scopeFilterSubDapertement($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('subdapertement_id', $ststussm);
+        }
+        return $query;
+    }
+
+    public function scopeFilterDapertement($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('dapertement_id', $ststussm);
+        }
+        return $query;
+    }
+
+    public function scopeFilterWorkUnit($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('work_unit_id', $ststussm);
+        }
+        return $query;
+    }
+
+    public function scopeFilterJob($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('job_id', $ststussm);
+        }
+        return $query;
+    }
 }

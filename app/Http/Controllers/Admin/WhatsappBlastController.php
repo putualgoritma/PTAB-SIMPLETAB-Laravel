@@ -852,17 +852,17 @@ class WhatsappBlastController extends Controller
 
                     $array_merg = [];
                     // // send WA
-                    // foreach (array_chunk($kumpulan_data, $limit) as $key => $smallerArray) {
-                    //     foreach ($smallerArray as $index => $value) {
-                    //         $temp[] = $value;
-                    //     }
-                    //     $test1 = WablasTrait::sendText($temp);
-                    //     $temp = [];
-                    //     // dd($test1);
-                    //     if (!empty(json_decode($test1)->data->messages)) {
-                    //         $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
-                    //     }
-                    // }
+                    foreach (array_chunk($kumpulan_data, $limit) as $key => $smallerArray) {
+                        foreach ($smallerArray as $index => $value) {
+                            $temp[] = $value;
+                        }
+                        $test1 = WablasTrait::sendText($temp);
+                        $temp = [];
+                        // dd($test1);
+                        if (!empty(json_decode($test1)->data->messages)) {
+                            $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
+                        }
+                    }
 
 
                     foreach ($array_merg as $key => $value) {

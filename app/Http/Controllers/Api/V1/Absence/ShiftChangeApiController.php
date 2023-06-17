@@ -33,6 +33,8 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
             ->where('A.staff_id', $request->staff_id)
+            ->where('shift_changes.status', '!=', 'approve')
+            ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -51,6 +53,8 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
             ->where('B.staff_id', $request->staff_id)
+            ->where('shift_changes.status', '!=', 'approve')
+            ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -64,13 +68,20 @@ class ShiftChangeApiController extends Controller
         $shiftChange = ShiftChange::where('id', $request->id)->first();
         $shiftChange->update(
             [
-                'status' => 'approve'
+                'status' => $request->status
             ]
         );
+        if ($request->status == "reject") {
+            $message = "Ditolak";
+        } else {
+            $message = "Diterima";
+        }
 
         return response()->json([
-            'message' => 'daftar pengajuan',
+            'message' => $message,
             'data' =>  $shiftChange,
+            'llll' => $request->status,
+            'sskks' => $request->id
         ]);
     }
 
@@ -80,8 +91,8 @@ class ShiftChangeApiController extends Controller
         $dataForm = json_decode($request->form);
         // if ($dataForm->date > date('Y-m-d')) {
         $data = [
-            'shift_id' => $dataForm->id,
-            'shift_change_id' => $dataForm->shift_change_id,
+            'shift_id' => $dataForm->shift_change_id,
+            'shift_change_id' =>  $dataForm->id,
             'description' => $dataForm->description,
             'status' => 'pending',
         ];

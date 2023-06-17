@@ -93,7 +93,7 @@ class LockController extends Controller
                 }
             }
             $qry = $qrydt->get();
-        } else if (Auth::user()->name == 'ADMIN') {
+        } else if (Auth::user()->name == 'ADMIN' || Auth::user()->id === 477) {
             $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
             $qry = LockAction::selectRaw('lock_action.*,tblopp.operator as operator,tblpelanggan.idurut as idurut, users.id as staff_id, users.name as staff_name ,lock_action.created_at as created_at, lock_action.updated_at as updated_at, tblpelanggan.idareal as idareal')
                 ->FilterStatus(request()->input('status'))

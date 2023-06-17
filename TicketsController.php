@@ -120,7 +120,7 @@ class TicketsController extends Controller
                 ->FilterDate($request->from, $request->to)
 
                 ->FilterDepartment($department)
-                // ->FilterStaff($staff)
+                ->FilterStaff($staff)
                 ->FilterSubDepartment($subdepartement)
 
                 ->with('department')
@@ -138,7 +138,7 @@ class TicketsController extends Controller
                 ->orderBy('created_at', 'DESC');
         }
 
-        // dd($qry->get());
+        // dd($qry);
 
         if ($request->ajax()) {
 

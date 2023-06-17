@@ -182,6 +182,20 @@ class ShiftChangeController extends Controller
         $shift2->update([
             'staff_id' => $staff_id1
         ]);
+        $shift_changes->update([
+            'status' => 'approve'
+        ]);
+        // penukaran shift end
+        return back();
+    }
+
+    public function reject(Request $request)
+    {
+        // penukaran Shift start
+        $shift_changes = ShiftChange::where('id', $request->id)->first();
+        $shift_changes->update([
+            'status' => 'reject'
+        ]);
         // penukaran shift end
         return back();
     }
