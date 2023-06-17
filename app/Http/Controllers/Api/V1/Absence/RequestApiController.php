@@ -112,8 +112,7 @@ class RequestApiController extends Controller
                     ->where('day_id', $day != "0" ? $day : "7")
                     ->orderBy('work_type_days.absence_category_id', 'ASC')
                     ->get();
-                $holiday = Holiday::whereDate('start', '<=', date("Y-m-d", strtotime($dataForm->start)))
-                    ->orWhereDate('end', '>=', date("Y-m-d", strtotime($dataForm->start)))->first();
+                $holiday = Holiday::whereDate('start', '=', date("Y-m-d", strtotime($dataForm->start)))->first();
                 if (!$holiday) {
                     if (count($absence) > 0) {
                         $masuk = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[0]->time));
@@ -128,6 +127,13 @@ class RequestApiController extends Controller
                         }
                     }
                 }
+                // else {
+                //     return response()->json(
+                //         [
+                //             'message' => $staff->work_type_id
+                //         ]
+                //     );
+                // }
             }
 
             // dd($absence);
@@ -160,6 +166,53 @@ class RequestApiController extends Controller
         if ($start < date('Y-m-d') || $start > $end) {
             $cek = "pass";
             $error = "Tanggal kurang dari hari ini";
+        } else if ($dataForm->category == "leave" || $dataForm->category == "permission") {
+            $start =  date("Y-m-d", strtotime($start));
+            $end =  date("Y-m-d", strtotime($end));
+            $absen_check = Absence::where('staff_id', $dataForm->staff_id)
+                ->leftJoin('absence_logs', 'absences.id', '=', 'absence_logs.absence_id')
+                ->whereBetween(DB::raw('DATE(absences.created_at)'), [$start, $end])
+                ->where('register', '!=', null)
+                ->first();
+            $cek = AbsenceRequest::where('staff_id', $dataForm->staff_id)
+                ->where(function ($query) use ($start, $end) {
+                    $query->where('category', 'visit')
+                        ->orWhere('category', 'visit')
+                        ->orWhere('category', 'leave')
+                        ->orWhere('category', 'permission')
+                        ->orWhere('category', 'extra')
+                        ->orWhere('category', 'geolocation_off')
+                        ->orWhere('category', 'excuse');
+
+                    // ->orWhere('status', 'close');
+                })
+                ->where(function ($query)  use ($start, $end) {
+                    $query->whereBetween(DB::raw('DATE(absence_requests.start)'), [$start, $end])
+                        ->where(function ($query)  use ($start, $end) {
+                            $query->where('status', '=', 'active')
+                                ->orWhere('status', '=', 'pending')
+                                ->orWhere('status', '=', 'approve');
+                            // ->orWhere('status', 'close');
+                        })
+                        ->orWhereBetween(DB::raw('DATE(absence_requests.end)'), [$start, $end])
+                        ->where(function ($query)  use ($start, $end) {
+                            $query->where('status', '=', 'active')
+                                ->orWhere('status', '=', 'pending')
+                                ->orWhere('status', '=', 'approve');
+                            // ->orWhere('status', 'close');
+                        });
+                    // ->orWhere('status', 'close');
+                })
+
+                ->first();
+            // dd($cek);
+
+
+            if ($cek) {
+                $error = "Anda Masih Memiliki Cuti/Dinas/Izin yang masih aktif di tanggal ini";
+            } else if ($absen_check) {
+                $error = "Pengajuan tidak bisa dilakukan jika anda masuk dihari tersebut";
+            }
         } else if ($dataForm->category == "duty" || $dataForm->category == "visit" || $dataForm->category == "leave" || $dataForm->category == "permission") {
             $start =  date("Y-m-d", strtotime($start));
             $end =  date("Y-m-d", strtotime($end));
@@ -237,6 +290,8 @@ class RequestApiController extends Controller
                 })
 
                 ->first();
+
+            $startS = date("Y-m-d H:i:s", strtotime($dataForm->start . $dataForm->time));
             if ($cek) {
                 $error = "Anda Masih Memiliki Permisi di tanggal ini";
             }

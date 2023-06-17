@@ -37,19 +37,35 @@ class UserApiController extends Controller
 
                 if (!empty($request->_id_onesignal)) {
                     //     if ($admin->subdapertement_id != 0) {
-                    if ($request->device) {
-                        $admin->update(['_id_onesignal' => $request->_id_onesignal, 'device' => $request->device]);
+                    if (!empty($request->login_date)) {
+                        if (!empty($request->device)) {
+                            $admin->update(['_id_onesignal' => $request->_id_onesignal, 'device' => $request->device]);
+                        } else {
+                            $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                        }
                     } else {
-                        $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                        if (!empty($request->device)) {
+                            $admin->update(['_id_onesignal' => $request->_id_onesignal, 'device' => $request->device, 'login_date' => date('Y-m-d H:i:s')]);
+                        } else {
+                            $admin->update(['_id_onesignal' => $request->_id_onesignal, 'login_date' => date('Y-m-d H:i:s')]);
+                        }
                     }
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'success login',
-                        'token' => $token,
-                        'data' => $admin,
-                        'password' => $request->password,
-                        'permission' => $permission,
-                    ]);
+                    if (!empty($request->login_date) && $request->login_date != $admin->login_date) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Akun Sudah Login di Device Lain, tolong hubungi admin',
+                        ]);
+                    } else {
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'success login',
+                            'token' => $token,
+                            'data' => $admin,
+                            'password' => $request->password,
+                            'permission' => $permission,
+                        ]);
+                    }
+
                     // } else {
                     //     return response()->json([
                     //         'success' => false,

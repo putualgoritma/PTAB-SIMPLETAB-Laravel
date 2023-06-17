@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Shift;
 use App\ShiftGroups;
 use App\ShiftPlannerStaffs;
+use App\Staff;
 use Illuminate\Http\Request;
 
 class ShiftApiController extends Controller
@@ -18,10 +19,15 @@ class ShiftApiController extends Controller
             ->join('staffs', 'staffs.id', '=', 'shift_planner_staffs.staff_id')
             ->where('shift_group_id', $request->shift_id)
             ->whereDate('start', '=', $request->start)
-            ->whereDate('staff_id', '!=', $request->staff_id)
+            ->where('staff_id', '!=', $request->staff_id)
             ->get();
 
-        $shift_list = ShiftGroups::get();
+        $staff = Staff::where('id', $request->staff_id)->first();
+        $shift_list = ShiftGroups::FilterDapertement($staff->dapertement_id)
+            ->FilterSubDapertement($staff->subdapertement_id)
+            ->FilterWorkUnit($staff->work_unit_id)
+            ->FilterJob($staff->job_id)
+            ->get();
 
         foreach ($staff_list as $key => $value) {
             $data[] = ['id' => $value->id, 'name' => $value->staff_name, 'checked' => false];

@@ -166,7 +166,7 @@ class HolidayController extends Controller
                         'title'        =>    $request->title,
                         'start'        =>    $request->start,
                         'description'        =>    $request->description,
-                        'end'        =>    $request->end
+                        'end'        =>    $request->start
                     ]);
                 }
                 return response()->json($event);

@@ -30,8 +30,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -53,8 +53,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -93,8 +93,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -116,8 +116,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -164,8 +164,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -225,8 +225,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -364,8 +364,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -375,7 +375,7 @@ class ReportsController extends Controller
         $departementlist = Dapertement::all();
         $areas = CtmWilayah::select('id as code', 'NamaWilayah');
 
-        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8 || Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 24) {
             $areas = $areas->get();
         } else {
             $group_unit = Dapertement::select('dapertements.group_unit')
@@ -403,8 +403,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -456,7 +456,7 @@ class ReportsController extends Controller
             ->FilterAreas($request->areas);
         // ->where('proposal_wms.status', 'close');
 
-        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8 || Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 24) {
             $dapertement = "";
             $sub_dapertement = "";
             $proposalWm = $proposalWm->get();
@@ -526,8 +526,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -537,7 +537,7 @@ class ReportsController extends Controller
         $departementlist = Dapertement::all();
         $areas = CtmWilayah::select('id as code', 'NamaWilayah');
 
-        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8 || Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 24) {
             $areas = $areas->get();
         } else {
             $group_unit = Dapertement::select('dapertements.group_unit')
@@ -565,8 +565,8 @@ class ReportsController extends Controller
             3 => 'Maret',
             4 => 'April',
             5 => 'Mei',
-            6 => 'Juli',
-            7 => 'Juni',
+            6 => 'Juni',
+            7 => 'Juli',
             8 => 'Agustus',
             9 => 'September',
             10 => 'Oktober',
@@ -646,7 +646,7 @@ class ReportsController extends Controller
 
         // ->where('proposal_wms.status', 'close');
 
-        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8) {
+        if (Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 8 || Auth::user()->roles[count(Auth::user()->roles) - 1]->id === 24) {
             $dapertement = "";
             $sub_dapertement = "";
             $proposalWm =  $proposalWm->orderBy('proposal_wms.code', 'ASC')->orderBy('close_queue', 'ASC')->get();
