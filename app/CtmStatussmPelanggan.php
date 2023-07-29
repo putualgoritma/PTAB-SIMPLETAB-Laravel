@@ -41,4 +41,12 @@ class CtmStatussmPelanggan extends Model
         }
         return $query;
     }
+
+    public function scopeFilterNomorrekening($query, $nomorrekening)
+    {
+        if ($nomorrekening != '') {
+            $query->where('tblpelanggan.nomorrekening', 'like', '%' . $nomorrekening . '%');
+        }
+        return $query;
+    }
 }

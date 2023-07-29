@@ -341,10 +341,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
 
+    Route::get('absence/getShiftPlanner', 'AbsenceController@getShiftPlanner')->name('absence.getShiftPlanner');
     Route::get('absence/reportAbsenceExcelView', 'AbsenceController@reportAbsenceExcelView')->name('absence.reportAbsenceExcelView');
     Route::get('absence/reportAbsenceView', 'AbsenceController@reportAbsenceView')->name('absence.reportAbsenceView');
 
+    Route::get('absence/createImport', 'AbsenceController@createImport')->name('absence.createImport');
+    Route::post('absence/storeImport', 'AbsenceController@storeImport')->name('absence.storeImport');
 
+    Route::get('absence/createExtra', 'AbsenceController@createExtra')->name('absence.createExtra');
+    Route::post('absence/storeExtra', 'AbsenceController@storeExtra')->name('absence.storeExtra');
+    Route::get('absence/createDuty', 'AbsenceController@createDuty')->name('absence.createDuty');
+    Route::post('absence/storeDuty', 'AbsenceController@storeDuty')->name('absence.storeDuty');
+    Route::get('absence/createLeave', 'AbsenceController@createLeave')->name('absence.createLeave');
+    Route::post('absence/storeLeave', 'AbsenceController@storeLeave')->name('absence.storeLeave');
+    Route::get('absence/createPermit', 'AbsenceController@createPermit')->name('absence.createPermit');
+    Route::post('absence/storePermit', 'AbsenceController@storePermit')->name('absence.storePermit');
+    Route::get('absence/createShift', 'AbsenceController@createShift')->name('absence.createShift');
+    Route::post('absence/storeShift', 'AbsenceController@storeShift')->name('absence.storeShift');
+    Route::get('absence/createImportShift', 'AbsenceController@createImportShift')->name('absence.createImportShift');
+    Route::post('absence/storeImportShift', 'AbsenceController@storeImportShift')->name('absence.storeImportShift');
 
     Route::get('absence/absenceMenu', 'AbsenceController@absenceMenu')->name('absence.absenceMenu');
     Route::resource('absence', 'AbsenceController');
@@ -445,8 +460,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('geolocation_off', 'GeolocationOffController');
 
 
-    Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
-    Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
+    // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
+    // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
+    Route::resource('absencegroup', 'AbsenceGroupController');
 
     Route::get('cronjob', 'CronJobController@index');
     Route::get('cronjob/problem', 'CronJobController@problemRemainer');

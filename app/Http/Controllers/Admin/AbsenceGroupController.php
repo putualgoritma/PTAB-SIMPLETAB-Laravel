@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Absence;
 use App\Absence_categories;
+use App\AbsenceRequest;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
 use App\Staff;
@@ -15,9 +16,23 @@ class AbsenceGroupController extends Controller
 {
     public function index(Request $request)
     {
+        // $absence_request_count =  AbsenceRequest::selectRaw('COUNT(CASE WHEN category = "visit" THEN 1 END) AS visit_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "duty" THEN 1 END) AS duty_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "excuse" THEN 1 END) AS excuse_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "extra" THEN 1 END) AS extra_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "leave" THEN 1 END) AS leave_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "geolocation_off" THEN 1 END) AS geolocation_off_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "permission" THEN 1 END) AS permission_count')
+        //     ->first();
+        // dd($absence_request_count);
+
+
+
         $qry = Absence::selectRaw('staffs.*,absences.*')
-            ->where('status_active', '!=', '')
-            ->join('staffs', 'staffs.id', '=', 'absences.staff_id');
+            // ->where('status_active', '!=', '')
+
+            ->join('staffs', 'staffs.id', '=', 'absences.staff_id')
+            ->FilterAbsence($request->id);
         // ->get();
         // dd($qry->get());
 
@@ -29,15 +44,18 @@ class AbsenceGroupController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $approveGate = 'absence_edit';
-                // $editGate = '';
+                // $approveGate = 'absence_edit';
                 // $deleteGate = '';
+                $viewGate = '';
+                $editGate = 'absence_edit';
+                $deleteGate = 'absence_delete';
                 $crudRoutePart = 'absencegroup';
 
-                return view('partials.datatablesApprove', compact(
-                    'approveGate',
-                    // 'editGate',
-                    // 'deleteGate',
+                return view('partials.datatablesActions', compact(
+                    // 'approveGate',
+                    'viewGate',
+                    'editGate',
+                    'deleteGate',
                     'crudRoutePart',
                     'row'
                 ));
@@ -59,12 +77,16 @@ class AbsenceGroupController extends Controller
             });
 
             $table->editColumn('status_active', function ($row) {
-                if ($row->status_active == "1") {
+                if ($row->status_active == "") {
+                    return "Masuk";
+                } else if ($row->status_active == "1") {
                     return "Fingerprint Bermasalah";
                 } else if ($row->status_active == "2") {
                     return "Lembur Mendesak";
                 } else if ($row->status_active == "3") {
                     return "Permisi Tidak Kembail";
+                } else if ($row->status_active == "4") {
+                    return "Dianggap Tidak Hadir";
                 }
                 return $row->status_active ? $row->status_active : "";
             });
@@ -82,7 +104,7 @@ class AbsenceGroupController extends Controller
         $dapertements = Dapertement::get();
         $absence_categories = Absence_categories::get();
 
-        return view('admin.absenceGroup.index', compact('staffs', 'dapertements', 'absence_categories'));
+        return view('admin.absenceGroup.index', compact('staffs', 'dapertements', 'absence_categories', 'request'));
     }
     public function approve(Request $request)
     {
@@ -93,5 +115,34 @@ class AbsenceGroupController extends Controller
             'status_active' => ''
         ]);
         return back();
+    }
+    public function edit($id)
+    {
+        abort_unless(\Gate::allows('absence_edit'), 403);
+        $absence = Absence::where('id', $id)->first();
+        // dd($absence);
+        return view('admin.absenceGroup.edit', compact('absence'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        abort_unless(\Gate::allows('absence_edit'), 403);
+        $absence = Absence::where('id', $id)->first();
+
+        $absence->update($request->all());
+
+        return redirect()->route('admin.absencegroup.index');
+    }
+
+    public function destroy($id)
+    {
+        abort_unless(\Gate::allows('absence_edit'), 403);
+
+        $absence = Absence::where('id', $id)->first();
+        $absence->absence_logs()->delete();
+        $absence->delete();
+        // $absence->update($request->all());
+
+        return redirect()->back();
     }
 }

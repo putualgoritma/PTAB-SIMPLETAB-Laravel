@@ -39,7 +39,6 @@ class ActionsApiController extends Controller
      */
     public function index()
     {
-
     }
 
     public function getCtmHasilbaca(Request $request)
@@ -81,7 +80,8 @@ class ActionsApiController extends Controller
         // $map_kunjungan_num = count($map_kunjungan);
         $status = CtmPelanggan::selectRaw('CASE
         WHEN tblstatussmpelanggan.NamaStatus != "-" AND tblstatussmpelanggan.NamaStatus != "" AND tblstatussmpelanggan.NamaStatus IS NOT NULL THEN tblstatussmpelanggan.NamaStatus ELSE "Terbaca" END AS namastatus, COUNT(tblpelanggan.nomorrekening) jumlahstatus,tblstatussmpelanggan.statusid')
-            ->leftJoinSub(CtmStatussmPelanggan::selectRaw('tblstatussmpelanggan.statussm,tblstatussmpelanggan.nomorrekening,tblstatuswm.NamaStatus AS NamaStatus,tblstatuswm.id AS statusid')
+            ->leftJoinSub(
+                CtmStatussmPelanggan::selectRaw('tblstatussmpelanggan.statussm,tblstatussmpelanggan.nomorrekening,tblstatuswm.NamaStatus AS NamaStatus,tblstatuswm.id AS statusid')
                     ->join('tblstatuswm', 'tblstatussmpelanggan.statussm', '=', 'tblstatuswm.id')
                     ->FilterMonth($request->month)
                     ->FilterYear($request->year),
@@ -213,13 +213,13 @@ class ActionsApiController extends Controller
             ->join('gambarmeter', 'gambarmeter.idgambar', '=', 'gambarmetersms.idgambar')
             ->join('tblpelanggan', 'tblpelanggan.nomorrekening', '=', 'gambarmetersms.nomorrekening')
             ->join('tblopp', 'tblopp.nomorrekening', '=', 'gambarmetersms.nomorrekening')
-          
-->FilterMonth($request->month)
+
+            ->FilterMonth($request->month)
             ->FilterYear($request->year)
             ->FilterOperator($operator)
             ->FilterSbg($request->nomorrekening)
             ->where('tblopp.status', '1')
-->groupBy('gambarmetersms.idgambar')  
+            ->groupBy('gambarmetersms.idgambar')
             ->get();
         try {
             if (!empty($mapping)) {
@@ -386,7 +386,6 @@ class ActionsApiController extends Controller
                         break;
                     }
                 }
-
             } else if ($action->status == 'active' && $dataForm->status == 'active') {
                 $oldImage = json_decode($action->image);
                 $index = 0;
@@ -487,7 +486,6 @@ class ActionsApiController extends Controller
             } else {
                 $dataNewAction['image_done'] = str_replace("\/", "/", json_encode($dataImageNameDone));
                 $uploadAction = true;
-
             }
 
             if ($uploadAction) {
@@ -521,7 +519,8 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}
+                        );
+                    }
                 }
 
                 //send notif to admin
@@ -537,7 +536,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->get();
@@ -552,7 +553,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to departement terkait
                 $admin_arr = User::where('dapertement_id', $ticket->dapertement_id)
@@ -569,7 +572,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to sub departement terkait
                 $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -585,7 +590,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 return response()->json([
                     'message' => 'Status di ubah ',
@@ -600,7 +607,6 @@ class ActionsApiController extends Controller
                     'status' => $action->status,
                 ]);
             }
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal update status ',
@@ -609,7 +615,8 @@ class ActionsApiController extends Controller
         }
     }
 
-    function list(Request $request) {
+    function list(Request $request)
+    {
         $department = '';
         $subdepartment = 0;
         $staff = 0;
@@ -656,7 +663,6 @@ class ActionsApiController extends Controller
                 'data' => $ex,
             ]);
         }
-
     }
 
     /**
@@ -729,7 +735,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to humas
         $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
@@ -746,7 +754,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to departement terkait
         $admin_arr = User::where('dapertement_id', $action->dapertement_id)
@@ -763,7 +773,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to sub departement terkait
         $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -779,7 +791,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         return response()->json([
             'message' => 'Data Dapertement Add Success',
@@ -855,7 +869,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to humas
         $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
@@ -872,7 +888,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to departement terkait
         $admin_arr = User::where('dapertement_id', $action->dapertement_id)
@@ -889,7 +907,9 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         //send notif to sub departement terkait
         $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -905,13 +925,14 @@ class ActionsApiController extends Controller
                     $data = null,
                     $buttons = null,
                     $schedule = null
-                );}}
+                );
+            }
+        }
 
         return response()->json([
             'message' => 'Data Dapertement Edit Success',
             'data' => $action,
         ]);
-
     }
 
     /**
@@ -969,7 +990,6 @@ class ActionsApiController extends Controller
                 'message' => 'sucssess',
                 'data' => $action,
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'sucssess',
@@ -1087,7 +1107,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
@@ -1104,7 +1126,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to departement terkait
                 $admin_arr = User::where('dapertement_id', $action->dapertement_id)
@@ -1121,7 +1145,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to sub departement terkait
                 $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -1137,21 +1163,21 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 return response()->json([
                     'message' => 'staff Berhasil di tambahkan ',
                     'data' => $action,
                 ]);
             }
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal tambah staff ',
                 'data' => $ex,
             ]);
         }
-
     }
 
     public function actionStaffUpdate(Request $request)
@@ -1251,7 +1277,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to humas
                 $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)
@@ -1268,7 +1296,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to departement terkait
                 $admin_arr = User::where('dapertement_id', $action->dapertement_id)
@@ -1285,7 +1315,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 //send notif to sub departement terkait
                 $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -1301,7 +1333,9 @@ class ActionsApiController extends Controller
                             $data = null,
                             $buttons = null,
                             $schedule = null
-                        );}}
+                        );
+                    }
+                }
 
                 return response()->json([
                     'message' => 'Status di ubah ',
@@ -1427,7 +1461,7 @@ class ActionsApiController extends Controller
                         ->join('area_staff', 'area_staff.area_id', '=', 'tblpelanggan.idareal')
                         ->FilterStatus($status)
                         ->FilterKeyword($searchfilter)
-                        ->where('area_staff.staff_id',$admin->staff_id)
+                        ->where('area_staff.staff_id', $admin->staff_id)
                         ->with('subdapertement')
                         ->with('lockaction')
                         ->with('customer')
@@ -1498,14 +1532,12 @@ class ActionsApiController extends Controller
                 'message' => 'sucssess',
                 'data' => $lock,
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'sucssess',
                 'data' => $ex,
             ]);
         }
-
     }
 
     public function lockStaffList($lockaction_id)
@@ -1567,7 +1599,6 @@ class ActionsApiController extends Controller
 
             if ($action) {
                 $cek = $action->staff()->attach($request->staff_id);
-
             }
 
             //send notif to admin
@@ -1583,7 +1614,9 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
 
             //send notif to departement terkait
             $subdapertement_obj = Subdapertement::where('id', $action->subdapertement_id)->first();
@@ -1601,7 +1634,9 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
 
             //send notif to sub departement terkait
             $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)
@@ -1617,20 +1652,20 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
 
             return response()->json([
                 'message' => 'staff Berhasil di tambahkan ',
                 'data' => $action,
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => 'gagal tambah staff ',
                 'data' => $ex,
             ]);
         }
-
     }
 
     public function actionlocklist(Request $request)
@@ -1650,7 +1685,6 @@ class ActionsApiController extends Controller
                 'data' => $ex,
             ]);
         }
-
     }
     public function lockactionscreate(Request $request)
     {
@@ -1710,7 +1744,9 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
 
             //send notif to sub departement terkait
             $lock_obj = Lock::where('id', $dataForm->lock_id)->first();
@@ -1729,7 +1765,9 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
 
             //send notif to sub departement terkait
             $admin_arr = User::where('subdapertement_id', $lock_obj->subdapertement_id)
@@ -1745,11 +1783,12 @@ class ActionsApiController extends Controller
                         $data = null,
                         $buttons = null,
                         $schedule = null
-                    );}}
+                    );
+                }
+            }
             return response()->json([
                 'message' => 'Success',
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => $ex,
@@ -1774,12 +1813,10 @@ class ActionsApiController extends Controller
 
                     $action->update();
                 }
-
             }
             return response()->json([
                 'message' => 'Success',
             ]);
-
         } catch (QueryException $ex) {
             return response()->json([
                 'message' => $ex,
@@ -1913,7 +1950,6 @@ class ActionsApiController extends Controller
                 'data' => $e,
             ]);
         }
-
     }
 
     public function typeshow($lockaction_id)
@@ -2021,7 +2057,6 @@ class ActionsApiController extends Controller
                             ->paginate(10, ['*'], 'page', $request->page);
                     }
                 }
-
             } else {
 
                 if (isset($request->status)) {
@@ -2238,5 +2273,4 @@ class ActionsApiController extends Controller
             ]);
         }
     }
-
 }

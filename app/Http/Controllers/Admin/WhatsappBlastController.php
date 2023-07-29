@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\CategoryWa;
+use App\Channel;
 use App\CtmWilayah;
 use App\Customer;
 use App\Http\Controllers\Controller;
@@ -11,13 +12,14 @@ use App\LockAction;
 use App\pelanggan_tiro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Traits\WablasTrait;
+use App\Traits\WablasAreaTrait;
 use App\wa_history;
 use App\WaTemplate;
 use GuzzleHttp\Promise\Create;
 use App\Traits\TraitModel;
 use App\User;
 use App\wa_template_file;
+use App\Traits\WablasTrait;
 use GuzzleHttp\Psr7\Message;
 
 class WhatsappBlastController extends Controller
@@ -27,7 +29,7 @@ class WhatsappBlastController extends Controller
     //tampilan awal WA blast
     public function index(Request $request)
     {
-        // WablasTrait::sendFile();
+        // WablasAreaTrait::sendFile();
         abort_unless(\Gate::allows('wablast_access'), 403);
         $categorys = CategoryWa::get();
         return view('admin.waBlast.index', compact('categorys'));
@@ -154,6 +156,27 @@ class WhatsappBlastController extends Controller
     {
         abort_unless(\Gate::allows('wablast_access'), 403);
         // dd($request->all());
+        // pilih channel start
+        $deviceWa = [];
+        $channel_list = Channel::get();
+        foreach ($channel_list as $key => $value) {
+            $data = WablasTrait::checkOnline($value->token);
+            if (json_decode($data)->status) {
+                $deviceWa[] = [$value->id];
+            } else {
+            }
+        }
+
+        $channel = wa_history::selectRaw('SUM(CASE WHEN wa_histories.id=1 AND wa_histories.status="pending" THEN 1 ELSE 0 END) as total, channels.*')
+            ->rightJoin('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            ->where('channels.type', '!=', 'reguler')
+            ->whereIn('channels.id', $deviceWa)
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);
+        // pilih channe end
+
         $limit = env('LIMIT_SEND');
         $jam = date('H');
         if ($jam > 0 && $jam < 11) {
@@ -246,7 +269,7 @@ class WhatsappBlastController extends Controller
                 foreach ($smallerArray as $index => $value) {
                     $temp[] = $value;
                 }
-                $test1 = WablasTrait::sendText($temp);
+                $test1 = WablasAreaTrait::sendText($temp, $channel->token);
                 $temp = [];
                 // dd($test1);
                 if (!empty(json_decode($test1)->data->messages)) {
@@ -317,7 +340,7 @@ class WhatsappBlastController extends Controller
                     foreach ($smallerArray as $index => $value) {
                         $temp[] = $value;
                     }
-                    $test1 = WablasTrait::sendFile($temp);
+                    $test1 = WablasAreaTrait::sendFile($temp);
                     $temp = [];
                     // dd($test1);
                     if (!empty(json_decode($test1)->data->messages)) {
@@ -421,14 +444,14 @@ class WhatsappBlastController extends Controller
                     ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
                     ->where('locks.id', null)
                     ->where('tblpelanggan.status', 1)->get();
-                dd($qry);
+                // dd($qry);
             } else {
                 $qry = Customer::selectRaw('locks.id, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
                     ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
                     ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
                     ->where('locks.id', '!=', null)
                     ->where('tblpelanggan.status', 1)->get();
-                dd($qry);
+                // dd($qry);
             }
         } else {
             $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
@@ -524,6 +547,26 @@ class WhatsappBlastController extends Controller
     public function storeMessageT(Request $request)
     {
         abort_unless(\Gate::allows('wablast_access'), 403);
+        // pilih channel start
+        $deviceWa = [];
+        $channel_list = Channel::get();
+        foreach ($channel_list as $key => $value) {
+            $data = WablasTrait::checkOnline($value->token);
+            if (json_decode($data)->status) {
+                $deviceWa[] = [$value->id];
+            } else {
+            }
+        }
+
+        $channel = wa_history::selectRaw('SUM(CASE WHEN wa_histories.id=1 AND wa_histories.status="pending" THEN 1 ELSE 0 END) as total, channels.*')
+            ->rightJoin('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            ->where('channels.type', '!=', 'reguler')
+            ->whereIn('channels.id', $deviceWa)
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);
+        // pilih channe end
         // dd($request->all());
         $limit = env('LIMIT_SEND');
         $jam = date('H');
@@ -617,7 +660,7 @@ class WhatsappBlastController extends Controller
                 foreach ($smallerArray as $index => $value) {
                     $temp[] = $value;
                 }
-                $test1 = WablasTrait::sendText($temp);
+                $test1 = WablasAreaTrait::sendText($temp, $channel->token);
                 $temp = [];
                 // dd($test1);
                 if (!empty(json_decode($test1)->data->messages)) {
@@ -775,6 +818,29 @@ class WhatsappBlastController extends Controller
         // print_r($result);
         // dd(User::orderBy('email')->get());
         // dd(json_decode($request->file));
+
+        // pilih channel start
+        $deviceWa = [];
+        $channel_list = Channel::get();
+        foreach ($channel_list as $key => $value) {
+            $data = WablasTrait::checkOnline($value->token);
+            if (json_decode($data)->status) {
+                $deviceWa[] = [$value->id];
+            } else {
+            }
+        }
+
+        $channel = wa_history::selectRaw('SUM(CASE WHEN wa_histories.id=1 AND wa_histories.status="pending" THEN 1 ELSE 0 END) as total, channels.*')
+            ->rightJoin('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            ->where('channels.type', '!=', 'reguler')
+            ->whereIn('channels.id', $deviceWa)
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);
+        // pilih channe end
+
+        // dd('sssss', $channel);
         $fileN = json_decode($request->file);
         $imageN = json_decode($request->image);
         // dd($fileN, $imageN[0][0]);
@@ -836,7 +902,7 @@ class WhatsappBlastController extends Controller
                     foreach (array_chunk($kumpulan_data, 5000) as $key => $smallerArray) {
                         foreach ($smallerArray as $index => $value) {
                             // count($kumpulan_data/5000);
-                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
+                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "channel_id" => $channel ? $channel->id : null]);
                             // $i = $i + 1;
 
                         }
@@ -856,7 +922,7 @@ class WhatsappBlastController extends Controller
                         foreach ($smallerArray as $index => $value) {
                             $temp[] = $value;
                         }
-                        $test1 = WablasTrait::sendText($temp);
+                        $test1 = WablasAreaTrait::sendText($temp, $channel->token);
                         $temp = [];
                         // dd($test1);
                         if (!empty(json_decode($test1)->data->messages)) {
@@ -914,7 +980,7 @@ class WhatsappBlastController extends Controller
                                 foreach ($smallerArray as $index => $value) {
                                     // dd($value);
                                     // count($kumpulan_data/5000);
-                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value['document']]);
+                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value['document'], "channel_id" => $channel->id]);
                                     // $i = $i + 1;
                                     unset($temp[$c]["document"]);
                                     $c++;
@@ -940,7 +1006,7 @@ class WhatsappBlastController extends Controller
                                     $temp[] = $value;
                                 }
                                 // dd($temp);
-                                $test1 = WablasTrait::sendFile($temp);
+                                $test1 = WablasAreaTrait::sendFile($temp, $channel->token);
                                 $temp = [];
                                 // dd($test1);
                                 if (!empty(json_decode($test1)->data->messages)) {
@@ -1001,7 +1067,7 @@ class WhatsappBlastController extends Controller
                                 $d = 0;
                                 foreach ($smallerArray as $index => $value) {
                                     // count($kumpulan_data/5000);
-                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value["image"]]);
+                                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => $value["image"], "channel_id" => $channel ? $channel->id : null]);
                                     // $i = $i + 1;
                                     unset($temp[$d]["image"]);
                                     unset($temp[$d]["caption"]);
@@ -1024,7 +1090,7 @@ class WhatsappBlastController extends Controller
                                     $temp[] = $value;
                                 }
                                 // dd($temp);
-                                $test1 = WablasTrait::sendImage($temp);
+                                $test1 = WablasAreaTrait::sendImage($temp, $channel->token);
                                 $temp = [];
                                 // dd($test1);
                                 if (!empty(json_decode($test1)->data->messages)) {
@@ -1094,7 +1160,7 @@ class WhatsappBlastController extends Controller
     }
     public function checkOnline()
     {
-        $d = WablasTrait::checkOnline();
+        $d = WablasAreaTrait::checkOnline();
         $data = json_decode($d)->data[0];
     }
 }

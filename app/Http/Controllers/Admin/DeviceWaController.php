@@ -2,21 +2,40 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Channel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\WablasTrait;
+use App\Traits\WablasAreaTrait;
 use Doctrine\DBAL\Schema\View;
 
 class DeviceWaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // abort_unless(\Gate::allows('user_access'), 403);
-        $data = WablasTrait::checkOnline();
+
+        $channelList = Channel::get();
+        if ($request->channel != "") {
+            $channel = Channel::where('id', $request->channel)->first();
+            $scan = WablasTrait::rescan($channel->token);
+            $data = WablasTrait::checkOnline($channel->token);
+        } else {
+            $channel = Channel::where('type', 'reguler')->first();
+            $scan = WablasTrait::rescan($channel->token);
+            $data = WablasTrait::checkOnline($channel->token);
+        }
+        // dd($channel, $data);
+
         // dd(json_decode($data)->data);
-        $deviceWa = json_decode($data)->data;
-        $scan = WablasTrait::rescan();
-        return view('admin.whatsapp.device.index', compact('deviceWa', 'scan'));
+        if (json_decode($data)->status) {
+            $deviceWa = json_decode($data)->data;
+        } else {
+            dd('Data Kosong');
+        }
+        // dd(json_decode($data)->status);
+
+        return view('admin.whatsapp.device.index', compact('deviceWa', 'scan', 'channelList'));
     }
     public function disconect()
     {
@@ -25,14 +44,16 @@ class DeviceWaController extends Controller
         return redirect()->back();
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return View('admin.whatsapp.device.create');
+        $token = $request->token;
+        // dd($token);
+        return View('admin.whatsapp.device.create', compact('token'));
     }
     public function store(Request $request)
     {
-        $phone = WablasTrait::changeNumber($request->phone);
-        dd($phone);
+        // dd($phone, $token);
+        $phone = WablasAreaTrait::changeNumber($request->phone, $request->token);
         return redirect()->route('admin.devicewa.index');
     }
 }

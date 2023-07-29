@@ -15,6 +15,7 @@
     <div class="card-header">
         {{ trans('global.absence.title_singular') }} {{ trans('global.list') }}
     </div>
+    <input type="hidden" id="id" value="{{ !empty($request->id) ? $request->id : '' }}">
     <div class="card-body">
     <div class="form-group">
         <div class="col-md-12">
@@ -202,6 +203,7 @@
         'to': $("#to").val(),
         'dapertement': $("#dapertement").val(),
         'absence_category_id' : $("#absence_category_id").val(),
+        'id' : $("#id").val()
       },
       dataType: "JSON"
     },

@@ -12,6 +12,19 @@
         <div class="form-group">
             <div class="col-md-12">
                 <form action="" id="filtersForm">
+                        <div class="col-md-12 row">
+                       
+                            <div class="col-md-6">
+                                <label>Channel</label>
+                                <select id="channel" name="channel" class="form-control">
+                                    <option value="">== Pilih Channel ==</option>
+                                    @foreach ($channelList as $item )
+                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
+                        </div>  
+                    </div>     
+
                     <div class="col-md-12 row">
                     <div class="col-md-6">
                         
@@ -131,7 +144,13 @@
         }else{
             $("#custom").val('');
         }
-        // console.log('custom : ', custom);
+
+        let channel = searchParams.get('channel')
+        if (channel) {
+            $("#channel").val(channel);
+        }else{
+            $("#channel").val('');
+        }
 
   let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
   let deleteButton = {
@@ -178,6 +197,7 @@
         'status': $("#status").val(),
         'custom': $("#custom").val(),
         'from': $("#from").val(),
+        'channel' : $("#channel").val(),
         'to': $("#to").val(),
       }
     },

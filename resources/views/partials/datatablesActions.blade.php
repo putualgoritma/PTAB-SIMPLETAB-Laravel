@@ -70,3 +70,9 @@
       Teruskan
     </a>
 @endif
+
+@if (!empty($act))
+    <a class="btn btn-xs btn-info" href="{{ route('admin.absencegroup.index',['id'=>$row->absence_id]) }}">
+      Tindakan
+    </a>
+@endif

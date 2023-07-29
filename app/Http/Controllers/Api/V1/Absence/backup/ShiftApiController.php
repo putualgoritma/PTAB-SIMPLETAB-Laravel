@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Shift;
 use App\ShiftGroups;
 use App\ShiftPlannerStaffs;
-use App\Staff;
 use Illuminate\Http\Request;
 
 class ShiftApiController extends Controller
@@ -19,15 +18,9 @@ class ShiftApiController extends Controller
             ->join('staffs', 'staffs.id', '=', 'shift_planner_staffs.staff_id')
             ->where('shift_group_id', $request->shift_id)
             ->whereDate('start', '=', $request->start)
-            ->where('staff_id', '!=', $request->staff_id)
             ->get();
 
-        $staff = Staff::where('id', $request->staff_id)->first();
-        $shift_list = ShiftGroups::FilterDapertement($staff->dapertement_id)
-            ->FilterSubDapertement($staff->subdapertement_id)
-            ->FilterWorkUnit($staff->work_unit_id)
-            ->FilterJob($staff->job_id)
-            ->get();
+        $shift_list = ShiftGroups::get();
 
         foreach ($staff_list as $key => $value) {
             $data[] = ['id' => $value->id, 'name' => $value->staff_name, 'checked' => false];
@@ -39,7 +32,6 @@ class ShiftApiController extends Controller
         return response()->json([
             'message' => 'success',
             'data' => $data,
-            'data23' => $staff,
             'data2' => $data2,
         ]);
     }
@@ -50,8 +42,7 @@ class ShiftApiController extends Controller
             ->join('shifts', 'shifts.id', '=', 'shift_planner_staffs.shift_group_id')
             ->join('staffs as staff', 'staff.id', '=', 'shift_planner_staffs.staff_id')
             ->join('staffs as staff_change', 'staff_change.id', '=', 'shift_planner_staffs.change_staff_id')
-            ->where('staff_id', $request->staff_id)
-            // ->where('change_staff_id', $request->staff_id)
+            ->where('change_staff_id', $request->staff_id)
             ->get();
 
         return response()->json([

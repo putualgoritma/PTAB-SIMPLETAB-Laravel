@@ -18,6 +18,7 @@ class wa_history extends Model
         'customer_id',
         'ref_id',
         'message',
+        'channel_id',
     ];
 
     public function scopeFilterDate($query, $from, $to)
@@ -40,6 +41,15 @@ class wa_history extends Model
     {
         if ($status != '') {
             $query->where('status', $status);
+            return $query;
+        } else {
+        }
+    }
+
+    public function scopeFilterChannel($query, $channel)
+    {
+        if ($channel != '') {
+            $query->where('channel_id', $channel);
             return $query;
         } else {
         }

@@ -2,6 +2,9 @@
 
 namespace App\Traits;
 
+use App\Channel;
+use App\wa_history;
+
 trait WablasTrait
 {
     public static function gantiFormat($nomorhp)
@@ -33,10 +36,30 @@ trait WablasTrait
 
     public static function sendText($data = [])
     {
+        // pilih channel start
+        $channel =   Channel::selectRaw('channels.*')
+            // ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            // ->where('wa_histories.status', 'pending')
+            ->where('channels.type', 'reguler')
+            ->groupBy('channels.id')
+            ->first();
+        $token = $channel->token;
+        // dd($channel);     
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+
         $payload = [
             "data" => $data,
+            // "data" => [
+            //     [
+            //         'phone' => '6281236815960',
+            //         'customer_id' => null,
+            //         'message' => "Tesss",
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa')
+            //     ]
+            // ]
         ];
         curl_setopt(
             $curl,
@@ -56,13 +79,22 @@ trait WablasTrait
         $result = curl_exec($curl);
         curl_close($curl);
         // print_r($result);
+        // dd($result);
         return $result;
     }
 
-    public static function checkOnline()
+    public static function checkOnline($token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+        // pilih channel start
+        // $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+        //     ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+        //     // ->where('wa_histories.status', 'pending')
+        //     ->groupBy('channels.id')
+        //     ->orderBy('total', 'asc')
+        //     ->first();
+        // dd($channel);  
+        $token = $token;
         curl_setopt($curl, CURLOPT_URL, "https://jogja.wablas.com/api/device/info?token=$token");
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -76,8 +108,16 @@ trait WablasTrait
 
     public static function resend($id)
     {
+        // pilih channel start
+        $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+            ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            // ->where('wa_histories.status', 'pending')
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);  
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+        $token = $channel->token;
         curl_setopt(
             $curl,
             CURLOPT_HTTPHEADER,
@@ -95,9 +135,9 @@ trait WablasTrait
         curl_close($curl);
         return $result;
     }
-    public static function rescan()
+    public static function rescan($token)
     {
-        $token = env('SECURITY_TOKEN_WABLAS');
+        $token = $token;
         $scan = "https://jogja.wablas.com/api/device/scan?token=" . $token;
         return $scan;
     }
@@ -151,9 +191,17 @@ trait WablasTrait
 
     public static function sendFile($data = [])
     {
+        // pilih channel start
+        $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+            ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            // ->where('wa_histories.status', 'pending')
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);  
 
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+        $token = $channel->token;
         // $payload = $data;
 
         $payload =  [
@@ -183,8 +231,17 @@ trait WablasTrait
 
     public static function sendImage($data = [])
     {
+        // pilih channel start
+        $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+            ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            // ->where('wa_histories.status', 'pending')
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);  
+
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+        $token = $channel->token;
         $payload =   [
             "data" => $data,
         ];
@@ -212,9 +269,16 @@ trait WablasTrait
 
     public static function sendVideo($data = [])
     {
-
+        // pilih channel start
+        $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+            ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            // ->where('wa_histories.status', 'pending')
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);  
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
+        $token = $channel->token;
         $payload = [
             "data" => $data,
         ];

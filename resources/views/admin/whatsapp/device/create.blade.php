@@ -9,6 +9,7 @@
     <div class="card-body">
         <form action="{{ route("admin.devicewa.store") }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
             <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
                 <label for="phone">Masukan Nomor Baru*</label>
                 <input type="text" id="phone" name="phone" class="form-control" value="" required>

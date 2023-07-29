@@ -42,4 +42,12 @@ class ShiftChange extends Model
             return $query->whereBetween(DB::raw('DATE(shift_changes.created_at)'), [$from, $to]);
         }
     }
+
+    public function scopeFilterDapertement($query, $ststussm)
+    {
+        if ($ststussm != '') {
+            $query->where('sh2.dapertement_id', $ststussm);
+        }
+        return $query;
+    }
 }

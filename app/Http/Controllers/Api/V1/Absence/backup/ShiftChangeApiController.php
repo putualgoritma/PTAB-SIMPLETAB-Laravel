@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Absence;
 
 use App\Http\Controllers\Controller;
 use App\ShiftChange;
-use App\ShiftPlannerStaffs;
 use Illuminate\Http\Request;
 
 class ShiftChangeApiController extends Controller
@@ -34,8 +33,6 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
             ->where('A.staff_id', $request->staff_id)
-            ->where('shift_changes.status', '!=', 'approve')
-            ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -54,8 +51,6 @@ class ShiftChangeApiController extends Controller
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
             ->where('B.staff_id', $request->staff_id)
-            ->where('shift_changes.status', '!=', 'approve')
-            ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -69,38 +64,13 @@ class ShiftChangeApiController extends Controller
         $shiftChange = ShiftChange::where('id', $request->id)->first();
         $shiftChange->update(
             [
-                'status' => $request->status
+                'status' => 'approve'
             ]
         );
-        if ($request->status == "reject") {
-            $message = "Ditolak";
-        } else {
-            // penukaran Shift start
-            $shift_changes = ShiftChange::where('id', $request->id)->first();
-            // shift saya
-            $shift1 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_change_id)->first();
-            $staff_id1 = $shift1->staff_id;
-            // shift yang ditukar
-            $shift2 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_id)->first();
-            $staff_id2 = $shift2->staff_id;
-            $shift1->update([
-                'staff_id' => $staff_id2
-            ]);
-            $shift2->update([
-                'staff_id' => $staff_id1
-            ]);
-            $shift_changes->update([
-                'status' => 'approve'
-            ]);
-            // penukaran shift end
-            $message = "Diterima";
-        }
 
         return response()->json([
-            'message' => $message,
+            'message' => 'daftar pengajuan',
             'data' =>  $shiftChange,
-            'llll' => $request->status,
-            'sskks' => $request->id
         ]);
     }
 
@@ -110,8 +80,8 @@ class ShiftChangeApiController extends Controller
         $dataForm = json_decode($request->form);
         // if ($dataForm->date > date('Y-m-d')) {
         $data = [
-            'shift_id' => $dataForm->shift_change_id,
-            'shift_change_id' =>  $dataForm->id,
+            'shift_id' => $dataForm->id,
+            'shift_change_id' => $dataForm->shift_change_id,
             'description' => $dataForm->description,
             'status' => 'pending',
         ];

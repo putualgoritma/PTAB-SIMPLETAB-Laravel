@@ -31,13 +31,13 @@ trait WablasAreaTrait
         return $nomorhp;
     }
 
-    public static function sendText($data = [])
+    public static function sendText($data = [], $token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         $payload = [
             "data" => $data,
         ];
+        // dd($payload);
         curl_setopt(
             $curl,
             CURLOPT_HTTPHEADER,
@@ -55,14 +55,14 @@ trait WablasAreaTrait
 
         $result = curl_exec($curl);
         curl_close($curl);
+        // dd($result);
         // print_r($result);
         return $result;
     }
 
-    public static function checkOnline()
+    public static function checkOnline($token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         curl_setopt($curl, CURLOPT_URL, "https://jogja.wablas.com/api/device/info?token=$token");
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -77,7 +77,6 @@ trait WablasAreaTrait
     public static function resend($id)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         curl_setopt(
             $curl,
             CURLOPT_HTTPHEADER,
@@ -95,16 +94,14 @@ trait WablasAreaTrait
         curl_close($curl);
         return $result;
     }
-    public static function rescan()
+    public static function rescan($token)
     {
-        $token = env('SECURITY_TOKEN_WABLAS');
         $scan = "https://jogja.wablas.com/api/device/scan?token=" . $token;
         return $scan;
     }
-    public static function disconect()
+    public static function disconect($token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         curl_setopt(
             $curl,
             CURLOPT_HTTPHEADER,
@@ -123,10 +120,9 @@ trait WablasAreaTrait
         return $result;
     }
 
-    public static function changeNumber($phone)
+    public static function changeNumber($phone, $token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         $data = [
             'phone' => $phone,
         ];
@@ -149,11 +145,10 @@ trait WablasAreaTrait
         return $result;
     }
 
-    public static function sendFile($data = [])
+    public static function sendFile($data = [], $token)
     {
 
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         // $payload = $data;
 
         $payload =  [
@@ -181,10 +176,9 @@ trait WablasAreaTrait
         // print_r($result);
     }
 
-    public static function sendImage($data = [])
+    public static function sendImage($data = [], $token)
     {
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         $payload =   [
             "data" => $data,
         ];
@@ -210,11 +204,10 @@ trait WablasAreaTrait
         // print_r($result);
     }
 
-    public static function sendVideo($data = [])
+    public static function sendVideo($data = [], $token)
     {
 
         $curl = curl_init();
-        $token = env('SECURITY_TOKEN_WABLAS');
         $payload = [
             "data" => $data,
         ];

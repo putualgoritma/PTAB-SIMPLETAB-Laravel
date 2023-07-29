@@ -2,11 +2,41 @@
 @section('content')
 
 <div class="card">
+
+  
+
     <div class="card-header">
+    
+        
         {{ trans('global.show') }} Data Device
     </div>
 
+
+    <div>
+        
+    </div>
+
     <div class="card-body">
+        <form action="" id="filtersForm">
+            <div class="col-md-12 row">
+           
+                <div class="col-md-6">
+                    <label>Channel</label>
+                    <select id="channel" name="channel" class="form-control">
+                        <option value="">== Pilih Channel ==</option>
+                        @foreach ($channelList as $item )
+                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        @endforeach
+                    </select>
+            </div>  
+        </div>     
+        <div class="col-md-12 row">
+                <span class="input-group-btn">
+                    &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
+                </span>   
+            </div>     
+        </form>
+<br>
         <table class="table table-bordered table-striped">
             <tbody>
 
@@ -34,7 +64,7 @@
                     </th>
                     <td>
                         +{{ $deviceWa->sender }} <br>
-                        <a class="btn btn-xs btn-warning" href="{{ route('admin.devicewa.create') }}">ganti nomor</a>
+                        <a class="btn btn-xs btn-warning" href="{{ route('admin.devicewa.create', ['token' => $deviceWa->token]) }}">ganti nomor</a>
                     </td>
                 </tr>
 
@@ -81,14 +111,14 @@
                         <a class="btn btn-primary" href="{{ $scan }}" target="_blank">Scan Disini</a>
                     </td>
                 </tr>
-                <tr>
+                {{-- <tr>
                     <th>
                         Disconect device
                     </th>
                     <td>
                         <a class="btn btn-danger" href="{{ route('admin.devicewa.disconect') }}" target="_blank">Disconect Disini</a>
                     </td>
-                </tr>
+                </tr> --}}
 
 
             </tbody>

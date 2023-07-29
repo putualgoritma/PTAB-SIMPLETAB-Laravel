@@ -28,6 +28,14 @@ class TicketsController extends Controller
     {
 
         abort_unless(\Gate::allows('ticket_access'), 403);
+        // $checker = [];
+        // $users = user::with(['roles'])->first();
+        // foreach ($users->roles as $data) {
+        //     foreach ($data->permissions as $data2) {
+        //         $checker[] = $data2->title;
+        //     }
+        // }
+        // dd($checker, in_array('all_absence_access', $checker));
 
         $departementlist = Dapertement::all();
         $subdepartementlist = array();
@@ -224,7 +232,7 @@ class TicketsController extends Controller
 
             $table->editColumn('status', function ($row) {
 
-                if ($row->print_report_status == "1") {
+                if ($row->print_report_status == "1" && $row->status == "close") {
 
                     return "close2";
                 } else if ($row->status == "pending" && count($row->action) > 0) {
@@ -505,7 +513,10 @@ class TicketsController extends Controller
 
                 $data = array_merge($data, ['spk' => $spk]);
             }
-
+            if ($request->statusupdate != "") {
+                $data = array_merge($data, ['status' => $request->statusupdate]);
+            }
+            // dd($data);
             $ticket->update($data);
 
             return redirect()->route('admin.tickets.index');
