@@ -252,6 +252,13 @@ Route::group(['prefix' => 'close/admin1', 'namespace' => 'Api\V1\Admin1', 'middl
 
 
 // sementara
+Route::group(['prefix' => 'open/absence', 'namespace' => 'Api\V1\Absence'], function () {
+    Route::post('loginAdmin', 'UserApiController@loginAdmin');
+    Route::post('login', 'UserApiController@login');
+});
+
+
+// Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence', 'middleware' => 'auth:apiadmin'], function () {
 Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], function () {
     Route::get('absence', 'AbsenceApiController@index');
     Route::post('absence/sickAdd', 'AbsenceApiController@sickAdd');
@@ -260,7 +267,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('requests/history', 'RequestApiController@history');
 
     // admin start
-
+    Route::get('menuadmin', 'RequestApiController@menuAdmin');
     Route::post('loginAdmin', 'UserApiController@loginAdmin');
     Route::get('requests/requestApprove', 'RequestApiController@requestApprove');
     Route::get('requests/show', 'RequestApiController@show');
@@ -331,51 +338,16 @@ Route::group(['prefix' => 'close/visit', 'namespace' => 'Api\V1\Visit'], functio
     Route::get('visit', 'VisitApiController@index');
     Route::get('show/{id}', 'VisitApiController@show');
     Route::post('store', 'VisitApiController@store');
-    Route::get('history', 'AbsenceApiController@history');
-    Route::get('requests/listFile', 'RequestApiController@listFile');
-    Route::get('requests/history', 'RequestApiController@history');
-    Route::delete('requests/imageDelete/{id}', 'RequestApiController@imageDelete');
-    Route::get('absence/schedule', 'AbsenceApiController@schedule');
-
-
-    Route::get('requests/absenceList', 'RequestApiController@absenceList');
-    Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
-    Route::get('menu', 'MenuApiController@index');
-    Route::get('shift', 'ShiftApiController@index');
-    Route::get('shift/listChange', 'ShiftApiController@listChange');
-    Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
-    Route::post('absence/store', 'AbsenceApiController@store');
-
-
-    Route::get('message', 'MessageApiController@index');
-    Route::post('message/read', 'MessageApiController@read');
-    Route::post('message/check', 'MessageApiController@check');
-
-
-    Route::post('absence/storeLocationEnd', 'AbsenceApiController@storeLocationEnd');
-    Route::post('absence/storeLocation', 'AbsenceApiController@storeLocation');
-    Route::post('absence/storeLocationExtra', 'AbsenceApiController@storeLocationExtra');
-    Route::post('absence/storeLocationDuty', 'AbsenceApiController@storeLocationDuty');
-    Route::post('leaveEnd', 'AbsenceApiController@leaveEnd');
-
-    Route::post('requests/update', 'RequestApiController@update');
-    Route::post('requests/store', 'RequestApiController@store');
-    Route::post('shift/update', 'ShiftApiController@update');
-    Route::post('shift/approve', 'ShiftApiController@approve');
-    Route::post('login', 'UserApiController@login');
-    Route::post('user/update', 'UserApiController@update');
-    Route::get('shift/myShift', 'ShiftApiController@myShift');
-    Route::get('shiftChange', 'ShiftChangeApiController@index');
-    Route::post('shiftChange/store', 'ShiftChangeApiController@store');
-
-    Route::get('changeShiftProposal', 'ShiftChangeApiController@changeShiftProposal');
-    Route::get('changeShift', 'ShiftChangeApiController@changeShift');
-    Route::post('changeShiftApprove', 'ShiftChangeApiController@changeShiftApprove');
-
-
-    Route::get('holiday', 'AbsenceApiController@holiday');
+    Route::get('getDataCbox', 'VisitApiController@getDataCbox');
+    Route::get('getDataStaff', 'VisitApiController@getDataStaff');
+    Route::post('storeEtc', 'VisitApiController@storeEtc');
+    Route::get('getHistory', 'VisitApiController@getHistory');
 });
 
+
+Route::group(['prefix' => 'open/wablast', 'namespace' => 'Api\V1'], function () {
+    Route::post('callback', 'WaBlastCallbackApiController@callback');
+});
 
 
 // kshusus uji coba absen( nanti dihapus)

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\ShiftChange;
 use App\ShiftPlannerStaffs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class ShiftChangeController extends Controller
@@ -22,13 +23,24 @@ class ShiftChangeController extends Controller
     {
 
         abort_unless(\Gate::allows('extra_access'), 403);
-        $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, st2.name as name2, sh2.title as shift2')
-            ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
-            ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
-            ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
-            ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
-            ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
-            ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id');
+        if (Auth::user()->dapertement_id != 5 && Auth::user()->dapertement_id != '') {
+            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, st2.name as name2, sh2.title as shift2')
+                ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
+                ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
+                ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
+                ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
+                ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
+                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
+                ->FilterDapertement(Auth::user()->dapertement_id);
+        } else {
+            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, st2.name as name2, sh2.title as shift2')
+                ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
+                ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
+                ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
+                ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
+                ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
+                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id');
+        }
         // dd($qry->get());
         if ($request->ajax()) {
             //set query

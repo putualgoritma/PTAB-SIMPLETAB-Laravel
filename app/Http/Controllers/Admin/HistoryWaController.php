@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Channel;
 use App\Http\Controllers\Controller;
 use App\wa_history;
 use Illuminate\Http\Request;
@@ -19,7 +20,10 @@ class HistoryWaController extends Controller
 
         if ($request->ajax()) {
             //set query
-            $qry = wa_history::FilterStatus($request->status)->FilterCustom($request->custom)->FilterDate($request->from, $request->to);
+            $qry = wa_history::FilterStatus($request->status)
+                ->FilterCustom($request->custom)
+                ->FilterChannel($request->channel)
+                ->FilterDate($request->from, $request->to);
 
             $table = Datatables::of($qry);
 
@@ -73,7 +77,8 @@ class HistoryWaController extends Controller
             $table->addIndexColumn();
             return $table->make(true);
         }
-        return view('admin.whatsapp.history.index');
+        $channelList = Channel::where('type', '!=', 'reguler')->get();
+        return view('admin.whatsapp.history.index', compact('channelList'));
     }
 
     public function destroy($id)

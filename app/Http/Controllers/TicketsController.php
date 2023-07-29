@@ -61,31 +61,27 @@ class TicketsController extends Controller
 
                 $staff = $admin->staff_id;
 
-                $departementlist = Dapertement::where('id', $department)->get();                
+                $departementlist = Dapertement::where('id', $department)->get();
 
                 // ->get();
 
             }
-
         }
 
         if (Auth::user()->email == "pengamatmeter@ptab-vps.com") {
 
             $department = $request->departement;
-
         }
 
         if ($request->departement != "") {
 
             $department = $request->departement;
-
         }
-        
+
         if ($request->subdepartement != "") {
 
             $subdepartement = $request->subdepartement;
-
-        }else{
+        } else {
             $subdepartement = "";
         }
 
@@ -100,6 +96,7 @@ class TicketsController extends Controller
 
             $qry = Ticket::FilterStatus(request()->input('status'))
 
+                ->FilterDate($request->from, $request->to)
                 ->FilterDepartment($department)
 
                 ->with('department')
@@ -120,9 +117,11 @@ class TicketsController extends Controller
             $qry = Ticket::selectRaw('DISTINCT tickets.*')
                 ->FilterStatus(request()->input('status'))
 
+                ->FilterDate($request->from, $request->to)
+
                 ->FilterDepartment($department)
-                ->FilterStaff($staff)
-                ->FilterSubDepartment($subdepartement)                
+                // ->FilterStaff($staff)
+                ->FilterSubDepartment($subdepartement)
 
                 ->with('department')
 
@@ -139,7 +138,7 @@ class TicketsController extends Controller
                 ->orderBy('created_at', 'DESC');
         }
 
-        // dd($qry);
+        // dd($qry->get());
 
         if ($request->ajax()) {
 
@@ -180,43 +179,36 @@ class TicketsController extends Controller
                     'row'
 
                 ));
-
             });
 
             $table->editColumn('code', function ($row) {
 
                 return $row->code ? $row->code : "";
-
             });
 
             $table->editColumn('nomorrekening', function ($row) {
 
                 return $row->customer->nomorrekening ? $row->customer->nomorrekening : "";
-
             });
 
             $table->editColumn('created_at', function ($row) {
 
                 return $row->created_at ? strval($row->created_at) : "";
-
             });
 
             $table->editColumn('dapertement', function ($row) {
 
                 return $row->dapertement->name ? $row->dapertement->name : "";
-
             });
 
             $table->editColumn('title', function ($row) {
 
                 return $row->title ? $row->title : "";
-
             });
 
             $table->editColumn('description', function ($row) {
 
                 return $row->description ? $row->description : "";
-
             });
 
             $table->editColumn('address', function ($row) {
@@ -224,13 +216,10 @@ class TicketsController extends Controller
                 if ($row->address != "") {
 
                     return $row->address != "" ? $row->address : "";
-
                 } else {
 
                     return $row->customer->alamat;
-
                 }
-
             });
 
             $table->editColumn('status', function ($row) {
@@ -238,39 +227,31 @@ class TicketsController extends Controller
                 if ($row->print_report_status == "1") {
 
                     return "close2";
-
                 } else if ($row->status == "pending" && count($row->action) > 0) {
 
                     return "pending2";
-
                 } else if (Auth::user()->dapertement_id === 1 && $row->status == 'pending' && $row->dapertement_id > 1 && count($row->action) < 1) {
 
                     return "pending2";
-
                 } else {
 
                     return $row->status ? $row->status : "pending";
-
                 }
-
             });
 
             $table->editColumn('category', function ($row) {
 
                 return $row->category ? $row->category->name : "";
-
             });
 
             $table->editColumn('customer', function ($row) {
 
                 return $row->customer ? $row->customer->name : "";
-
             });
 
             $table->editColumn('creator', function ($row) {
 
                 return $row->creator ? $row->creator : "";
-
             });
 
             $table->rawColumns(['actions', 'placeholder']);
@@ -278,17 +259,15 @@ class TicketsController extends Controller
             $table->addIndexColumn();
 
             return $table->make(true);
-
         }
 
         //default view
         echo $test_val;
-        if($department>0){
+        if ($department > 0) {
             $subdepartementlist = Subdapertement::where('dapertement_id', $department)->get();
         }
         //return $subdepartementlist;
-        return view('admin.tickets.index', compact('departementlist','subdepartementlist'));
-
+        return view('admin.tickets.index', compact('departementlist', 'subdepartementlist'));
     }
 
     public function create()
@@ -305,7 +284,6 @@ class TicketsController extends Controller
         //$customers = Customer::all();
 
         return view('admin.tickets.create', compact('categories', 'code'));
-
     }
 
     public function store(StoreTicketRequest $request)
@@ -320,7 +298,6 @@ class TicketsController extends Controller
         if (count($customer_id) < 1) {
 
             return back()->withError('No.SBG tidak ada !')->withInput();
-
         } else {
 
             $img_path = "/images/complaint";
@@ -348,9 +325,7 @@ class TicketsController extends Controller
                     $resourceImage->move($basepath . $img_path, $img_name);
 
                     $dataImageName[] = $img_name;
-
                 }
-
             }
 
             // video
@@ -364,11 +339,9 @@ class TicketsController extends Controller
                 $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
 
                 $resource->move($basepath . $video_path, $video_name);
-
             } else {
 
                 $video_name = "";
-
             }
 
             // data
@@ -424,17 +397,13 @@ class TicketsController extends Controller
                     $upload_image->ticket_id = $ticket->id;
 
                     $upload_image->save();
-
                 }
 
                 return redirect()->route('admin.tickets.index');
-
             } catch (QueryException $ex) {
 
                 return back()->withErrors($ex);
-
             }
-
         }
 
         // dd(json_encode($dataImageName));
@@ -455,11 +424,9 @@ class TicketsController extends Controller
             $subdapertement = $ticket->action[0]->subdapertement;
 
             $staffs = $ticket->action[0]->staff;
-
         }
 
         return view('admin.tickets.show', compact('ticket', 'subdapertement', 'staffs'));
-
     }
 
     public function edit(Ticket $ticket)
@@ -486,23 +453,18 @@ class TicketsController extends Controller
             if (!in_array("ticket_all_access", $permission)) {
 
                 $department = $admin->dapertement_id;
-
             }
-
         }
 
         if ($department != '') {
 
             $dapertements = Dapertement::where('id', $department)->get();
-
         } else {
 
             $dapertements = Dapertement::all();
-
         }
 
         return view('admin.tickets.edit', compact('ticket', 'categories', 'dapertements'));
-
     }
 
     public function update(UpdateTicketRequest $request, Ticket $ticket)
@@ -519,7 +481,6 @@ class TicketsController extends Controller
         if (count($customer_id) < 1) {
 
             return back()->withError('No.SBG tidak ada !')->withInput();
-
         } else {
 
             $data = $request->all();
@@ -543,15 +504,12 @@ class TicketsController extends Controller
                 //merge data
 
                 $data = array_merge($data, ['spk' => $spk]);
-
             }
 
             $ticket->update($data);
 
             return redirect()->route('admin.tickets.index');
-
         }
-
     }
 
     public function destroy(Ticket $ticket)
@@ -588,11 +546,8 @@ class TicketsController extends Controller
                     if (trim($img_name) != '' && file_exists($file_path)) {
 
                         unlink($file_path);
-
                     }
-
                 }
-
             }
 
             $ticket_image = Ticket_Image::where('ticket_id', $ticket->id)->delete();
@@ -600,13 +555,10 @@ class TicketsController extends Controller
             $ticket->delete();
 
             return back();
-
         } catch (QueryException $e) {
 
             return back()->withErrors(['Mohon hapus dahulu data yang terkait']);
-
         }
-
     }
 
     public function massDestroy()
@@ -616,7 +568,8 @@ class TicketsController extends Controller
 
     }
 
-    function print($id) {
+    function print($id)
+    {
 
         $ticket = Ticket::findOrFail($id);
 
@@ -655,7 +608,6 @@ class TicketsController extends Controller
         Ticket::where('id', $id)->update(['print_status' => 1]);
 
         return view('admin.tickets.printservice', compact('ticket'));
-
     }
 
     public function printspk($id)
@@ -672,13 +624,11 @@ class TicketsController extends Controller
             $subdapertement = $ticket->action[0]->subdapertement;
 
             $staffs = $ticket->action[0]->staff;
-
         }
 
         Ticket::where('id', $id)->update(['print_spk_status' => 1]);
 
         return view('admin.tickets.printspk', compact('ticket', 'subdapertement', 'staffs'));
-
     }
 
     public function printReport($id)
@@ -689,7 +639,5 @@ class TicketsController extends Controller
         Ticket::where('id', $id)->update(['print_report_status' => 1]);
 
         return view('admin.tickets.printreport', compact('ticket'));
-
     }
-
 }

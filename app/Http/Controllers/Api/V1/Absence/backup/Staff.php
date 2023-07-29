@@ -3,7 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Staff extends Model
 {
@@ -47,7 +46,7 @@ class Staff extends Model
     public function scopeFilterDapertement($query, $dapertement)
     {
         if ($dapertement != '') {
-            $query->where('dapertement_id', $dapertement);
+            $query->where('staffs.dapertement_id', $dapertement);
         }
         return $query;
     }
@@ -66,14 +65,6 @@ class Staff extends Model
         return $query;
     }
 
-    public function scopeFilterName($query, $name)
-    {
-        if ($name != '') {
-            $query->where('staffs.name', 'like', '%' . $name . '%');
-        }
-        return $query;
-    }
-
     public function scopeFilterSubdapertement($query, $subdapertement, $job)
     {
         if ($job == '' || $job == '0' || $job == null) {
@@ -81,29 +72,6 @@ class Staff extends Model
                 $query->where('subdapertement_id', $subdapertement);
             }
             return $query;
-        }
-    }
-
-    public function scopeFilterDateWeb($query, $from, $to)
-    {
-        if (!empty(request()->input('from')) && !empty(request()->input('to'))) {
-            $from = request()->input('from');
-            $to = request()->input('to');
-            //return $query->whereBetween('lock_action.created_at', [$from, $to]);
-            return $query->whereBetween(DB::raw('DATE(absences.created_at)'), [$from, $to]);
-            // return $query->where('froms_id', $from);
-            // dd(request()->input('from'));
-
-        } else {
-            if (date('d') > 20) {
-                $from = date("Y-m-d", strtotime(date('Y-m') . "-21"));
-                $to = date("Y-m-d", strtotime('+1 month', strtotime(date('Y-m') . "-20")));
-            } else {
-                $from = date("Y-m-d", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
-                $to = date("Y-m-d", strtotime('0 month', strtotime(date('Y-m') . "-20")));
-            }
-
-            return $query->whereBetween(DB::raw('DATE(absences.created_at)'), [$from, $to]);
         }
     }
 }

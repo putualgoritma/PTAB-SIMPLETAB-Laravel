@@ -166,6 +166,72 @@ class RequestApiController extends Controller
         if ($start < date('Y-m-d') || $start > $end) {
             $cek = "pass";
             $error = "Tanggal kurang dari hari ini";
+        } else if ($dataForm->category == "visit" || $dataForm->category == "excuse") {
+            $request_date = "2023-07-28";
+            $day_id = date('w', strtotime($request_date)) == "0" ? '7' : date('w', strtotime($request_date));
+            // dd($day_id);
+            $message_err = 'anda hanya bisa mengajukan di jam kerja';
+            $staff = Staff::where('id', 453)->first();
+            $absen_now = Absence::join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+                ->where('staff_id', 404)
+                ->where('absence_category_id', 2)
+                ->where('absence_logs.status', 1)
+                ->whereDate('absences.created_at', date('Y-m-d'))
+                ->first();
+
+
+
+            if (date('Y-m-d') == $request_date) {
+
+
+                if (!$absen_now) {
+                    return json_encode($message_err);
+                } else {
+
+                    if ($staff->work_type_id === 1) {
+                        $schedule = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 1)->first();
+                        $schedule_end = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 2)->first();
+                    } else {
+                        $shift_staff = ShiftPlannerStaffs::where('staff_id', $staff->id)->first();
+                        // dd($shift_staff);
+                        if ($shift_staff) {
+                            $schedule = ShiftGroupTimesheets::where('id', $shift_staff->id)->where('absence_category_id', 1)->first();
+                            $schedule_end = ShiftGroupTimesheets::where('id', $id)->where('absence_category_id', 2)->first();
+                        } else {
+                            return json_encode($message_err);
+                        }
+                    }
+                    // dd($absen_now);
+                    $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                    // dd($schedule);
+                    if ($schedule->time < date('Y-m-d H:i:s') && date('Y-m-d H:i:s') < $time_end) {
+                        // return json_encode('pengajuan berhasil');
+                    } else {
+                        return json_encode($message_err);
+                    }
+                }
+            } else {
+                if ($staff->work_type_id === 1) {
+                    $schedule = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 1)->first();
+                    $schedule_end = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 2)->first();
+                } else {
+                    $shift_staff = ShiftPlannerStaffs::where('staff_id', $staff->id)->first();
+                    // dd($shift_staff);
+                    if ($shift_staff) {
+                        $schedule = ShiftGroupTimesheets::where('id', $shift_staff->id)->where('absence_category_id', 1)->first();
+                        $schedule_end = ShiftGroupTimesheets::where('id', $id)->where('absence_category_id', 2)->first();
+                    } else {
+                        return json_encode($message_err);
+                    }
+                }
+                $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                // dd($schedule);
+                if ($schedule->time < date('Y-m-d H:i:s') && date('Y-m-d H:i:s') < $time_end) {
+                    // return json_encode('pengajuan berhasil');
+                } else {
+                    return json_encode($message_err);
+                }
+            }
         } else if ($dataForm->category == "leave" || $dataForm->category == "permission") {
             $start =  date("Y-m-d", strtotime($start));
             $end =  date("Y-m-d", strtotime($end));
@@ -223,7 +289,6 @@ class RequestApiController extends Controller
                         ->orWhere('category', 'leave')
                         ->orWhere('category', 'permission')
                         ->orWhere('category', 'extra')
-                        ->orWhere('category', 'geolocation_off')
                         ->orWhere('category', 'excuse');
 
                     // ->orWhere('status', 'close');
@@ -498,7 +563,8 @@ class RequestApiController extends Controller
             // // untuk notif end
 
             //send notif to admin
-            $admin_arr = User::where('dapertement_id', 5)
+            $bagian = Staff::selectRaw('users.*')->where('staffs.id',  $dataForm->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+            $admin_arr = User::where('dapertement_id', $bagian->dapertement_id)
                 ->where('subdapertement_id', 0)
                 ->where('staff_id', 0)->get();
             foreach ($admin_arr as $key => $admin) {
@@ -675,6 +741,47 @@ class RequestApiController extends Controller
         ]);
     }
 
+    // untuk admin start
+
+    public function menuAdmin(Request $request)
+    {
+        $user = User::where('id', $request->id)->first();
+        $checker = [];
+        $users = user::with(['roles'])
+            ->where('id', $request->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+        if (in_array('absence_all_access', $checker)) {
+            $absence_request_count =  AbsenceRequest::selectRaw('COUNT(CASE WHEN category = "visit" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS visit_count')
+                ->selectRaw('COUNT(CASE WHEN category = "duty" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS duty_count')
+                ->selectRaw('COUNT(CASE WHEN category = "excuse" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS excuse_count')
+                ->selectRaw('COUNT(CASE WHEN category = "extra" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS extra_count')
+                ->selectRaw('COUNT(CASE WHEN category = "leave" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS leave_count')
+                ->selectRaw('COUNT(CASE WHEN category = "geolocation_off" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS geolocation_off_count')
+                ->selectRaw('COUNT(CASE WHEN category = "permission" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS permission_count')
+                ->first();
+        } else {
+            $absence_request_count =  AbsenceRequest::selectRaw('COUNT(CASE WHEN category = "visit" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS visit_count')
+                ->selectRaw('COUNT(CASE WHEN category = "duty" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS duty_count')
+                ->selectRaw('COUNT(CASE WHEN category = "excuse" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS excuse_count')
+                ->selectRaw('COUNT(CASE WHEN category = "extra" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS extra_count')
+                ->selectRaw('COUNT(CASE WHEN category = "leave" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS leave_count')
+                ->selectRaw('COUNT(CASE WHEN category = "geolocation_off" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS geolocation_off_count')
+                ->selectRaw('COUNT(CASE WHEN category = "permission" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS permission_count')
+                ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+                ->where('dapertement_id', $user->dapertement_id)
+                ->first();
+        }
+
+        return response()->json([
+            'message' => 'Pengajuan Terkirim',
+            'data' => $absence_request_count,
+        ]);
+    }
 
     public function requestApprove(Request $request)
     {
@@ -683,7 +790,23 @@ class RequestApiController extends Controller
         //     'message' => 'Pengajuan Terkirim',
         //     'data' =>  $user,
         // ]);
-        if ($user->dapertement_id == '5') {
+        // AbsenceRequest::selectRaw('COUNT(CASE WHEN category = "visit" THEN 1 END) AS visit_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "duty" THEN 1 END) AS duty_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "excuse" THEN 1 END) AS excuse_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "extra" THEN 1 END) AS extra_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "leave" THEN 1 END) AS leave_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "geolocaation_off" THEN 1 END) AS geolocaation_off_count')
+        //     ->selectRaw('COUNT(CASE WHEN category = "permission" THEN 1 END) AS permission_count');
+        $checker = [];
+        $users = user::with(['roles'])
+            ->where('id', $request->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+        if (in_array('absence_all_access', $checker)) {
             $requests = AbsenceRequest::select('absence_requests.*', 'staffs.name as staff_name')->join('staffs', 'absence_requests.staff_id', '=', 'staffs.id')
                 // ->FilterDapertement($user->dapertement_id)
                 ->FilterDate($request->from, $request->to)
@@ -707,6 +830,8 @@ class RequestApiController extends Controller
             ]);
         }
     }
+
+    // untuk admin end
 
     public function approve(Request $request)
     {

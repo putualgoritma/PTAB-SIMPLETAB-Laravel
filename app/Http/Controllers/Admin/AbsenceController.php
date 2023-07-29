@@ -8,13 +8,20 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Absence_categories;
 use App\AbsenceLog;
 use App\AbsenceProblem;
+use App\AbsenceRequest;
 use App\Dapertement;
 use App\Day;
 use App\Exports\AbsenceAccuracy;
 use App\Exports\AbsenceReport;
 use App\Holiday;
 use App\Http\Controllers\Controller;
+use App\Imports\AbsenceImport;
+use App\Imports\AbsenceShiftImport;
 use App\Requests;
+use App\Shift;
+use App\ShiftGroups;
+use App\ShiftGroupTimesheets;
+use App\ShiftParent;
 use App\ShiftPlannerStaff;
 use App\ShiftPlannerStaffs;
 use App\ShiftStaff;
@@ -24,12 +31,101 @@ use App\WorkTypeDays;
 use App\WorkTypes;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class AbsenceController extends Controller
 {
+
+    public function getShiftPlanner(Request $request)
+    {
+        $shift_group = ShiftGroups::where('shift_parent_id', $request->shift_parent_id)
+            ->pluck('title', 'id');
+
+        return response()->json($shift_group);
+    }
+
     public function index(Request $request)
     {
+        // $encrypted = Crypt::encrypt(['sksksks'=>'sjsjsjsj']);
+
+        // $decrypted = Crypt::decrypt($encrypted);
+        // dd($encrypted, $decrypted);
+        // 244
+        // $test = AbsenceLog::whereDate('created_at', '>', '2023-07-13')->where('created_by_staff_id', 244)->get();
+        // $test = Absence::whereDate('created_at', '>', '2023-07-13')->where('staff_id', 244)->get();
+
+        // $test = AbsenceLog::where('absence_id', '10460')->get();
+        // $test = AbsenceLog::join('absences', 'absence_logs.absence_id', '=', 'absences.id')->first();
+        // dd($test);
+
+        // $request_date = "2023-07-28";
+        // $day_id = date('w', strtotime($request_date)) == "0" ? '7' : date('w', strtotime($request_date));
+        // // dd($day_id);
+        // $message_err = 'anda hanya bisa mengajukan di jam kerja';
+        // $staff = Staff::where('id', 453)->first();
+        // $absen_now = Absence::join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+        //     ->where('staff_id', 404)
+        //     ->where('absence_category_id', 2)
+        //     ->where('absence_logs.status', 1)
+        //     ->whereDate('absences.created_at', date('Y-m-d'))
+        //     ->first();
+
+
+
+        // if (date('Y-m-d') == $request_date) {
+
+
+        //     if (!$absen_now) {
+        //         return json_encode($message_err);
+        //     } else {
+
+        //         if ($staff->work_type_id === 1) {
+        //             $schedule = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 1)->first();
+        //             $schedule_end = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 2)->first();
+        //         } else {
+        //             $shift_staff = ShiftPlannerStaffs::where('staff_id', $staff->id)->first();
+        //             // dd($shift_staff);
+        //             if ($shift_staff) {
+        //                 $schedule = ShiftGroupTimesheets::where('id', $shift_staff->id)->where('absence_category_id', 1)->first();
+        //                 $schedule_end = ShiftGroupTimesheets::where('id', $id)->where('absence_category_id', 2)->first();
+        //             } else {
+        //                 return json_encode($message_err);
+        //             }
+        //         }
+        //         dd($absen_now);
+        //         $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+        //         // dd($schedule);
+        //         if ($schedule->time < date('Y-m-d H:i:s') && date('Y-m-d H:i:s') < $time_end) {
+        //             return json_encode('pengajuan berhasil');
+        //         } else {
+        //             return json_encode($message_err);
+        //         }
+        //     }
+        // } else {
+        //     if ($staff->work_type_id === 1) {
+        //         $schedule = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 1)->first();
+        //         $schedule_end = WorkTypeDays::where('day_id', $day_id)->where('absence_category_id', 2)->first();
+        //     } else {
+        //         $shift_staff = ShiftPlannerStaffs::where('staff_id', $staff->id)->first();
+        //         // dd($shift_staff);
+        //         if ($shift_staff) {
+        //             $schedule = ShiftGroupTimesheets::where('id', $shift_staff->id)->where('absence_category_id', 1)->first();
+        //             $schedule_end = ShiftGroupTimesheets::where('id', $id)->where('absence_category_id', 2)->first();
+        //         } else {
+        //             return json_encode($message_err);
+        //         }
+        //     }
+        //     $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+        //     // dd($schedule);
+        //     if ($schedule->time < date('Y-m-d H:i:s') && date('Y-m-d H:i:s') < $time_end) {
+        //         return json_encode('pengajuan berhasil');
+        //     } else {
+        //         return json_encode($message_err);
+        //     }
+        // }
+        // dd(, $schedule_end->time);
 
         // $staff = Staff::selectRaw('work_units.name as work_unit, work_units.id as work_unit_id, staffs.*')
         //     ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')->get();
@@ -187,19 +283,44 @@ class AbsenceController extends Controller
         // dd($test);
 
         abort_unless(\Gate::allows('absence_access'), 403);
-        $qry = AbsenceLog::selectRaw('absence_logs.*, work_types.type as work_type,  NIK, days.name as day, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
-            ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-            ->leftJoin('days', 'days.id', '=', 'absences.day_id')
-            ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
-            ->leftJoin('work_types', 'work_types.id', '=', 'staffs.work_type_id')
-            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            ->FilterStaff($request->staff_id)
-            ->FilterAbsenceCategory($request->absence_category_id)
-            ->FilterDateWeb($request->from, $request->to)
-            ->FilterDapertement($request->dapertement)
-            ->where('absence_logs.register', '!=', '')
-            ->orderBy('staffs.NIK')
-            ->orderBy('register', 'DESC');
+        $checker = [];
+        $users = user::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+        if (in_array('absence_all_access', $checker)) {
+            $qry = AbsenceLog::selectRaw('absence_logs.*, work_types.type as work_type,  NIK, days.name as day, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
+                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                ->leftJoin('days', 'days.id', '=', 'absences.day_id')
+                ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
+                ->leftJoin('work_types', 'work_types.id', '=', 'staffs.work_type_id')
+                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->FilterStaff($request->staff_id)
+                ->FilterAbsenceCategory($request->absence_category_id)
+                ->FilterDateWeb($request->from, $request->to)
+                ->FilterDapertement($request->dapertement)
+                ->where('absence_logs.register', '!=', '')
+                ->orderBy('staffs.NIK')
+                ->orderBy('register', 'DESC');
+        } else {
+            $qry = AbsenceLog::selectRaw('absence_logs.*, work_types.type as work_type,  NIK, days.name as day, staffs.name as staff, staffs.image as staff_image, absence_categories.title as absence_category')
+                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
+                ->leftJoin('days', 'days.id', '=', 'absences.day_id')
+                ->leftJoin('staffs', 'absences.staff_id', '=', 'staffs.id')
+                ->leftJoin('work_types', 'work_types.id', '=', 'staffs.work_type_id')
+                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->FilterStaff($request->staff_id)
+                ->FilterAbsenceCategory($request->absence_category_id)
+                ->FilterDateWeb($request->from, $request->to)
+                ->where('dapertement_id', Auth::user()->dapertement_id)
+                ->where('absence_logs.register', '!=', '')
+                ->orderBy('staffs.NIK')
+                ->orderBy('register', 'DESC');
+        }
         // ->orderBy('nik', 'ASC');
         // dd($qry->get());
         // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
@@ -212,15 +333,18 @@ class AbsenceController extends Controller
             $table->addColumn('actions', '&nbsp;');
 
             $table->editColumn('actions', function ($row) {
-                $viewGate = 'absence_show';
-                $editGate = 'absence_edit';
-                $deleteGate = 'absence_delete';
+                $viewGate = '';
+                $editGate = '';
+                $deleteGate = '';
+                // $act = 'absence_edit';
+                $act = '';
                 $crudRoutePart = 'absence';
 
                 return view('partials.datatablesActions', compact(
                     'viewGate',
                     'editGate',
                     'deleteGate',
+                    'act',
                     'crudRoutePart',
                     'row'
                 ));
@@ -290,50 +414,1530 @@ class AbsenceController extends Controller
 
         return view('admin.absence.index', compact('staffs', 'dapertements', 'absence_categories'));
     }
+    public function createImportShift()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        return view('admin.absence.addImportShift');
+    }
 
+    public function storeImportShift(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        $import = new AbsenceShiftImport;
+        $test =  Excel::import($import, $request->file('file'));
+        // dd($test);
+        $array = $import->getArray();
+        // dd($array);
+
+        $absences =  collect($import->getArray());
+        $staff =  $absences->groupBy('nik');
+        $checker = [];
+        $users = user::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+
+        // dd($absences);
+        foreach ($staff as $key => $value) {
+
+            if (in_array('absence_all_access', $checker)) {
+                $staff_id = Staff::selectRaw('staffs.*, work_units.import as import_status')
+                    ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')
+                    ->where('work_type_id', '2')
+                    ->where('NIK', $key)
+                    ->first();
+            } else {
+                $staff_id = Staff::selectRaw('staffs.*, work_units.import as import_status')
+                    ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')
+                    ->where('NIK', $key)
+                    ->where('work_type_id', '2')
+                    ->where('dapertement_id', Auth::user()->dapertement_id)->first();
+            }
+            if ($staff_id) {
+                if ($staff_id->import_status == "ON") {
+                    $absence_staff =  collect($import->getArray())->where('nik', $key);
+
+                    $get_check_inR = collect($import->getArray())->where('nik', $key)->where('category_id', 'in')->first();
+                    $get_check_outR = collect($import->getArray())->where('nik', $key)->where('category_id', 'out')->first();
+                    $check_inR =  $get_check_inR['date'];
+                    $check_outR = $get_check_outR['date'];
+
+                    $get_check_inB = collect($import->getArray())->where('nik', $key)->where('category_id', 'break_in')->first();
+                    $get_check_outB = collect($import->getArray())->where('nik', $key)->where('category_id', 'break_out')->first();
+                    $check_inB =  $get_check_inB['date'];
+                    $check_outB = $get_check_outB['date'];
+
+                    $get_check_inV = collect($import->getArray())->where('nik', $key)->where('category_id', 'visit_in')->first();
+                    $get_check_inV = collect($import->getArray())->where('nik', $key)->where('category_id', 'visit_out')->first();
+
+                    $get_check_inE = collect($import->getArray())->where('nik', $key)->where('category_id', 'excuse_in')->first();
+                    $get_check_outE = collect($import->getArray())->where('nik', $key)->where('category_id', 'excuse_out')->first();
+
+                    // dd((date('Y-m-d', strtotime('-3 days', strtotime(date('Y-m-d'))))),
+                    //     date('Y-m-d', strtotime($check_inR)),
+                    //     date('Y-m-d', strtotime('+1 days', strtotime(date('Y-m-d'))))
+                    // );
+                    // Pengecekan
+                    if (date('Y-m-d', strtotime('-3 days', strtotime(date('Y-m-d')))) > date('Y-m-d', strtotime($check_inR)) || date('Y-m-d', strtotime('+1 days', strtotime(date('Y-m-d')))) < date('Y-m-d', strtotime($check_inR))) {
+                        // return dd('Tanggal Lebih besar dari hari ini atau lewat dari 3 hari');
+                    } else if (Absence::where('staff_id', $staff_id->id)->whereDate('created_at', '=', date('Y-m-d', strtotime($check_inR)))->first()) {
+                        // return dd('Absen sudah ada di tanggal tersebut');
+                    }
+                    // dd($check_inR, $check_outR);
+                    // input absence start
+                    // dd($request->all());
+                    else {
+                        $shift_staff_old = ShiftPlannerStaffs::where('staff_id', $staff_id->id)
+                            ->where('shift_group_id', $get_check_inR['shiftGroup'])
+                            ->whereDate('start', date('Y-m-d'))
+                            ->first();
+
+                        if ($shift_staff_old) {
+                            ShiftPlannerStaffs::where('id', $shift_staff_old->id)->delete();
+                        }
+
+                        $shift_group = ShiftGroups::where('shift_groups.id', $get_check_inR['shiftGroup'])
+                            ->where('shift_groups.id', $get_check_inR['shiftGroup'])
+                            ->first();
+
+                        $shift_group_timesheets = ShiftGroupTimesheets::where('shift_group_id', $get_check_inR['shiftGroup'])
+                            ->orderBy('absence_category_id')
+                            ->get();
+
+
+                        // dd($shift_staff_old->id);
+                        // dd($shift_group_timesheets);
+                        $shift_staff = ShiftPlannerStaffs::create([
+                            'staff_id'        =>    $staff_id->id,
+                            'shift_group_id' => $get_check_inR['shiftGroup'],
+                            'start'        =>     date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'end'        =>     date('Y-m-d H:i:s', strtotime($check_outR))
+                        ]);
+
+                        $data = [];
+                        $data2 = [];
+                        $data3 = [];
+
+                        $data = [
+                            'day_id' => date('w', strtotime($check_inR)),
+                            'staff_id' => $staff_id->id,
+                            'created_at' =>  date('Y-m-d 00:00:00', strtotime($check_inR)),
+                            'shift_group_id' => $shift_group->id
+                        ];
+
+                        $absence = Absence::create($data);
+
+
+                        $data1 = [
+                            'register' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'absence_category_id' => 1,
+                            'absence_id' => $absence->id,
+                            'duration' => 0,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                            'shift_planner_id' => $shift_staff->id,
+                            'shift_group_timesheet_id' => $shift_group_timesheets[0]->id
+                        ];
+                        AbsenceLog::create($data1);
+                        $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inR));
+                        $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outR));
+
+                        $from_time = strtotime($datetime_1);
+                        $to_time = strtotime($datetime_2);
+                        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                        $data1end = [
+                            'register' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                            'absence_category_id' => 2,
+                            'absence_id' => $absence->id,
+                            'duration' => $diff_minutes,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                            'shift_planner_id' => $shift_staff->id,
+                            'shift_group_timesheet_id' => $shift_group_timesheets[1]->id
+                        ];
+                        AbsenceLog::create($data1end);
+
+                        $data5 = [
+                            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $check_inB)),
+                            'absence_category_id' => 3,
+                            // 'absence_request_id' => $break->id,
+                            'absence_id' => $absence->id,
+                            'duration' => 0,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                            'shift_planner_id' => $shift_staff->id,
+                            'shift_group_timesheet_id' => $shift_group_timesheets[2]->id
+                        ];
+                        AbsenceLog::create($data5);
+
+                        $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inB));
+                        $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outB));
+
+                        $from_time = strtotime($datetime_1);
+                        $to_time = strtotime($datetime_2);
+                        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                        $data5end = [
+                            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $check_outB)),
+                            'absence_category_id' => 4,
+                            // 'absence_request_id' => $break->id,
+                            'absence_id' => $absence->id,
+                            'duration' => $diff_minutes,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+                            'shift_planner_id' => $shift_staff->id,
+                            'shift_group_timesheet_id' => $shift_group_timesheets[3]->id
+                        ];
+                        AbsenceLog::create($data5end);
+
+                        if ($get_check_inV) {
+                            // if ($request->duty_end) {
+                            foreach ($absences->where('category_id', 'visit_in') as $dty) {
+                                $check_inV = $dty['date'];
+                                $check_outV =  collect($import->getArray())->where('nik', $key)->where('group_id', $dty['group_id'])->where('category_id', 'visit_out')->first()['date'];
+                                $duty = AbsenceRequest::create([
+                                    'staff_id' => $staff_id->id,
+                                    'start' => date('Y-m-d H:i:s', strtotime($check_inV)),
+                                    'end' => date('Y-m-d H:i:s', strtotime($check_outV)),
+                                    'type' => 'other',
+                                    'time' =>   date('H:i:s', strtotime($check_inV)),
+                                    'status' => 'approve',
+                                    'category' => 'visit',
+                                    'description' => $dty['description'],
+                                ]);
+                                $data2 = [
+                                    'register' => date('Y-m-d H:i:s', strtotime($check_inV)),
+                                    'absence_category_id' => 5,
+                                    'absence_request_id' => $duty->id,
+                                    'absence_id' => $absence->id,
+                                    'duration' => 0,
+                                    'created_by_staff_id' => 0,
+                                    'status' => 0,
+                                    'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                    'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                                ];
+                                AbsenceLog::create($data2);
+
+                                $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inV));
+                                $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outV));
+
+                                $from_time = strtotime($datetime_1);
+                                $to_time = strtotime($datetime_2);
+                                $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                                $data2end = [
+                                    'register' => date('Y-m-d H:i:s', strtotime($check_outV)),
+                                    'absence_category_id' => 6,
+                                    'absence_request_id' => $duty->id,
+                                    'absence_id' => $absence->id,
+                                    'duration' =>  $diff_minutes,
+                                    'created_by_staff_id' => 0,
+                                    'status' => 0,
+                                    'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                    'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                                ];
+                                AbsenceLog::create($data2end);
+                            }
+                            // }
+                        }
+                        if ($get_check_inE) {
+                            $check_inE = $get_check_inE['date'];
+                            $check_outE = $get_check_outE['date'];
+                            $excuse = AbsenceRequest::create([
+                                'staff_id' => $staff_id->id,
+                                'start' => date('Y-m-d H:i:s', strtotime($check_inE)),
+                                'end' => date('Y-m-d H:i:s', strtotime($check_outE)),
+                                'type' => 'other',
+                                'time' => $request->excuse,
+                                'status' => 'approve',
+                                'category' => 'visit',
+                                'description' => $request->description_excuse,
+                            ]);
+                            $data3 = [
+                                'register' => date('Y-m-d H:i:s', strtotime($check_inE)),
+                                'absence_category_id' => 11,
+                                'absence_request_id' => $excuse->id,
+                                'absence_id' => $absence->id,
+                                'duration' => 0,
+                                'created_by_staff_id' => 0,
+                                'status' => 0,
+                                'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                            ];
+                            AbsenceLog::create($data3);
+
+
+                            $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inE));
+                            $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outE));
+
+                            $from_time = strtotime($datetime_1);
+                            $to_time = strtotime($datetime_2);
+                            $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                            $data3end = [
+                                'register' => date('Y-m-d H:i:s', strtotime($check_outE)),
+                                'absence_category_id' => $excuse->id,
+                                'absence_request_id' => 12,
+                                'absence_id' => $absence->id,
+                                'duration' => $diff_minutes,
+                                'created_by_staff_id' => 0,
+                                'status' => 0,
+                                'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                            ];
+                            AbsenceLog::create($data3end);
+                        }
+                    }
+                }
+
+                // input absence end
+                // dd($absence_staff);
+            }
+        }
+
+        // dd($staff_id);
+        ini_set("memory_limit", -1);
+        set_time_limit(0);
+        //ini test
+
+        // $records = [
+        //     ['id' => 3, 'nama' => 'budi'],
+        //     ['id' => 4, 'nama' => 'udin'],
+        //     ['id' => 6, 'nama' => 'udin'],
+        //     ['id' => 5, 'nama' => 'yasa']
+        // ];
+
+        // $collect =  collect($records);
+        // $search = $collect->groupBy('id');
+
+        // $collect->where('id', '3');
+        return redirect()->route('admin.absence.index');
+        // dd($search);
+    }
+
+    // import absen reguler start
+    public function createImport()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        return view('admin.absence.addImport');
+    }
+
+    public function storeImport(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        ini_set("memory_limit", -1);
+        set_time_limit(0);
+        $import = new AbsenceImport;
+        $test =  Excel::import($import, $request->file('file'));
+        // dd($test);
+        $array = $import->getArray();
+        // dd($array);
+        $absences =  collect($import->getArray());
+        $staff =  $absences->groupBy('nik');
+        // dd($absences->where('category_id', 'in'));
+        $users = user::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+
+        // dd($absences);
+
+        foreach ($staff as $key => $value) {
+            if (in_array('absence_all_access', $checker)) {
+                $staff_id = Staff::selectRaw('staffs.*, work_units.import as import_status')
+                    ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')
+                    ->where('NIK', $key)
+                    ->where('work_type_id', '1')
+                    ->first();
+            } else {
+                $staff_id = Staff::selectRaw('staffs.*, work_units.import as import_status')
+                    ->join('work_units', 'work_units.id', '=', 'staffs.work_unit_id')
+                    ->where('NIK', $key)
+                    ->where('work_type_id', '1')
+                    ->where('dapertement_id', Auth::user()->dapertement_id)->first();
+            }
+            // dd('ini departemen id : ', Auth::user()->dapertement_id);
+
+            // dd($staff_id, $key, Auth::user()->dapertement_id);
+            if ($staff_id) {
+
+                if ($staff_id->import_status == "ON") {
+                    $absence_staff =  collect($import->getArray())->where('nik', $key);
+
+                    $get_check_inR = collect($import->getArray())->where('nik', $key)->where('category_id', 'in')->first();
+                    $get_check_outR = collect($import->getArray())->where('nik', $key)->where('category_id', 'out')->first();
+                    $check_inR =  $get_check_inR['date'];
+                    $check_outR = $get_check_outR['date'];
+
+                    $get_check_inB = collect($import->getArray())->where('nik', $key)->where('category_id', 'break_in')->first();
+                    $get_check_outB = collect($import->getArray())->where('nik', $key)->where('category_id', 'break_out')->first();
+                    $check_inB =  $get_check_inB['date'];
+                    $check_outB = $get_check_outB['date'];
+
+                    $get_check_inV = collect($import->getArray())->where('nik', $key)->where('category_id', 'visit_in')->first();
+                    $get_check_outV = collect($import->getArray())->where('nik', $key)->where('category_id', 'visin_out')->first();
+
+                    $get_check_inE = collect($import->getArray())->where('nik', $key)->where('category_id', 'excuse_in')->first();
+                    $get_check_outE = collect($import->getArray())->where('nik', $key)->where('category_id', 'excuse_out')->first();
+
+
+                    // Pengecekan
+                    if (date('Y-m-d', strtotime('-3 days', strtotime(date('Y-m-d')))) > date('Y-m-d', strtotime($check_inR)) || date('Y-m-d', strtotime('+1 days', strtotime(date('Y-m-d')))) < date('Y-m-d', strtotime($check_inR))) {
+                        // return dd('Tanggal Lebih besar dari hari ini atau lewat dari 3 hari');
+                    } else if (Absence::where('staff_id', $staff_id->id)->whereDate('created_at', '=', date('Y-m-d', strtotime($check_inR)))->first()) {
+                        // return dd('Absen sudah ada di tanggal tersebut');
+                    } else {
+
+
+
+                        // dd($shift_staff_old->id);
+                        // dd($shift_group_timesheets);
+
+                        $data = [];
+                        $data2 = [];
+                        $data3 = [];
+
+                        $data = [
+                            'day_id' => date('w', strtotime($check_inR)),
+                            'staff_id' => $staff_id->id,
+                            'created_at' =>  date('Y-m-d 00:00:00', strtotime($check_inR)),
+                        ];
+
+                        $absence = Absence::create($data);
+
+
+                        $data1 = [
+                            'register' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'absence_category_id' => 1,
+                            'absence_id' => $absence->id,
+                            'duration' => 0,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                        ];
+                        AbsenceLog::create($data1);
+                        $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inR));
+                        $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outR));
+
+                        $from_time = strtotime($datetime_1);
+                        $to_time = strtotime($datetime_2);
+                        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                        $data1end = [
+                            'register' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                            'absence_category_id' => 2,
+                            'absence_id' => $absence->id,
+                            'duration' => $diff_minutes,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                        ];
+                        AbsenceLog::create($data1end);
+
+                        $data5 = [
+                            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $check_inB)),
+                            'absence_category_id' => 3,
+                            // 'absence_request_id' => $break->id,
+                            'absence_id' => $absence->id,
+                            'duration' => 0,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($check_outR)),
+                        ];
+                        AbsenceLog::create($data5);
+
+                        $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inB));
+                        $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outB));
+
+                        $from_time = strtotime($datetime_1);
+                        $to_time = strtotime($datetime_2);
+                        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                        $data5end = [
+                            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $check_outB)),
+                            'absence_category_id' => 4,
+                            // 'absence_request_id' => $break->id,
+                            'absence_id' => $absence->id,
+                            'duration' => $diff_minutes,
+                            'created_by_staff_id' => 0,
+                            'status' => 0,
+                            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+                            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+
+                        ];
+                        AbsenceLog::create($data5end);
+
+                        if ($get_check_inV) {
+                            // if ($request->duty_end) {
+                            foreach ($absences->where('category_id', '5') as $dty) {
+                                $check_inV = $dty['date'];
+                                $check_outV =  collect($import->getArray())->where('nik', $key)->where('category_id', 'visit_out')->first()['date'];
+                                $duty = AbsenceRequest::create([
+                                    'staff_id' => $staff_id->id,
+                                    'start' => date('Y-m-d H:i:s', strtotime($check_inV)),
+                                    'end' => date('Y-m-d H:i:s', strtotime($check_outV)),
+                                    'type' => 'other',
+                                    'time' =>   date('H:i:s', strtotime($check_inV)),
+                                    'status' => 'approve',
+                                    'category' => 'visit',
+                                    'description' => $dty['description'],
+                                ]);
+                                $data2 = [
+                                    'register' => date('Y-m-d H:i:s', strtotime($check_inV)),
+                                    'absence_category_id' => 5,
+                                    'absence_request_id' => $duty->id,
+                                    'absence_id' => $absence->id,
+                                    'duration' => 0,
+                                    'created_by_staff_id' => 0,
+                                    'status' => 0,
+                                    'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                    'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                                ];
+                                AbsenceLog::create($data2);
+
+                                $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inV));
+                                $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outV));
+
+                                $from_time = strtotime($datetime_1);
+                                $to_time = strtotime($datetime_2);
+                                $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                                $data2end = [
+                                    'register' => date('Y-m-d H:i:s', strtotime($check_outV)),
+                                    'absence_category_id' => 6,
+                                    'absence_request_id' => $duty->id,
+                                    'absence_id' => $absence->id,
+                                    'duration' =>  $diff_minutes,
+                                    'created_by_staff_id' => 0,
+                                    'status' => 0,
+                                    'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                    'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                                ];
+                                AbsenceLog::create($data2end);
+                            }
+                            // }
+                        }
+                        if ($get_check_inE) {
+                            $check_inE = $get_check_inE['date'];
+                            $check_outE = $get_check_outE['date'];
+                            $excuse = AbsenceRequest::create([
+                                'staff_id' => $staff_id->id,
+                                'start' => date('Y-m-d H:i:s', strtotime($check_inE)),
+                                'end' => date('Y-m-d H:i:s', strtotime($check_outE)),
+                                'type' => 'other',
+                                'time' => $request->excuse,
+                                'status' => 'approve',
+                                'category' => 'visit',
+                                'description' => $request->description_excuse,
+                            ]);
+                            $data3 = [
+                                'register' => date('Y-m-d H:i:s', strtotime($check_inE)),
+                                'absence_category_id' => 11,
+                                'absence_request_id' => $excuse->id,
+                                'absence_id' => $absence->id,
+                                'duration' => 0,
+                                'created_by_staff_id' => 0,
+                                'status' => 0,
+                                'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                            ];
+                            AbsenceLog::create($data3);
+
+
+                            $datetime_1 = date('Y-m-d H:i:s', strtotime($check_inE));
+                            $datetime_2 = date('Y-m-d H:i:s', strtotime($check_outE));
+
+                            $from_time = strtotime($datetime_1);
+                            $to_time = strtotime($datetime_2);
+                            $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                            $data3end = [
+                                'register' => date('Y-m-d H:i:s', strtotime($check_outE)),
+                                'absence_category_id' => $excuse->id,
+                                'absence_request_id' => 12,
+                                'absence_id' => $absence->id,
+                                'duration' => $diff_minutes,
+                                'created_by_staff_id' => 0,
+                                'status' => 0,
+                                'timein' => date('Y-m-d H:i:s', strtotime($check_inR)),
+                                'timeout' => date('Y-m-d H:i:s', strtotime($check_outR))
+                            ];
+                            AbsenceLog::create($data3end);
+                        }
+
+                        // input absence end
+                        // dd($absence_staff);
+                    }
+                }
+            }
+        }
+
+        // dd($staff_id);
+
+        //ini test
+        // dd($data3end);
+        return redirect()->route('admin.absence.index');
+        // $records = [
+        //     ['id' => 3, 'nama' => 'budi'],
+        //     ['id' => 4, 'nama' => 'udin'],
+        //     ['id' => 6, 'nama' => 'udin'],
+        //     ['id' => 5, 'nama' => 'yasa']
+        // ];
+
+        // $collect =  collect($records);
+        // $search = $collect->groupBy('id');
+
+        // $collect->where('id', '3');
+
+        // dd($search);
+    }
+    // import absen reguler end
+
+    public function createShift()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        $shift_parents = ShiftParent::get();
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::where('work_type_id', '2')->orderBy('name')->get();
+        return view('admin.absence.createShift', compact('staffs', 'shift_parents'));
+    }
+
+    public function storeShift(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // dd($request->all());
+        $shift_staff_old = ShiftPlannerStaffs::where('staff_id', $request->staff_id)
+            ->where('shift_group_id', $request->shift_group_id)
+            ->whereDate('start', date('Y-m-d'))
+            ->first();
+
+        if ($shift_staff_old) {
+            ShiftPlannerStaffs::where('id', $shift_staff_old->id)->delete();
+        }
+
+        $shift_group = ShiftGroups::where('shift_groups.id', $request->shift_group_id)
+            ->where('shift_groups.id', $request->shift_group_id)
+            ->first();
+
+        $shift_group_timesheets = ShiftGroupTimesheets::where('shift_group_id', $request->shift_group_id)
+            ->orderBy('absence_category_id')
+            ->get();
+        // dd($shift_group_timesheets);
+
+        // dd($shift_staff_old->id);
+
+        $shift_staff = ShiftPlannerStaffs::create([
+            'staff_id'        =>    $request->staff_id,
+            'shift_group_id' => $request->shift_group_id,
+            'start'        =>     date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'end'        =>     date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end))
+        ]);
+
+
+        // dd(
+        //     $shift_staff_old,
+        //     $shift_group,
+        //     $shift_staff
+        // );
+
+        // dd($diff_minutes);
+
+        $data = [];
+        $data2 = [];
+        $data3 = [];
+
+        $data = [
+            'day_id' => date('w', strtotime($request->date)),
+            'staff_id' => $request->staff_id,
+            'created_at' =>  date('Y-m-d 00:00:00', strtotime($request->date)),
+            'shift_group_id' => $shift_group->id
+        ];
+
+        $absence = Absence::create($data);
+
+
+        $data1 = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'absence_category_id' => 1,
+            'absence_id' => $absence->id,
+            'duration' => 0,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'shift_planner_id' => $shift_staff->id,
+            'shift_group_timesheet_id' => $shift_group_timesheets[0]->id
+        ];
+        AbsenceLog::create($data1);
+        $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+        $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+        $from_time = strtotime($datetime_1);
+        $to_time = strtotime($datetime_2);
+        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        $data1end = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'absence_category_id' => 2,
+            'absence_id' => $absence->id,
+            'duration' => $diff_minutes,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'shift_planner_id' => $shift_staff->id,
+            'shift_group_timesheet_id' => $shift_group_timesheets[1]->id
+        ];
+        AbsenceLog::create($data1end);
+
+        $data5 = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+            'absence_category_id' => 3,
+            // 'absence_request_id' => $break->id,
+            'absence_id' => $absence->id,
+            'duration' => 0,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+            'shift_planner_id' => $shift_staff->id,
+            'shift_group_timesheet_id' => $shift_group_timesheets[2]->id
+        ];
+        AbsenceLog::create($data5);
+
+        $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+        $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+        $from_time = strtotime($datetime_1);
+        $to_time = strtotime($datetime_2);
+        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        $data5end = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+            'absence_category_id' => 4,
+            // 'absence_request_id' => $break->id,
+            'absence_id' => $absence->id,
+            'duration' => $diff_minutes,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+            'shift_planner_id' => $shift_staff->id,
+            'shift_group_timesheet_id' => $shift_group_timesheets[3]->id
+        ];
+        AbsenceLog::create($data5end);
+
+        // if ($request->duty_end) {
+        //     foreach ($request->duty_end as $dty) {
+        //         $duty = AbsenceRequest::create([
+        //             'staff_id' => $request->staff_id,
+        //             'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty)),
+        //             'end' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty_end)),
+        //             'type' => 'other',
+        //             'time' => $dty->duty,
+        //             'status' => 'approve',
+        //             'category' => 'visit',
+        //             'description' => $dty->description_duty,
+        //         ]);
+        //         $data2 = [
+        //             'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty)),
+        //             'absence_category_id' => 5,
+        //             'absence_request_id' => $duty->id,
+        //             'absence_id' => $absence->id,
+        //             'duration' => 0,
+        //             'created_by_staff_id' => 0,
+        //             'status' => 0,
+        //             'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty)),
+        //             'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty_end))
+        //         ];
+        //         AbsenceLog::create($data2);
+
+        //         $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+        //         $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+        //         $from_time = strtotime($datetime_1);
+        //         $to_time = strtotime($datetime_2);
+        //         $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        //         $data2end = [
+        //             'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty_end)),
+        //             'absence_category_id' => 5,
+        //             'absence_request_id' => $duty->id,
+        //             'absence_id' => $absence->id,
+        //             'duration' =>  $diff_minutes,
+        //             'created_by_staff_id' => 0,
+        //             'status' => 0,
+        //             'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty)),
+        //             'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $dty->duty_end))
+        //         ];
+        //         AbsenceLog::create($data2end);
+        //     }
+        // }
+        if ($request->excuse_end) {
+            $excuse = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end)),
+                'type' => 'other',
+                'time' => $request->excuse,
+                'status' => 'approve',
+                'category' => 'visit',
+                'description' => $request->description_excuse,
+            ]);
+            $data3 = [
+                'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'absence_category_id' => $excuse->id,
+                'absence_request_id' => $excuse->id,
+                'absence_id' => $absence->id,
+                'duration' => 0,
+                'created_by_staff_id' => 0,
+                'status' => 0,
+                'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end))
+            ];
+            AbsenceLog::create($data3);
+
+
+            $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+            $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+            $from_time = strtotime($datetime_1);
+            $to_time = strtotime($datetime_2);
+            $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+            $data3end = [
+                'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end)),
+                'absence_category_id' => $excuse->id,
+                'absence_request_id' => $excuse->id,
+                'absence_id' => $absence->id,
+                'duration' => $diff_minutes,
+                'created_by_staff_id' => 0,
+                'status' => 0,
+                'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end))
+            ];
+            AbsenceLog::create($data3end);
+        }
+
+
+
+        // dd($data, $data2, $data3);
+
+        return redirect()->route('admin.absence.index');
+    }
+
+    // absen reguler start
     public function create()
     {
-        abort_unless(\Gate::allows('absence_create'), 403);
-        $absence_categories = Absence_categories::where('day_id', null)->get();
-        $day = Day::get();
-        $users = User::where('staff_id', '!=', '0')->orderBy('name')->get();
-        return view('admin.absence.create', compact('absence_categories', 'day', 'users'));
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        $shift_parents = ShiftParent::get();
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::where('work_type_id', '1')->orderBy('name')->get();
+        return view('admin.absence.create', compact('staffs', 'shift_parents'));
     }
 
     public function store(Request $request)
     {
-        abort_unless(\Gate::allows('absence_create'), 403);
-        $checkD = date("w",  strtotime($request->register));
-        if ($checkD == "0") {
-            $day = 7;
-        } else {
-            $day = $checkD;
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // dd(Absence::where('staff_id', $request->staff_id)->whereDate('created_at', '=', date('Y-m-d', strtotime($request->date)))->first());
+        if (date('Y-m-d', strtotime('-3 days', strtotime(date('Y-m-d')))) > date('Y-m-d', strtotime($request->date)) || date('Y-m-d', strtotime('+1 days', strtotime(date('Y-m-d')))) < date('Y-m-d', strtotime($request->date))) {
+            return dd('Tanggal Lebih besar dari hari ini atau lewat dari 3 hari');
+        } else if (Absence::where('staff_id', $request->staff_id)->whereDate('created_at', '=', date('Y-m-d', strtotime($request->date)))->first()) {
+            return dd('Absen sudah ada di tanggal tersebut');
         }
-        $value = 0;
-        $absence_category_id = "";
-        if ($request->absence_category_id == "in" || $request->absence_category_id == "break_in" || $request->absence_category_id == "break_out" || $request->absence_category_id = "out") {
-            $absence_category = Absence_categories::where('day_id', $day)->where('title', $request->absence_category_id)->first();
-            $value = $absence_category->value;
-            $absence_category_id = $absence_category->id;
-        } else {
-            $absence_category_id = $request->absence_category_id;
-        }
-
+        $data = [];
+        $data2 = [];
+        $data3 = [];
 
         $data = [
-            'user_id' => $request->user_id,
-            'image' => '',
-            'lat' => '',
-            'lng' => '',
-            'register' => $request->register,
-            'shift_id' => '',
-            'absence_category_id' => $absence_category_id,
-            'value' => $value,
-            'day_id' => $day,
+            'day_id' => date('w', strtotime($request->date)),
+            'staff_id' => $request->staff_id,
+            'created_at' =>  date('Y-m-d 00:00:00', strtotime($request->date))
         ];
-        Absence::create($data);
+
+        $absence = Absence::create($data);
+
+        $data1 = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'absence_category_id' => 1,
+            'absence_id' => $absence->id,
+            'duration' => 0,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data1);
+        $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+        $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+        $from_time = strtotime($datetime_1);
+        $to_time = strtotime($datetime_2);
+        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        $data1end = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'absence_category_id' => 2,
+            'absence_id' => $absence->id,
+            'duration' => $diff_minutes,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data1end);
+
+        $data5 = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break)),
+            'absence_category_id' => 3,
+            // 'absence_request_id' => $break->id,
+            'absence_id' => $absence->id,
+            'duration' => 0,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data5);
+
+        $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break));
+        $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end));
+
+        $from_time = strtotime($datetime_1);
+        $to_time = strtotime($datetime_2);
+        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        $data5end = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->break_end)),
+            'absence_category_id' => 4,
+            // 'absence_request_id' => $break->id,
+            'absence_id' => $absence->id,
+            'duration' => $diff_minutes,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data5end);
+
+
+        if ($request->duty_end) {
+            $i = 0;
+            foreach ($request->duty_end as $dty) {
+                if ($request->duty[$i]) {
+                    // dd($dty);
+                    $duty = AbsenceRequest::create([
+                        'staff_id' => $request->staff_id,
+                        'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty[$i])),
+                        'end' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty_end[$i])),
+                        'type' => 'other',
+                        'time' => $request->duty[$i],
+                        'status' => 'approve',
+                        'category' => 'visit',
+                        'description' => $request->description_duty,
+                    ]);
+                    $data2 = [
+                        'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty[$i])),
+                        'absence_category_id' => 5,
+                        'absence_request_id' => $duty->id,
+                        'absence_id' => $absence->id,
+                        'duration' => 0,
+                        'created_by_staff_id' => 0,
+                        'status' => 0,
+                        'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty[$i])),
+                        'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty_end[$i]))
+                    ];
+                    AbsenceLog::create($data2);
+
+                    $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+                    $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+                    $from_time = strtotime($datetime_1);
+                    $to_time = strtotime($datetime_2);
+                    $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+                    $data2end = [
+                        'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty_end[$i])),
+                        'absence_category_id' => 6,
+                        'absence_request_id' => $duty->id,
+                        'absence_id' => $absence->id,
+                        'duration' =>  $diff_minutes,
+                        'created_by_staff_id' => 0,
+                        'status' => 0,
+                        'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty[$i])),
+                        'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->duty_end[$i]))
+                    ];
+                    AbsenceLog::create($data2end);
+                }
+                // $i++;
+            }
+            // dd($i, $request->duty);
+        }
+
+        if ($request->excuse_end) {
+            $excuse = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end)),
+                'type' => 'other',
+                'time' => $request->excuse,
+                'status' => 'approve',
+                'category' => 'excuse',
+                'description' => $request->description_excuse,
+            ]);
+            $data3 = [
+                'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse)),
+                'absence_category_id' => 11,
+                'absence_request_id' => $excuse->id,
+                'absence_id' => $absence->id,
+                'duration' => 0,
+                'created_by_staff_id' => 0,
+                'status' => 0,
+                'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+                'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end))
+            ];
+            AbsenceLog::create($data3);
+
+
+            $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' .  $request->excuse));
+            $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end));
+
+            $from_time = strtotime($datetime_1);
+            $to_time = strtotime($datetime_2);
+            $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+            $data3end = [
+                'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->excuse_end)),
+                'absence_category_id' => 12,
+                'absence_request_id' => $excuse->id,
+                'absence_id' => $absence->id,
+                'duration' => $diff_minutes,
+                'created_by_staff_id' => 0,
+                'status' => 0,
+                'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+                'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end))
+            ];
+            AbsenceLog::create($data3end);
+        }
+        // dd($data, $data2, $data3);
         return redirect()->route('admin.absence.index');
     }
+
+    // absen reguler end
+
+
+
+    // absen ektra start
+    public function createExtra()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::orderBy('name')->get();
+        return view('admin.absence.createExtra', compact('staffs'));
+    }
+
+    public function storeExtra(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+
+        $data = [];
+        $data2 = [];
+        $data3 = [];
+
+        $data = [
+            'day_id' => date('w', strtotime($request->date)),
+            'staff_id' => $request->staff_id,
+            'created_at' =>  date('Y-m-d 00:00:00', strtotime($request->date))
+        ];
+
+        $absence = Absence::create($data);
+
+        $extra = AbsenceRequest::create([
+            'staff_id' => $request->staff_id,
+            'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'end' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'type' => 'other',
+            'time' => $request->time,
+            'status' => 'approve',
+            'category' => 'extra',
+            'description' => $request->description,
+        ]);
+
+        $data1 = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'absence_category_id' => 9,
+            'absence_request_id' => $extra->id,
+            'absence_id' => $absence->id,
+            'duration' => 0,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data1);
+
+
+        $datetime_1 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time));
+        $datetime_2 = date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end));
+
+        $from_time = strtotime($datetime_1);
+        $to_time = strtotime($datetime_2);
+        $diff_minutes = round(abs($from_time - $to_time) / 3600, 2) . " minutes";
+        $data1end = [
+            'register' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+            'absence_category_id' => 10,
+            'absence_id' => $absence->id,
+            'duration' => $diff_minutes,
+            'created_by_staff_id' => 0,
+            'status' => 0,
+            'timein' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time)),
+            'timeout' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . $request->time_end)),
+        ];
+        AbsenceLog::create($data1end);
+
+
+        // dd($data, $data2, $data3);
+        return redirect()->route('admin.absence.index');
+    }
+
+    // absen ektra end
+
+    // absen tidak hadir
+    public function createPermit()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::orderBy('name')->get();
+        return view('admin.absence.createPermit', compact('staffs'));
+    }
+
+
+    public function storePermit(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+
+        $staff = Staff::where('id', $request->staff_id)->first();
+        if ($staff->work_type_id === 2) {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => $request->type,
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'permission',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $shift_staff = ShiftPlannerStaffs::whereDate('start', '=', date('Y-m-d', $i))->first();
+                        if (!$shift_staff) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 13,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => $request->type,
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'permission',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                        if (!$holiday) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 13,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // buat absence log end
+
+
+
+        return redirect()->route('admin.absence.index');
+    }
+    // absen tidak hadir end
+
+    // absen cuti start
+    public function createLeave()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::orderBy('name')->get();
+        return view('admin.absence.createLeave', compact('staffs'));
+    }
+
+
+    public function storeLeave(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+
+        $staff = Staff::where('id', $request->staff_id)->first();
+        if ($staff->work_type_id === 2) {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => 'other',
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'leave',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $shift_staff = ShiftPlannerStaffs::whereDate('start', '=', date('Y-m-d', $i))->first();
+                        if (!$shift_staff) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 8,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => $request->type,
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'permission',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                        if (!$holiday) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 8,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // buat absence log end
+
+
+
+        return redirect()->route('admin.absence.index');
+    }
+    // absen cuti end
+
+
+    // absen Dinas Luar Start
+    public function createDuty()
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+        // $absence_categories = Absence_categories::where('day_id', null)->get();
+        // $day = Day::get();
+        $staffs = Staff::orderBy('name')->get();
+        return view('admin.absence.createDuty', compact('staffs'));
+    }
+
+
+    public function storeDuty(Request $request)
+    {
+        abort_unless(\Gate::allows('absenceOffline_access'), 403);
+
+        $staff = Staff::where('id', $request->staff_id)->first();
+        if ($staff->work_type_id === 2) {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => 'other',
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'leave',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $shift_staff = ShiftPlannerStaffs::whereDate('start', '=', date('Y-m-d', $i))->first();
+                        if (!$shift_staff) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 8,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $permit = AbsenceRequest::create([
+                'staff_id' => $request->staff_id,
+                'start' => date('Y-m-d H:i:s', strtotime($request->date . ' ' . '00:00:00')),
+                'end' => date('Y-m-d H:i:s', strtotime($request->date2 . ' ' . '23:59:59')),
+                'type' => $request->type,
+                'time' => '',
+                'status' => 'approve',
+                'category' => 'permission',
+                'description' => $request->description,
+            ]);
+
+            $d = AbsenceRequest::where('id', $permit->id)->first();
+
+            // buat absence log start
+
+            $absenceRequest =  AbsenceRequest::where('id', $permit->id)->first();
+            // $message = "Cuti anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+            // if ($absenceRequest->end > $absenceRequest->start) {
+            //     dd("shshsh");
+            // } else {
+            //     dd(date('Y-m-d'), $absenceRequest->start);
+            // }
+            // dd($absenceRequest->start);
+            // if (date('Y-m-d') > $absenceRequest->start) {
+            if ($absenceRequest->end > $absenceRequest->start) {
+                $begin = strtotime($absenceRequest->start);
+                $end   = strtotime($absenceRequest->end);
+
+                for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                    // dd(date('Y-m-d', $i));
+                    $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                    // dd($check_empty);
+                    if (!$check_empty) {
+                        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                        if (!$holiday) {
+                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => 7,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // buat absence log end
+
+
+
+        return redirect()->route('admin.absence.index');
+    }
+    // absen dinas end
 
     public function show($id)
     {

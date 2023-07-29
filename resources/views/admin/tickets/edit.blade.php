@@ -65,6 +65,29 @@
                     </em>
                 @endif
             </div>
+
+
+            @can('ticket_delete')
+            <label for="" style="color :red">note : pastikan status yang diinputkan benar, 
+                karena bisa menyebabkan error/bug pada sistem(lebih baik diinput setelah semua tindakan selesai).
+                 dapat dikosongkan jika tidak merubah status</label>
+            <div class="form-group {{ $errors->has('category') ? 'has-error' : '' }}">
+                <label for="category">Status*</label>
+                <select id="status" name="statusupdate"  class="form-control" value="{{ old('category', isset($ticket) ? $ticket->category : '') }}">
+                    <option value="">== Semua Status ==</option>
+                    <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="close">Close</option>
+                </select>
+                @if($errors->has('category'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('category') }}
+                    </em>
+                @endif
+            </div>
+                            
+            @endcan
+
             <div class="form-group {{ $errors->has('dapertement') ? 'has-error' : '' }}">
                 <label for="dapertement">{{ trans('global.action.fields.dapertement') }}*</label>
                 <select id="dapertement" name="dapertement_id" class="form-control">

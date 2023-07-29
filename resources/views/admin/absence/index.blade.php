@@ -1,15 +1,65 @@
 @extends('layouts.admin')
 @section('content')
-{{-- @can('absence_create') --}}
-    {{-- <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-12">
+@can('absenceOffline_access')
+    <div style="margin-bottom: 10px;" class="row">
+        <div class="col-lg-3">
+            <div>
             <a class="btn btn-success" href="{{ route('admin.absence.create') }}">
-                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Reguler)
             </a>
         </div>
-    </div> --}}
+            <br>
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createShift') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Shift)
+            </a>
+        </div>
+        </div>
+        <div class="col-lg-3">
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createImport') }}">
+                Import {{ trans('global.absence.title_singular') }}(Reguler)
+            </a>
+        </div>
+            <br>
+
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createImportShift') }}">
+                Import {{ trans('global.absence.title_singular') }}(Shift)
+            </a>
+        </div>
+        </div>
+        <div class="col-lg-3">
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createPermit') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Izin)
+            </a>
+        </div>
+            <br>
+
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createExtra') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Lembur)
+            </a>
+        </div>
+        </div>
+        <div class="col-lg-3">
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createLeave') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Cuti)
+            </a>
+        </div>
+            <br>
+
+            <div>
+            <a class="btn btn-success" href="{{ route('admin.absence.createDuty') }}">
+                {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Dinas Luar)
+            </a>
+        </div>
+        </div>
+    </div>
     
-{{-- @endcan --}}
+@endcan
 <div class="card">
 
     <div class="card-header">

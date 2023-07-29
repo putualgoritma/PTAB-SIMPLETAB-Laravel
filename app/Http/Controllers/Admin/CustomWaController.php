@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Channel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Imports\CustomWaImport;
 use App\wa_history;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\WablasAreaTrait;
 use App\Traits\WablasTrait;
 
 class CustomWaController extends Controller
@@ -47,7 +49,36 @@ class CustomWaController extends Controller
 
     public function import(Request $request)
     {
+        // pilih channel start
+        $deviceWa = [];
+        $channel_list = Channel::get();
+        foreach ($channel_list as $key => $value) {
+            $data = WablasTrait::checkOnline($value->token);
+            if (json_decode($data)->status) {
+                $deviceWa[] = [$value->id];
+            } else {
+            }
+        }
 
+        // dd($deviceWa);
+
+        $channel =   wa_history::selectRaw('SUM(CASE WHEN wa_histories.id=1 AND wa_histories.status="pending" THEN 1 ELSE 0 END) as total, channels.*')
+            ->rightJoin('channels', 'channels.id', '=', 'wa_histories.channel_id')
+            ->where('channels.type', '!=', 'reguler')
+            ->whereIn('channels.id', $deviceWa)
+            ->groupBy('channels.id')
+            ->orderBy('total', 'asc')
+            ->first();
+        // dd($channel);
+        // if ($channel) {
+        //     $channel =   wa_history::selectRaw('count(wa_histories.id) as total, channels.*')
+        //         ->join('channels', 'channels.id', '=', 'wa_histories.channel_id')
+        //         ->where('wa_histories.status', 'pending')
+        //         ->groupBy('channels.id')
+        //         ->orderBy('total', 'asc')
+        //         ->first();
+        // }
+        // dd($channel);
         $fileN = [];
         $imageN = [];
         $videoN = [];
@@ -172,19 +203,21 @@ class CustomWaController extends Controller
                     }
                 }
 
-                $data = [
-                    'phone' => $nomorhp,
-                    // test
-                    // 'phone' => 'x',
-                    'customer_id' => '',
-                    'message' => $message,
-                    // 'id_wa' => 'empty',
-                    // 'template_id' => $request[$i]->template_id,
-                    'status' => 'gagal',
-                    'ref_id' => $code . $customers[$i]['id']
-                ];
+                if ($nomorhp != "") {
+                    $data = [
+                        'phone' => $nomorhp,
+                        // test
+                        // 'phone' => 'x',
+                        'customer_id' => '',
+                        'message' => $message,
+                        // 'id_wa' => 'empty',
+                        // 'template_id' => $request[$i]->template_id,
+                        'status' => 'gagal',
+                        'ref_id' => $code . $customers[$i]['id']
+                    ];
 
-                $kumpulan_data[] = $data;
+                    $kumpulan_data[] = $data;
+                }
             }
             // dd($kumpulan_data);
             $i = 0;
@@ -193,7 +226,7 @@ class CustomWaController extends Controller
             foreach (array_chunk($kumpulan_data, 5000) as $key => $smallerArray) {
                 foreach ($smallerArray as $index => $value) {
                     // count($kumpulan_data/5000);
-                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa')]);
+                    $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "channel_id" => $channel->id]);
                     // $i = $i + 1;
 
                 }
@@ -214,7 +247,7 @@ class CustomWaController extends Controller
                 foreach ($smallerArray as $index => $value) {
                     $temp[] = $value;
                 }
-                $test1 = WablasTrait::sendText($temp);
+                $test1 = WablasAreaTrait::sendText($temp,  $channel->token);
                 $temp = [];
                 // dd($test1);
                 if (!empty(json_decode($test1)->data->messages)) {
@@ -292,7 +325,7 @@ class CustomWaController extends Controller
                         $c = 0;
                         foreach ($smallerArray as $index => $value) {
                             // count($kumpulan_data/5000);
-                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file"]);
+                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file", "channel_id" => $channel->id]);
                             // $i = $i + 1;
                             unset($temp[$c]["document"]);
                             $c++;
@@ -314,7 +347,7 @@ class CustomWaController extends Controller
                             $temp[] = $value;
                         }
                         // dd($temp);
-                        $test1 = WablasTrait::sendFile($temp);
+                        $test1 = WablasAreaTrait::sendFile($temp, $channel->token);
                         $temp = [];
                         // dd($test1);
                         if (!empty(json_decode($test1)->data->messages)) {
@@ -398,7 +431,7 @@ class CustomWaController extends Controller
                         $d = 0;
                         foreach ($smallerArray as $index => $value) {
                             // count($kumpulan_data/5000);
-                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file"]);
+                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file", "channel_id" => $channel->id]);
                             // $i = $i + 1;
                             unset($temp[$d]["image"]);
                             unset($temp[$d]["caption"]);
@@ -421,7 +454,7 @@ class CustomWaController extends Controller
                             $temp[] = $value;
                         }
                         // dd($temp);
-                        $test1 = WablasTrait::sendImage($temp);
+                        $test1 = WablasAreaTrait::sendImage($temp, $channel->token);
                         $temp = [];
                         // dd($test1);
                         if (!empty(json_decode($test1)->data->messages)) {
@@ -506,7 +539,7 @@ class CustomWaController extends Controller
                         $d = 0;
                         foreach ($smallerArray as $index => $value) {
                             // count($kumpulan_data/5000);
-                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file"]);
+                            $temp[] = array_merge($value, ["created_at" => date('Y-m-d h:i:sa'), "updated_at" => date('Y-m-d h:i:sa'), "message" => "file", "channel_id" => $channel->id]);
                             // $i = $i + 1;
                             unset($temp[$d]["video"]);
                             unset($temp[$d]["caption"]);
@@ -529,9 +562,9 @@ class CustomWaController extends Controller
                             $temp[] = $value;
                         }
                         // dd($temp);
-                        $test1 = WablasTrait::sendVideo($temp);
+                        $test1 = WablasAreaTrait::sendFile($temp, $channel->token);
                         $temp = [];
-                        dd($test1);
+                        // dd($test1);
                         if (!empty(json_decode($test1)->data->messages)) {
                             $array_merg = array_merge(json_decode($test1)->data->messages, $array_merg);
                         }

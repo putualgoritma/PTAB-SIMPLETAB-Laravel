@@ -134,11 +134,11 @@ class LockController extends Controller
                 ->join('ptabroot_ctm.tblopp as tblopp', 'tblopp.nomorrekening', '=', 'tblpelanggan.nomorrekening')
                 ->join('users', 'lock_action.staff_id', '=', 'users.id')
                 ->with('customer')
-                ->with('subdapertement');
-            // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
-            // ->where('tblpelanggan.nomorrekening', 'I')->orwhere('tblpelanggan.namapelanggan', 'like', '%' . 'I' . '%')
-            // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
-            // ->get();
+                ->with('subdapertement')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                // ->where('tblpelanggan.nomorrekening', 'I')->orwhere('tblpelanggan.namapelanggan', 'like', '%' . 'I' . '%')
+                // ->where('created_at', 'like', '2022-08' . '%')->where('type', 'lock')
+                ->get();
             // $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
             //     ->leftJoin('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
             //     ->leftJoin('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')

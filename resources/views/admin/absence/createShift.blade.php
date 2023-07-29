@@ -7,7 +7,7 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route("admin.absence.store") }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route("admin.absence.storeShift") }}" method="POST" enctype="multipart/form-data">
             @csrf
             {{-- <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.absence.fields.code') }}*</label>
@@ -21,6 +21,33 @@
                     {{ trans('global.absence.fields.code_helper') }}
                 </p>
             </div> --}}
+
+            <div class="form-group {{ $errors->has('shift_parent_id') ? 'has-error' : '' }}">
+                <label for="shift_parent_id">Group Shift*</label>
+                <select id="shift_parent_id" name="shift_parent_id" class="form-control" value="{{ old('shift_parent_id', isset($absence) ? $absence->shift_parent_id : '') }}">
+                    <option value="">--Pilih Group --</option>
+                    @foreach ($shift_parents as $key=>$shift_parent )
+                        <option value="{{$shift_parent->id}}">{{$shift_parent->title}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('shift_parent_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('shift_parent_id') }}
+                    </em>
+                @endif
+            </div>
+
+            <div class="form-group {{ $errors->has('shift_group_id') ? 'has-error' : '' }}">
+                <label for="shift_group_id">Shift*</label>
+                <select id="shift_group_id" name="shift_group_id" class="form-control" value="{{ old('shift_group_id', isset($customer) ? $customer->shift_group : '') }}">
+                    <option value="">--Pilih Shift--</option>                    
+                </select>
+                @if($errors->has('shift_group_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('shift_group_id') }}
+                    </em>
+                @endif
+            </div>
 
             <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
                 <label for="staff_id">Staff*</label>

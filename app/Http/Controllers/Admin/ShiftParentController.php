@@ -14,6 +14,7 @@ use App\Traits\TraitModel;
 use App\ShiftParent;
 use App\Subdapertement;
 use App\WorkUnit;
+use Illuminate\Support\Facades\Auth;
 
 class ShiftParentController extends Controller
 {
@@ -21,12 +22,22 @@ class ShiftParentController extends Controller
 
     public function index(Request $request)
     {
-        $shift_parents = ShiftParent::selectRaw('shift_parents.*, dapertements.name as dapertement_name, jobs.name as job_name, work_units.name as work_unit_name')
-            ->leftJoin('jobs', 'jobs.id', '=', 'shift_parents.job_id')
-            ->leftJoin('dapertements', 'dapertements.id', '=', 'shift_parents.dapertement_id')
-            ->leftJoin('work_units', 'work_units.id', '=', 'shift_parents.work_unit_id')
-            ->orderBy('updated_at')
-            ->get();
+        if (Auth::user()->id != 328 && Auth::user()->dapertement_id != 0) {
+            $shift_parents = ShiftParent::selectRaw('shift_parents.*, dapertements.name as dapertement_name, jobs.name as job_name, work_units.name as work_unit_name')
+                ->leftJoin('jobs', 'jobs.id', '=', 'shift_parents.job_id')
+                ->leftJoin('dapertements', 'dapertements.id', '=', 'shift_parents.dapertement_id')
+                ->leftJoin('work_units', 'work_units.id', '=', 'shift_parents.work_unit_id')
+                ->where('dapertements.id', Auth::user()->dapertement_id)
+                ->orderBy('updated_at')
+                ->get();
+        } else {
+            $shift_parents = ShiftParent::selectRaw('shift_parents.*, dapertements.name as dapertement_name, jobs.name as job_name, work_units.name as work_unit_name')
+                ->leftJoin('jobs', 'jobs.id', '=', 'shift_parents.job_id')
+                ->leftJoin('dapertements', 'dapertements.id', '=', 'shift_parents.dapertement_id')
+                ->leftJoin('work_units', 'work_units.id', '=', 'shift_parents.work_unit_id')
+                ->orderBy('updated_at')
+                ->get();
+        }
         return view('admin.shift_parent.index', compact('shift_parents'));
     }
     public function create()

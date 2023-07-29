@@ -73,6 +73,11 @@ class User extends Authenticatable
         }
     }
 
+    public function staffs()
+    {
+        return $this->belongsTo(Staff::class, 'staff_id', 'id');
+    }
+
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPassword($token));

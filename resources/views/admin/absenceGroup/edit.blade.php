@@ -7,27 +7,41 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route("admin.absence.update", $absence->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route("admin.absencegroup.update", $absence->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <div class="">
-                <img src="{{ asset('') }}/{{ $absence->image }}" width="200"/>
-            </div>
-           
-            <label for="image">Gambar Sebelumnya</label>
           
-
-            <div class="form-group {{ $errors->has('image') ? 'has-error' : '' }}">
-                <label for="image">{{ trans('global.absence.fields.image') }}*</label>
-                <input type="file" id="image" name="image" class="form-control" value="{{ old('image', isset($absence) ? $absence->image : '') }}" required>
-                @if($errors->has('image'))
+            <div class="form-group {{ $errors->has('status_active') ? 'has-error' : '' }}">
+                <label for="status_active">Status*</label>
+                <select id="status_active" name="status_active" class="form-control">
+                    <option value="" @if ($absence->status_active =='')
+                        selected
+                    @endif >Masuk</option>
+                        <option value="2"  @if ($absence->status_active =='2')
+                            selected
+                        @endif>Lembur Mendesak</option>
+                        <option value="3"  @if ($absence->status_active =='3')
+                            selected
+                        @endif>Permisi Tidak Kembail</option>
+                        <option value="4"  @if ($absence->status_active =='4')
+                            selected
+                        @endif>Dianggap Tidak Hadir</option>
+                </select>
+                @if($errors->has('status_active'))
                     <em class="invalid-feedback">
-                        {{ $errors->first('file') }}
+                        {{ $errors->first('status_active') }}
                     </em>
                 @endif
-                <p class="helper-block">
-                    {{ trans('global.absence.fields.image_helper') }}
-                </p>
+            </div>
+
+            <div class="form-group {{ $errors->has('description') ? 'has-error' : '' }}">
+                <label for="description">{{ trans('global.action.fields.description') }}*</label>
+                <textArea id="description" name="description" class="form-control" >{{$absence->description}}</textArea>
+                @if($errors->has('description'))
+                    <em class="invalid-feedback">
+                        {{-- {{ $errors->first('description') }} --}}
+                    </em>
+                @endif
             </div>
 
             <div>

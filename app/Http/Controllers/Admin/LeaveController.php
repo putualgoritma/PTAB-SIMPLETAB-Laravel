@@ -17,6 +17,7 @@ use App\Traits\WablasTrait;
 use App\wa_history;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 
@@ -62,10 +63,27 @@ class LeaveController extends Controller
         //     ->first();
         // dd($cek);
         abort_unless(\Gate::allows('leave_access'), 403);
-        $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
-            ->where('absence_requests.category', 'leave')
-            ->FilterStatus($request->status)
-            ->FilterDateStart($request->from, $request->to);
+        $checker = [];
+        $users = user::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
+        if (!in_array('absence_all_access', $checker)) {
+            $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+                ->where('absence_requests.category', 'leave')
+                ->where('staffs.dapertement_id', Auth::user()->dapertement_id)
+                ->FilterStatus($request->status)
+                ->FilterDateStart($request->from, $request->to);
+        } else {
+            $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
+                ->where('absence_requests.category', 'leave')
+                ->FilterStatus($request->status)
+                ->FilterDateStart($request->from, $request->to);
+        }
         // ->orderBy('staffs.NIK')
         // ->orderBy('absence_requests.created_at', 'DESC');
         // dd($qry->get());

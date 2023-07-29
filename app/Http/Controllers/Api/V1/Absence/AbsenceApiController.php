@@ -20,6 +20,7 @@ use App\ShiftPlannerStaffs;
 use App\ShiftStaff;
 use App\StaffSpecial;
 use App\User;
+use App\Visit;
 use App\WorkTypeDays;
 use App\WorkUnit;
 use Illuminate\Http\Request;
@@ -171,10 +172,18 @@ class AbsenceApiController extends Controller
                 ->first();
             if ($visit) {
                 $visit_id = $visit->id;
+                $visitEtc =  Visit::where('absence_request_id', $visit->absence_request_id)->first();
+                if ($visitEtc) {
+                    $menuVisit = "ON";
+                } else {
+
+                    // $menuVisit = "ACTIVE";
+                    $menuVisit = "ON";
+                }
             } else {
                 $visitC = Absence_categories::where('type', 'visit')->get();
             }
-            $menuVisit = "ON";
+            // $menuVisit = "ON";
             // $menuVisit = "OFF";
         }
 
@@ -546,10 +555,18 @@ class AbsenceApiController extends Controller
                         ->first();
                     if ($visit) {
                         $visit_id = $visit->id;
+                        $visitEtc =  Visit::where('absence_request_id', $visit->absence_request_id)->first();
+                        if ($visitEtc) {
+                            $menuVisit = "ON";
+                        } else {
+                            // $menuVisit = "ACTIVE";
+                            $menuVisit = "ON";
+                        }
                     } else {
                         $visitC = Absence_categories::where('type', 'visit')->get();
+                        $menuVisit = "ON";
                     }
-                    $menuVisit = "ON";
+
                     // $menuVisit = "OFF";
                 }
 
@@ -1358,7 +1375,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -1395,7 +1412,7 @@ class AbsenceApiController extends Controller
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                 $font->size(14);
                 $font->color('#000000');
                 $font->valign('top');
@@ -1584,7 +1601,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -1669,7 +1686,7 @@ class AbsenceApiController extends Controller
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                 $font->size(14);
                 $font->color('#000000');
                 $font->valign('top');
@@ -1688,64 +1705,66 @@ class AbsenceApiController extends Controller
         }
 
         try {
-            $upload_image = new AbsenceLog;
-            $upload_image->image = $data_image;
-            // sementara start
-            $upload_image->created_by_staff_id = $request->satff_id;
-            $upload_image->updated_by_staff_id = $request->satff_id;
-            $upload_image->register = date('Y-m-d H:i:s');
-            $upload_image->absence_id = $request->absence_id;
-            $upload_image->absence_request_id = $request->absence_request_id;
-            // $upload_image->late = $late;
-            // $upload_image->early = $early;
-            // $upload_image->duration = $duration;
-            // sementara end
-            $upload_image->register = date('Y-m-d H:i:s');
-            $upload_image->created_at = date('Y-m-d H:i:s');
-            $upload_image->updated_at = date('Y-m-d H:i:s');
-            $upload_image->absence_category_id = $request->absence_category_id;
-            $upload_image->lat = $request->lat;
-            $upload_image->lng = $request->lng;
-            $upload_image->status =  0;
-            $upload_image->expired_date = $request->expired_date;
-            $upload_image->start_date = date('Y-m-d H:i:10');
-            $upload_image->accuracy = $request->accuracy;
-            $upload_image->distance = $request->distance;
-            // $upload_image->shift_id = $request->shift_id;
-
-            $upload_image->save();
-
-            $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('absence_id', $request->absence_id)
-                ->where('type', 'presence')
-                ->orderBy('queue', 'DESC')
-                ->first();
-
-            AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration]);
-
-            $breakin = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('absence_id', $request->absence_id)
-                ->where('type', 'break')
-                ->where('queue', '1')
-                ->first();
-
-            AbsenceLog::where('id', $breakin->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-
-            $breakout = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('absence_id', $request->absence_id)
-                ->where('type', 'break')
-                ->where('queue', '2')
-                ->first();
-
-            AbsenceLog::where('id', $breakout->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-
-            // buat absen endnya
-            $absenceR = AbsenceRequest::where('id', $request->absence_request_id)->first();
-
             // cek absen sudah ada atau tidak ada
             $check = AbsenceLog::where('absence_id', $request->absence_id)
+                ->where('absence_request_id', $request->absence_request_id)
                 ->where('absence_category_id', $request->absence_category_id_end)->first();
             if (!$check) {
+                $upload_image = new AbsenceLog;
+                $upload_image->image = $data_image;
+                // sementara start
+                $upload_image->created_by_staff_id = $request->satff_id;
+                $upload_image->updated_by_staff_id = $request->satff_id;
+                $upload_image->register = date('Y-m-d H:i:s');
+                $upload_image->absence_id = $request->absence_id;
+                $upload_image->absence_request_id = $request->absence_request_id;
+                // $upload_image->late = $late;
+                // $upload_image->early = $early;
+                // $upload_image->duration = $duration;
+                // sementara end
+                $upload_image->register = date('Y-m-d H:i:s');
+                $upload_image->created_at = date('Y-m-d H:i:s');
+                $upload_image->updated_at = date('Y-m-d H:i:s');
+                $upload_image->absence_category_id = $request->absence_category_id;
+                $upload_image->lat = $request->lat;
+                $upload_image->lng = $request->lng;
+                $upload_image->status =  0;
+                $upload_image->expired_date = $request->expired_date;
+                $upload_image->start_date = date('Y-m-d H:i:10');
+                $upload_image->accuracy = $request->accuracy;
+                $upload_image->distance = $request->distance;
+                // $upload_image->shift_id = $request->shift_id;
+
+                $upload_image->save();
+
+                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('absence_id', $request->absence_id)
+                    ->where('type', 'presence')
+                    ->orderBy('queue', 'DESC')
+                    ->first();
+
+                AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration]);
+
+                $breakin = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('absence_id', $request->absence_id)
+                    ->where('type', 'break')
+                    ->where('queue', '1')
+                    ->first();
+
+                AbsenceLog::where('id', $breakin->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
+
+                $breakout = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('absence_id', $request->absence_id)
+                    ->where('type', 'break')
+                    ->where('queue', '2')
+                    ->first();
+
+                AbsenceLog::where('id', $breakout->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
+
+                // buat absen endnya
+                $absenceR = AbsenceRequest::where('id', $request->absence_request_id)->first();
+
+
                 if ($request->absence_category_id == "11" && $absenceR->type == "out") {
                     AbsenceLog::create([
                         'absence_id' => $request->absence_id,
@@ -1801,7 +1820,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -1834,7 +1853,7 @@ class AbsenceApiController extends Controller
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                 $font->size(14);
                 $font->color('#000000');
                 $font->valign('top');
@@ -1982,7 +2001,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/RequestFile";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -2010,7 +2029,7 @@ class AbsenceApiController extends Controller
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                 $font->size(14);
                 $font->color('#000000');
                 $font->valign('top');
@@ -2123,7 +2142,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -2175,7 +2194,7 @@ class AbsenceApiController extends Controller
                 $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
                 $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                    $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                    $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                     $font->size(14);
                     $font->color('#000000');
                     $font->valign('top');
@@ -2387,7 +2406,7 @@ class AbsenceApiController extends Controller
                 ->where('shift_planner_staffs.staff_id', '=', $request->staff_id)
                 ->groupBy('shift_planner_staffs.id')
                 ->whereDate('shift_planner_staffs.start', '>=', date('Y-m-d'))
-                ->orderBy('shift_groups.queue', 'ASC')
+                ->orderBy('shift_planner_staffs.start', 'ASC')
                 ->get();
 
             foreach ($list_absence as $data) {
@@ -2450,7 +2469,7 @@ class AbsenceApiController extends Controller
 
         // $code = acc_code_generate($last_code, 8, 3);
         $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
         // $dataForm = json_decode($request->form);
         $responseImage = '';
         $data_image = "";
@@ -2476,7 +2495,7 @@ class AbsenceApiController extends Controller
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab-test", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
                 $font->size(14);
                 $font->color('#000000');
                 $font->valign('top');

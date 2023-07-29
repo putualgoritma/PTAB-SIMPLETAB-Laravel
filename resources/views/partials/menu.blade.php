@@ -241,6 +241,13 @@
                            Absen
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.absencegroup.index') }}" class="nav-link">
+                            <i class="nav-icon fa fa-address-book-o"></i>
+                           Kelola Absen
+                        </a>
+                    </li>
                     @endcan
 
                     {{-- @can('shift_access')
@@ -309,6 +316,15 @@
                                 </a>
                             </li>
                             @endcan
+                             {{-- @can('absence_report') --}}
+                          <li class="nav-item">
+                            <a href="{{ route('admin.geolocation_off.index') }}" class="nav-link">
+                            <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                            <i class="nav-icon fas fa-book"></i>
+                          Geofence Off
+                            </a>
+                        </li>
+                        {{-- @endcan --}}
                         </ul>
                     </li>
 
@@ -353,15 +369,7 @@
                     </li>
                     @endcan
 
-                          {{-- @can('absence_report') --}}
-                          <li class="nav-item">
-                            <a href="{{ route('admin.geolocation_off.index') }}" class="nav-link">
-                            <!-- <i class="nav-icon fas fa-landmark"></i> -->
-                            <i class="nav-icon fas fa-book"></i>
-                          Geofence Off
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
+                         
     
                     
 

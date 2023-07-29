@@ -16,8 +16,15 @@ class Absence extends Model
         'status_active',
         'created_at',
         'updated_at',
+        'description'
 
     ];
+
+    public function absence_logs()
+    {
+        return $this->hasMany(AbsenceLog::class, 'absence_id', 'id');
+    }
+
     public function getCreatedAtAttribute()
     {
         $timeStamp = date("Y-m-d", strtotime($this->attributes['created_at']));
@@ -46,6 +53,15 @@ class Absence extends Model
             }
 
             return $query->whereBetween(DB::raw('DATE(absences.created_at)'), [$from, $to]);
+        }
+    }
+
+    public function scopeFilterAbsence($query, $id)
+    {
+        if ($id != '') {
+            return $query->where('absences.id', '=', $id);
+        } else {
+            return $query;
         }
     }
 }
