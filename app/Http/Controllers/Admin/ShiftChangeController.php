@@ -24,7 +24,7 @@ class ShiftChangeController extends Controller
 
         abort_unless(\Gate::allows('extra_access'), 403);
         if (Auth::user()->dapertement_id != 5 && Auth::user()->dapertement_id != '') {
-            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, st2.name as name2, sh2.title as shift2')
+            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
                 ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
                 ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
                 ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
@@ -33,7 +33,7 @@ class ShiftChangeController extends Controller
                 ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
                 ->FilterDapertement(Auth::user()->dapertement_id);
         } else {
-            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, st2.name as name2, sh2.title as shift2')
+            $qry = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
                 ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
                 ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
                 ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
@@ -72,16 +72,23 @@ class ShiftChangeController extends Controller
             });
 
             $table->editColumn('shift1', function ($row) {
-                return $row->shift1 ? $row->shift1 : "";
+                return $row->shift1 ? date('Y-m-d', strtotime($row->start1)) . '(' . $row->shift1 . ')' : "";
             });
+            // $table->editColumn('start1', function ($row) {
+            //     return $row->start1 ? $row->start1.$row->start1 : "";
+            // });
 
             $table->editColumn('name2', function ($row) {
                 return $row->name2 ? $row->name2 : "";
             });
 
             $table->editColumn('shift2', function ($row) {
-                return $row->shift2 ? $row->shift2 : "";
+                return $row->shift2 ? date('Y-m-d', strtotime($row->start2))  . '(' . $row->shift2 . ')' : "";
             });
+
+            // $table->editColumn('start2', function ($row) {
+            //     return $row->start2 ? $row->start2 : "";
+            // });
             $table->editColumn('status', function ($row) {
                 return $row->status ? $row->status : "";
             });

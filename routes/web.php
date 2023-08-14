@@ -460,6 +460,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('geolocation_off', 'GeolocationOffController');
 
 
+    Route::post('forget/{id}/approve', 'ForgetController@approve')->name('forget.approve');
+    Route::post('forget/{id}/reject', 'ForgetController@reject')->name('forget.reject');
+    Route::resource('forget', 'ForgetController');
+
     // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
     // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
     Route::resource('absencegroup', 'AbsenceGroupController');

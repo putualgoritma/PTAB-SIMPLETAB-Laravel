@@ -274,6 +274,10 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::post('requests/approve', 'RequestApiController@approve');
     Route::post('requests/reject', 'RequestApiController@reject');
 
+    Route::get('changeShiftAdminList', 'ShiftChangeApiController@changeShiftAdminList');
+    Route::post('approveAdmin', 'ShiftChangeApiController@approveAdmin');
+    Route::post('rejectAdmin', 'ShiftChangeApiController@rejectAdmin');
+
     // admin end
 
     Route::get('historyExtra', 'AbsenceApiController@historyExtra');
@@ -290,6 +294,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('shift/listChange', 'ShiftApiController@listChange');
     Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
     Route::post('absence/store', 'AbsenceApiController@store');
+    Route::post('absence/storeN3w', 'AbsenceApiController@storeNew');
     Route::post('absence/storeExtra', 'AbsenceApiController@storeExtra');
 
 
@@ -319,6 +324,10 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('changeShiftProposal', 'ShiftChangeApiController@changeShiftProposal');
     Route::get('changeShift', 'ShiftChangeApiController@changeShift');
     Route::post('changeShiftApprove', 'ShiftChangeApiController@changeShiftApprove');
+
+
+
+
 
 
     Route::get('holiday', 'AbsenceApiController@holiday');

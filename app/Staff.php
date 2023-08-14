@@ -74,6 +74,14 @@ class Staff extends Model
         return $query;
     }
 
+    public function scopeFilterId($query, $id)
+    {
+        if ($id != '') {
+            $query->where('staffs.id', $id);
+        }
+        return $query;
+    }
+
     public function scopeFilterSubdapertement($query, $subdapertement, $job)
     {
         if ($job == '' || $job == '0' || $job == null) {

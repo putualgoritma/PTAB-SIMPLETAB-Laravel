@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Absence;
 use App\Http\Controllers\Controller;
 use App\ShiftChange;
 use App\ShiftPlannerStaffs;
+use App\User;
 use Illuminate\Http\Request;
 
 class ShiftChangeApiController extends Controller
@@ -67,40 +68,40 @@ class ShiftChangeApiController extends Controller
     public function changeShiftApprove(Request $request)
     {
         $shiftChange = ShiftChange::where('id', $request->id)->first();
-        $shiftChange->update(
-            [
-                'status' => $request->status
-            ]
-        );
-        if ($request->status == "reject") {
-            $message = "Ditolak";
-        } else {
-            // penukaran Shift start
-            $shift_changes = ShiftChange::where('id', $request->id)->first();
-            // shift saya
-            $shift1 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_change_id)->first();
-            $staff_id1 = $shift1->staff_id;
-            // shift yang ditukar
-            $shift2 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_id)->first();
-            $staff_id2 = $shift2->staff_id;
-            $shift1->update([
-                'staff_id' => $staff_id2
-            ]);
-            $shift2->update([
-                'staff_id' => $staff_id1
-            ]);
-            $shift_changes->update([
-                'status' => 'approve'
-            ]);
-            // penukaran shift end
-            $message = "Diterima";
-        }
+        // $shiftChange->update(
+        //     [
+        //         'status' => $request->status
+        //     ]
+        // );
+        // if ($request->status == "reject") {
+        //     $message = "Ditolak";
+        // } else {
+        //     // penukaran Shift start
+        //     $shift_changes = ShiftChange::where('id', $request->id)->first();
+        //     // shift saya
+        //     $shift1 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_change_id)->first();
+        //     $staff_id1 = $shift1->staff_id;
+        //     // shift yang ditukar
+        //     $shift2 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_id)->first();
+        //     $staff_id2 = $shift2->staff_id;
+        //     $shift1->update([
+        //         'staff_id' => $staff_id2
+        //     ]);
+        //     $shift2->update([
+        //         'staff_id' => $staff_id1
+        //     ]);
+        //     $shift_changes->update([
+        //         'status' => 'approve'
+        //     ]);
+        //     // penukaran shift end
+        //     $message = "Diterima";
+        // }
 
         return response()->json([
             'message' => $message,
             'data' =>  $shiftChange,
-            'llll' => $request->status,
-            'sskks' => $request->id
+            // 'llll' => $request->status,
+            // 'sskks' => $request->id
         ]);
     }
 
@@ -125,5 +126,70 @@ class ShiftChangeApiController extends Controller
         //         'message' => 'failed',
         //     ]);
         // }
+    }
+
+    public function changeShiftAdminList(Request $request)
+    {
+        $user = User::where('id', $request->id)->first();
+        if ($user->dapertement_id != 5 && $user->dapertement_id != '') {
+            $shiftChange = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
+                ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
+                ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
+                ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
+                ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
+                ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
+                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
+                ->FilterDapertement($user->dapertement_id)->paginate(3, ['*'], 'page', $request->page);
+        } else {
+            $shiftChange = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
+                ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
+                ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
+                ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
+                ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
+                ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
+                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')->paginate(3, ['*'], 'page', $request->page);
+        }
+        return response()->json([
+            'message' => 'berhasil',
+            'data' =>  $shiftChange,
+        ]);
+    }
+
+    public function approveAdmin(Request $request)
+    {
+        // penukaran Shift start
+        $shift_changes = ShiftChange::where('id', $request->id)->first();
+        // shift saya
+        $shift1 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_change_id)->first();
+        $staff_id1 = $shift1->staff_id;
+        // shift yang ditukar
+        $shift2 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_id)->first();
+        $staff_id2 = $shift2->staff_id;
+        $shift1->update([
+            'staff_id' => $staff_id2
+        ]);
+        $shift2->update([
+            'staff_id' => $staff_id1
+        ]);
+        $shift_changes->update([
+            'status' => 'approve'
+        ]);
+        // penukaran shift end
+        return response()->json([
+            'message' => 'penukaran disetujui',
+        ]);
+    }
+
+    public function rejectAdmin(Request $request)
+    {
+        // penukaran Shift start
+        $shift_changes = ShiftChange::where('id', $request->id)->first();
+        $shift_changes->update([
+            'status' => 'reject'
+        ]);
+        // penukaran shift end
+        return response()->json([
+            'message' => 'penukaran ditolak',
+        ]);
     }
 }

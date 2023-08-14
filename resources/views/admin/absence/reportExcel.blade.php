@@ -37,9 +37,38 @@
             <input id="to" placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{date('Y-m-d')}}">
         </div>
     </div>
+
+
+<div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+    <label for="staff_id">Staff*</label>
+    <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($absence) ? $absence->staff_id : '') }}">
+        <option value="">--staff--</option>
+        @foreach ($staffs as $key=>$staff )
+            <option value="{{$staff->id}}">{{$staff->name}}</option>
+        @endforeach
+    </select>
+    @if($errors->has('staff_id'))
+        <em class="invalid-feedback">
+            {{ $errors->first('staff_id') }}
+        </em>
+    @endif
+</div>
+
+<div class="form-group {{ $errors->has('work_unit_id') ? 'has-error' : '' }}">
+    <label for="work_unit_id">work_unit*</label>
+    <select id="work_unit_id" name="work_unit_id" class="form-control" value="{{ old('work_unit_id', isset($absence) ? $absence->work_unit_id : '') }}">
+        <option value="">--work_unit--</option>
+        @foreach ($work_units as $key=>$work_unit )
+            <option value="{{$work_unit->id}}">{{$work_unit->name}}</option>
+        @endforeach
+    </select>
+    @if($errors->has('work_unit_id'))
+        <em class="invalid-feedback">
+            {{ $errors->first('work_unit_id') }}
+        </em>
+    @endif
+</div>
 </div>  
-
-
 
 {{-- <label for="type">Wilayah</label>
 <select id="areas" name="areas" class="form-control">
@@ -59,6 +88,18 @@
 @endsection
 @parent
 @section('scripts')
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#staff_id').select2({
+         placeholder: 'Pilih Staff',
+         allowClear: true
+        });
+        $('#work_unit_id').select2({
+         placeholder: 'Pilih Work Unit',
+         allowClear: true
+        });
+    });
+   </script>
 <script>
     
 $('#dpRM').datetimepicker({
