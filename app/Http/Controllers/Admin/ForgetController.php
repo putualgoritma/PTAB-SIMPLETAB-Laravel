@@ -19,13 +19,13 @@ use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 
-class GeolocationOffController extends Controller
+class ForgetController extends Controller
 {
     use WablasTrait;
     public function index(Request $request)
     {
 
-        // abort_unless(\Gate::allows('geolocation_off_access'), 403);
+        // abort_unless(\Gate::allows('forget_access'), 403);
         $checker = [];
         $users = user::with(['roles'])
             ->where('id', Auth::user()->id)
@@ -38,7 +38,7 @@ class GeolocationOffController extends Controller
         if (!in_array('absence_all_access', $checker)) {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
-                ->where('absence_requests.category', 'geolocation_off')
+                ->where('absence_requests.category', 'forget')
                 ->where('staffs.dapertement_id', Auth::user()->dapertement_id)
                 ->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
@@ -46,7 +46,7 @@ class GeolocationOffController extends Controller
 
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
-                ->where('absence_requests.category', 'geolocation_off')
+                ->where('absence_requests.category', 'forget')
                 ->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
         }
@@ -63,8 +63,8 @@ class GeolocationOffController extends Controller
             $table->editColumn('actions', function ($row) {
                 $viewGate = 'duty_access';
                 $editGate = '';
-                $deleteGate = 'geolocation_off_delete';
-                $crudRoutePart = 'geolocation_off';
+                $deleteGate = 'forget_delete';
+                $crudRoutePart = 'forget';
 
                 return view('partials.datatablesDuties', compact(
                     'viewGate',
@@ -119,64 +119,64 @@ class GeolocationOffController extends Controller
             $table->addIndexColumn();
             return $table->make(true);
         }
-        return view('admin.geolocation_off.index');
+        return view('admin.forget.index');
     }
     public function create(Request $request)
     {
-        // abort_unless(\Gate::allows('geolocation_off_create'), 403);
+        // abort_unless(\Gate::allows('forget_create'), 403);
         $type = $request->type;
         $staffs = Staff::orderBy('name')->get();
-        return view('admin.geolocation_off.create', compact('staffs', 'type'));
+        return view('admin.forget.create', compact('staffs', 'type'));
     }
 
     public function show($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_access'), 403);
-        $geolocation_off = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
+        // abort_unless(\Gate::allows('forget_access'), 403);
+        $forget = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
             ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.id', $id)->first();
 
         $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
 
-        // dd($geolocation_off, $file);
-        return view('admin.geolocation_off.show', compact('geolocation_off', 'file'));
+        // dd($forget, $file);
+        return view('admin.forget.show', compact('forget', 'file'));
     }
 
     public function store(Request $request)
     {
-        // abort_unless(\Gate::allows('geolocation_off_create'), 403);
+        // abort_unless(\Gate::allows('forget_create'), 403);
         $data = [
-            'category' => 'geolocation_off',
+            'category' => 'forget',
             'type' => 'other',
             'staff_id' => $request->staff_id,
             'end' => $request->end,
             'start' => $request->start,
             'description' => $request->description,
         ];
-        $geolocation_off = AbsenceRequest::create($data);
-        return redirect()->route('admin.geolocation_off.index');
+        $forget = AbsenceRequest::create($data);
+        return redirect()->route('admin.forget.index');
     }
 
     public function edit($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
+        // abort_unless(\Gate::allows('forget_edit'), 403);
         $requests = Requests::where('id', $id)->first();
         $type = $requests->type;
         $users = User::where('staff_id', '!=', '0')->orderBy('name')->get();
-        return view('admin.geolocation_off.edit', compact('users', 'type', 'requests'));
+        return view('admin.forget.edit', compact('users', 'type', 'requests'));
     }
     public function update(Request $request, $id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
-        $geolocation_off = Requests::where('id', $id)
+        // abort_unless(\Gate::allows('forget_edit'), 403);
+        $forget = Requests::where('id', $id)
             ->update($request->except(['_token', '_method']));
-        return redirect()->route('admin.geolocation_off.index');
+        return redirect()->route('admin.forget.index');
     }
 
 
     public function reject($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
+        // abort_unless(\Gate::allows('forget_edit'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'reject']);
 
@@ -245,7 +245,7 @@ class GeolocationOffController extends Controller
     }
     public function approve($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_delete'), 403);
+        // abort_unless(\Gate::allows('forget_delete'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
 
@@ -257,30 +257,31 @@ class GeolocationOffController extends Controller
                 ->where('staff_id', $d->staff_id)
                 ->orderBy('id', 'DESC')
                 ->first();
-
+            // dd($cek_absen);
             if ($cek_absen) {
                 // untuk reguler
-
                 if ($cek_absen->staffs->work_type_id != 2) {
                     $get_absence =  Absence::with(['absence_logs', 'absence_logs.workTypeDays', 'staffs'])
                         ->where('id', $cek_absen->id)
                         ->first();
                     $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
                     $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
+                    // dd($get_absence, $time_cek, $time);
                     if ($time_cek && $time) {
-                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . (1 * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
-
+                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($time->workTypeDays->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
+                        // dd($penambahan_durasi);
                         if ($penambahan_durasi < date('Y-m-d H:i:s')) {
                             AbsenceLog::where('id',  $time_cek->id)
                                 ->update([
                                     'expired_date' => date('Y-m-d 23:59:59')
                                 ]);
                         }
+                        // dd('cek');
                     } else {
                     }
-                    dd($time_cek);
+                    // dd($time_cek);
                 } else {
-                    dd($shiftGroupTimeSheets->duration);
+                    // dd($shiftGroupTimeSheets->duration);
                     $get_absence =  Absence::with(['absence_logs', 'absence_logs.shiftGroupTimeSheets', 'staffs'])
                         ->where('id',  $cek_absen->id)
                         ->first();
@@ -300,10 +301,10 @@ class GeolocationOffController extends Controller
                 }
             }
         }
-        dd('slsls');
+        // dd('slsls');
         // penambahan durasi absen start
 
-        $message = "Absen diluar anda tanggal " . $d->start . " disetuji";
+        $message = "Lupa Absen anda tanggal " . $d->start . " disetuji";
         MessageLog::create([
             'staff_id' => $d->staff_id,
             'memo' => $message,
@@ -365,7 +366,7 @@ class GeolocationOffController extends Controller
     }
     public function destroy($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_delete'), 403);
+        // abort_unless(\Gate::allows('forget_delete'), 403);
         AbsenceRequest::where('id', $id)
             ->delete();
         return redirect()->back();

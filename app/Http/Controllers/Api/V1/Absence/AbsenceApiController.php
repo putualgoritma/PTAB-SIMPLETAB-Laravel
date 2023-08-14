@@ -1593,6 +1593,235 @@ class AbsenceApiController extends Controller
         }
     }
 
+    // new absen store start
+
+    public function storeNew(Request $request)
+    {
+
+        // $last_code = $this->get_last_code('lock_action');
+
+        // $code = acc_code_generate($last_code, 8, 3);
+        $img_path = "/images/absence";
+        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+        // $dataForm = json_decode($request->form);
+        $responseImage = '';
+        $data_image = "";
+
+        if (date('w') == '0') {
+            $day = '7';
+        } else {
+            $day = date('w');
+        }
+
+        // jika ada figerprint bermasalah start
+
+        if ($request->fingerprintError == "yes") {
+            Absence::where('id', $request->absence_id)->update([
+                'status_active' =>  '1'
+            ]);
+        }
+
+        // jika ada figerprint bermasalah end
+
+        if ($request->file('image')) {
+            $resource_image = $request->file('image');
+            $name_image = $request->staff_id;
+            $file_ext_image = $request->file('image')->extension();
+            // $id_name_image = str_replace(' ', '-', $id_image);
+
+            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+
+            // tambah watermark start
+            $image = $request->file('image');
+
+            $imgFile = Image::make($image->getRealPath());
+
+            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+
+            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $font->size(14);
+                $font->color('#000000');
+                $font->valign('top');
+            })->save($basepath . '/' . $name_image);
+
+            // tambah watermark end
+
+
+            // $resource_image->move($basepath . $img_path, $name_image);
+            $data_image = $name_image;
+        }
+
+
+        if ($responseImage != '') {
+            return response()->json([
+                'message' => $responseImage,
+            ]);
+        }
+
+        $absenceBefore = AbsenceLog::select('register')
+            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+            ->where('absence_id', $request->absence_id)
+            ->where('queue', '1')
+            ->where('type', 'presence')
+            ->first();
+
+        // mencari durasi
+        $duration = 0;
+        if ($request->queue == "2") {
+            $absenceBefore2 = AbsenceLog::selectRaw('absence_logs.id, register, absence_logs.expired_date, absence_logs.absence_id')
+                ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', $request->type)
+                ->where('queue', '1')
+                ->first();
+            // return response()->json([
+            //     'message' => $absenceBefore2,
+            // ]);
+            $day3 = $absenceBefore2->register;
+            $day3 = strtotime($day3);
+            $day4 = date('Y-m-d H:i:s');
+            $day4 = strtotime($day4);
+
+            $duration = ($day4 - $day3) / 3600;
+        }
+
+        if ($absenceBefore != null) {
+            $day1 = $absenceBefore->register;
+        } else {
+            $day1 = $absenceBefore->register;
+        }
+
+        if ($request->type == "presence" && $request->queue == "1") {
+            $outDuration = 0;
+        } else {
+            $day1 = strtotime($day1);
+            $day2 = date('Y-m-d H:i:s');
+            $day2 = strtotime($day2);
+
+            $outDuration = ($day2 - $day1) / 3600;
+        }
+
+        // variable early dan late
+        $late = 0;
+        $early = 0;
+        try {
+            $upload_image = AbsenceLog::where('id', $request->id)->first();
+            if ($request->type == "presence") {
+                if (date('Y-m-d H:i:s') > $upload_image->timein) {
+                    $dayL1 = $upload_image->timein;
+                    $dayL1 = strtotime($dayL1);
+                    $dayL2 = date('Y-m-d H:i:s');
+                    $dayL2 = strtotime($dayL2);
+
+                    $late = ($dayL2 - $dayL1) / 3600;
+                } else {
+                    $dayE1 = $upload_image->timein;
+                    $dayE1 = strtotime($dayE1);
+                    $dayE2 = date('Y-m-d H:i:s');
+                    $dayE2 = strtotime($dayE2);
+
+                    $early = ($dayE1 - $dayE2) / 3600;
+                }
+            }
+
+
+            $upload_image->late = $late;
+            $upload_image->early = $early;
+
+
+            $upload_image->image = $data_image;
+            // sementara start
+            $upload_image->created_by_staff_id = $request->staff_id;
+            $upload_image->updated_by_staff_id = $request->staff_id;
+            $upload_image->register = date('Y-m-d H:i:s');
+            // $upload_image->late = $late;
+            // $upload_image->early = $early;
+            $upload_image->duration = $duration;
+
+            // sementara end
+            $upload_image->register = date('Y-m-d H:i:s');
+            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->lat = $request->lat;
+            $upload_image->lng = $request->lng;
+            $upload_image->status =  0;
+            $upload_image->accuracy = '0';
+            $upload_image->distance = $request->distance;
+            // $upload_image->shift_id = $request->shift_id;
+
+            $upload_image->save();
+
+            if ($request->queue == "1") {
+                $end = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')
+                    ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('absence_id', $request->absence_id)
+                    ->where('type', $request->type)
+                    ->where('absence_logs.status', '1')
+                    ->where('queue', '2')
+                    ->first();
+                AbsenceLog::where('id', $end->id)->update(['register' => date('Y-m-d H:i:s')]);
+            }
+
+            // start update request
+            if ($upload_image->absence_request_id != "" && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where('id', $upload_image->absence_request_id)->update(['status' => 'close']);
+            }
+
+            // end update request
+            if ($request->type != "extra") {
+                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                    ->where('absence_id', $request->absence_id)
+                    ->where('type', 'presence')
+                    ->orderBy('queue', 'DESC')
+                    ->first();
+                AbsenceLog::where('id', $out->id)->update([
+                    'register' => date('Y-m-d H:i:s'),
+                    'duration' => $outDuration
+                ]);
+            }
+
+            if ($request->queue == "1" && $request->type == "presence") {
+                $check = AbsenceLog::where('absence_id', $out->absence_id)
+                    ->where('absence_category_id', 3)
+                    ->first();
+                if (!$check) {
+                    // buat absen istirahat
+                    AbsenceLog::create([
+
+                        'absence_id' => $out->absence_id,
+                        'absence_category_id' => 3,
+                        'status' => '1',
+                        'expired_date' => $out->expired_date,
+                        'start_date' => date('Y-m-d H:i:10'),
+
+                    ]);
+                    AbsenceLog::create([
+
+                        'absence_id' => $out->absence_id,
+                        'absence_category_id' => 4,
+                        'status' => '1',
+                        'expired_date' => $out->expired_date,
+                        'start_date' => date('Y-m-d H:i:11'),
+
+                    ]);
+                    // buat absen istirahat end
+                }
+            }
+
+
+            return response()->json([
+                'message' => 'Absen Terkirim',
+                'data' => $upload_image,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal',
+            ]);
+        }
+    }
+
+    // new absen store end
+
     // create absen baru
     public function storeLocation(Request $request)
     {

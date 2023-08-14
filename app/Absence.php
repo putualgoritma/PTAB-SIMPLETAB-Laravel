@@ -24,6 +24,20 @@ class Absence extends Model
     {
         return $this->hasMany(AbsenceLog::class, 'absence_id', 'id');
     }
+    public function staffs()
+    {
+        return $this->belongsTo(Staff::class, 'staff_id', 'id');
+    }
+
+    // public function workTypeDay()
+    // {
+    //     return $this->belongsTo(WorkTypeDays::class, 'work_type_day_id', 'id');
+    // }
+
+    // public function shiftGroupTimeSheet()
+    // {
+    //     return $this->belongsTo(ShiftGroupTimesheets::class, 'shift_group_timesheet_id', 'id');
+    // }
 
     public function getCreatedAtAttribute()
     {

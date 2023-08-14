@@ -39,7 +39,15 @@ class AbsenceLog extends Model
         'distance',
     ];
 
+    public function workTypeDays()
+    {
+        return $this->belongsTo(WorkTypeDays::class, 'work_type_day_id', 'id');
+    }
 
+    public function shiftGroupTimeSheets()
+    {
+        return $this->belongsTo(ShiftGroupTimesheets::class, 'shift_group_timesheet_id', 'id');
+    }
     // public function scopeFilterDate($query, $monthyear)
     // {
     //     if (!empty(request()->input('monthyear'))) {
