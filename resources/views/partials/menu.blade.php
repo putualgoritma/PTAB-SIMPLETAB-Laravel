@@ -241,7 +241,9 @@
                            Absen
                         </a>
                     </li>
+                    @endcan
 
+                    @can('absence_all_access')
                     <li class="nav-item">
                         <a href="{{ route('admin.absencegroup.index') }}" class="nav-link">
                             <i class="nav-icon fa fa-address-book-o"></i>
@@ -249,7 +251,7 @@
                         </a>
                     </li>
                     @endcan
-
+                    
                     {{-- @can('shift_access')
                     <li class="nav-item">
                         <a href="{{ route('admin.shift.index') }}" class="nav-link">
@@ -260,7 +262,103 @@
                     </li>
                     @endcan --}}
 
+                    {{-- untuk absen offline --}}
+                    @can('absenceOffline_access')
 
+                  
+
+                    <li class="nav-item nav-dropdown">
+                        <a class="nav-link  nav-dropdown-toggle">
+                            <i class="fas fa-hand-o-up  nav-icon">
+        
+                            </i>
+                           Buat Absen Offline
+                        </a>
+                        <ul class="nav-dropdown-items">                       
+                            {{-- @can('duty_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.create') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-car"></i> --}}
+                              - Absen Reguler
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+        
+                            {{-- @can('extra_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createShift') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-wrench"></i> --}}
+                              - Absen Shift
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+        
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createImport') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                              - Import Absen(reguler)
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createImportShift') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                             - Import Absen(Shift)
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createPermit') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                              - Absen Izin/Sakit
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createExtra') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                              - Absen Lembur
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createLeave') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                              - Cuti
+                                </a>
+                            </li>
+                            {{-- @endcan --}}
+
+                            {{-- @can('excuse_access') --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.absence.createDuty') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                {{-- <i class="nav-icon fas fa-motorcycle"></i> --}}
+                              - Dinas Luar
+                                </a>
+                            </li>
+                            {{-- @endcan         --}}
+                         
+                        </ul>
+                    </li>
+                    @endcan
+                    {{-- untuk absen offline --}}
                     <li class="nav-item nav-dropdown">
                         <a class="nav-link  nav-dropdown-toggle">
                             <i class="fas fa-hand-o-up  nav-icon">
@@ -315,16 +413,33 @@
                                     Izin
                                 </a>
                             </li>
+
+                            {{-- biar cepat --}}
+                            <li class="nav-item">
+                                <a href="{{ route('admin.additionalTime.index') }}" class="nav-link">
+                                    <i class="nav-icon fa fa-clock-o"></i>
+                                    Additonal Time
+                                </a>
+                            </li>
                             @endcan
-                             {{-- @can('absence_report') --}}
-                          <li class="nav-item">
-                            <a href="{{ route('admin.geolocation_off.index') }}" class="nav-link">
-                            <!-- <i class="nav-icon fas fa-landmark"></i> -->
-                            <i class="nav-icon fas fa-book"></i>
-                          Geofence Off
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
+
+                            @can('absence_all_access')
+                            <li class="nav-item">
+                                <a href="{{ route('admin.forget.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-question"></i>
+                               Lupa Absen
+                                </a>
+                            </li>
+                            @endcan
+
+                            <li class="nav-item">
+                                <a href="{{ route('admin.geolocation_off.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-book"></i>
+                              Geofence Off
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -369,7 +484,9 @@
                     </li>
                     @endcan
 
-                         
+                          {{-- @can('absence_report') --}}
+                     
+                        {{-- @endcan --}}
     
                     
 
@@ -393,7 +510,7 @@
                             </li>
                             {{-- @endcan --}}
 
-                            @can('staff_access')
+                            @can('absence_all_access')
                             <li class="nav-item">
                                 <a href="{{ route('admin.staffSpecials.index') }}" class="nav-link">
                                 <!-- <i class="nav-icon fas fa-landmark"></i> -->

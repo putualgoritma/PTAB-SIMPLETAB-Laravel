@@ -31,10 +31,26 @@
 
 
             
-            <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+            {{-- <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
                 <label for="staff_id">{{ trans('global.staffSpecial.fields.staff') }}*</label>
                 <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($customer) ? $customer->staff : '') }}">
                     <option value="">--Pilih staff--</option>
+                    @foreach ($staffs as $key=>$staff )
+                        <option value="{{$staff->id}}">{{$staff->name}}</option>
+                    @endforeach
+                </select>
+                @if($errors->has('staff_id'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('staff_id') }}
+                    </em>
+                @endif
+            </div> --}}
+
+
+            <div class="form-group {{ $errors->has('staff_id') ? 'has-error' : '' }}">
+                <label for="staff_id">Staff*</label>
+                <select id="staff_id" name="staff_id" class="form-control" value="{{ old('staff_id', isset($absence) ? $absence->staff_id : '') }}">
+                    <option value="">--staff--</option>
                     @foreach ($staffs as $key=>$staff )
                         <option value="{{$staff->id}}">{{$staff->name}}</option>
                     @endforeach
@@ -113,6 +129,21 @@
 </div>
 @section('scripts')
 @parent
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#staff_id').select2({
+         placeholder: 'Pilih Staff',
+         allowClear: true
+        });
+        $('#work_unit_id').select2({
+         placeholder: 'Pilih Work Unit',
+         allowClear: true
+        });
+    });
+   </script>
+<script>
+
 <script>
     $('#dapertement_id').change(function(){
     var dapertement_id = $(this).val();    

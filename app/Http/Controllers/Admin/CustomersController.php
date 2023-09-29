@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\ComparisonAbsences;
 use App\Customer;
+use App\Exports\TestExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyCustomerRequest;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use App\Imports\AbsenceCheckImport;
+use App\Imports\AbsenceImport;
 use App\Traits\TraitModel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Imports\CustomerImport;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -172,6 +177,67 @@ class CustomersController extends Controller
         abort_unless(\Gate::allows('customer_edit'), 403);
         return view('admin.customers.editImport');
     }
+
+    // untuk cek absen di fingerspot dan sistem baru
+    // public function updateImport(Request $request)
+    // {
+    //     abort_unless(\Gate::allows('customer_edit'), 403);
+    //     $import = new AbsenceCheckImport;
+    //     ini_set("memory_limit", -1);
+    //     set_time_limit(0);
+    //     $test =  Excel::import($import, $request->file('file'));
+    //     // dd($test);
+    //     $array = $import->getArray();
+    //     // dd($array);
+    //     // abort_unless(\Gate::allows('wablast_access'), 403);
+
+    //     // $customers = $import->getArray();
+    //     $data = [];
+    //     // for ($i = 0; $i < count($customer) - 1; $i++) {
+    //     //     $data[] = [
+    //     //         'nik' => $customer[$i]['nik'],
+
+    //     //     ];
+    //     //     # code...
+    //     // }
+    //     // DB::table('absence_excels')->insert($customers);
+    //     // DB::table('comparison_absences')->insert($customers);
+    //     $data = ComparisonAbsences::selectRaw('
+    //     comparison_absences.nik as FO_nik, 
+    //     comparison_absences.date as FO_date,
+    //     comparison_absences.description as FO_description,
+    //     absence_excels.nik as S_nik, 
+    //     absence_excels.date as S_date,
+    //     absence_excels.description as S_description
+
+    //     ')
+    //         ->leftJoin('absence_excels', function ($join) {
+    //             $join->on('comparison_absences.nik', '=', 'absence_excels.nik');
+    //             $join->on('comparison_absences.date', '=', 'absence_excels.date');
+    //         })->get();
+
+
+    //     return Excel::download(new TestExport($data), 'report_excel.xlsx');
+
+    //     // leftJoin('absence_excels', 'absence_excels.nik','=','comparation_absences.nik')
+    //     dd($data[10]);
+    //     // dd($customers);
+
+    //     //ini test
+
+    //     // dd($customers[2]['name']);
+    //     // for ($i = 0; $i < count($customers) - 1; $i++) {
+    //     //     if ($customers[$i]['phone'] != null && $customers[$i]['nomorrekening'] != null) {
+    //     //         $customer = Customer::find($customers[$i]['nomorrekening']);
+    //     //         $customer->phone = $customers[$i]['phone'];
+    //     //         $customer->nomorhp = $customers[$i]['nomorhp'];
+    //     //         $customer->_synced = 0;
+    //     //         $customer->save();
+    //     //     }
+    //     // }
+
+    //     return redirect()->route('admin.customers.index');
+    // }
 
     public function updateImport(Request $request)
     {

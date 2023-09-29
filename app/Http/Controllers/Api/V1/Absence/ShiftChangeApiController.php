@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1\Absence;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\Http\Controllers\Controller;
+use App\Shift;
 use App\ShiftChange;
+use App\ShiftPlannerStaff;
 use App\ShiftPlannerStaffs;
 use App\User;
 use Illuminate\Http\Request;
@@ -109,11 +113,20 @@ class ShiftChangeApiController extends Controller
     public function store(Request $request)
     {
         $dataForm = json_decode($request->form);
+        // $dataForm = $request;
+
+        $shift1 = ShiftPlannerStaffs::where('id', $dataForm->shift_change_id)
+            ->first();
+        $shift2 = ShiftPlannerStaffs::where('id', $dataForm->id)
+            ->first();
+
         // if ($dataForm->date > date('Y-m-d')) {
         $data = [
             'shift_id' => $dataForm->shift_change_id,
             'shift_change_id' =>  $dataForm->id,
             'description' => $dataForm->description,
+            'staff_id' => $shift1->staff_id,
+            'staff_change_id' => $shift2->staff_id,
             'status' => 'pending',
         ];
         $shiftChange = ShiftChange::create($data);
@@ -132,22 +145,25 @@ class ShiftChangeApiController extends Controller
     {
         $user = User::where('id', $request->id)->first();
         if ($user->dapertement_id != 5 && $user->dapertement_id != '') {
-            $shiftChange = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
+            $shiftChange = ShiftChange::selectRaw('shift_changes.id,shift_changes.description, shift_changes.created_at, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
                 ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
                 ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
                 ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
                 ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
                 ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
                 ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
+                ->orderBy('shift_changes.created_at', 'DESC')
                 ->FilterDapertement($user->dapertement_id)->paginate(3, ['*'], 'page', $request->page);
         } else {
-            $shiftChange = ShiftChange::selectRaw('shift_changes.id, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
+            $shiftChange = ShiftChange::selectRaw('shift_changes.id,shift_changes.description, shift_changes.created_at, shift_changes.status, st1.name as name1, sh1.title as shift1, s1.start as start1 ,st2.name as name2, sh2.title as shift2, s2.start as start2')
                 ->join('shift_planner_staffs as s1', 's1.id', '=', 'shift_changes.shift_id')
                 ->join('staffs as st1', 'st1.id', '=', 's1.staff_id')
                 ->join('shift_groups as sh1', 'sh1.id', '=', 's1.shift_group_id')
                 ->join('shift_planner_staffs as s2', 's2.id', '=', 'shift_changes.shift_change_id')
                 ->join('staffs as st2', 'st2.id', '=', 's2.staff_id')
-                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')->paginate(3, ['*'], 'page', $request->page);
+                ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
+                ->orderBy('shift_changes.created_at', 'DESC')
+                ->paginate(3, ['*'], 'page', $request->page);
         }
         return response()->json([
             'message' => 'berhasil',
@@ -165,6 +181,31 @@ class ShiftChangeApiController extends Controller
         // shift yang ditukar
         $shift2 = ShiftPlannerStaffs::where('id',  $shift_changes->shift_id)->first();
         $staff_id2 = $shift2->staff_id;
+
+        // hapus absen sebelumnya
+        $ab1 =  Absence::select('absences.id')->join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+            ->where('absence_category_id', '1')
+            ->where('absence_logs.status', '1')
+            ->where('staff_id', $staff_id1)
+            ->where('shift_planner_id', $shift_changes->shift_change_id)->first();
+        // dd($ab1);
+        if ($ab1) {
+            AbsenceLog::where('absence_id', $ab1->id)->delete();
+            Absence::where('id', $ab1->id)->delete();
+        }
+        // dd($tess, $tef);
+
+        $ab2 =  Absence::select('absences.id')->join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+            ->where('absence_category_id', '1')
+            ->where('absence_logs.status', '1')
+            ->where('staff_id', $staff_id2)
+            ->where('shift_planner_id', $shift_changes->shift_id)->first();
+        if ($ab2) {
+            AbsenceLog::where('absence_id', $ab2->id)->delete();
+            Absence::where('id', $ab2->id)->delete();
+        }
+        // hapus absen sebelumnya end
+
         $shift1->update([
             'staff_id' => $staff_id2
         ]);

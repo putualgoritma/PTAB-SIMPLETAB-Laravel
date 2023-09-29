@@ -437,40 +437,40 @@ class WhatsappBlastController extends Controller
 
         $code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
         // dd($request->status);
-        if ($request->status == "3") {
-            if ($request->type == "Penyegelan") {
-                $qry = Customer::selectRaw('locks.id, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
-                    ->where('locks.id', null)
-                    ->where('tblpelanggan.status', 1)->get();
-                // dd($qry);
-            } else {
-                $qry = Customer::selectRaw('locks.id, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                    ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                    ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
-                    ->where('locks.id', '!=', null)
-                    ->where('tblpelanggan.status', 1)->get();
-                // dd($qry);
-            }
-        } else {
-            $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
-                ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
-                ->where('tblpelanggan.status', 1);
-        }
+        // if ($request->status == "3") {
+        //     if ($request->type == "Penyegelan") {
+        //         $qry = Customer::selectRaw('locks.id, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+        //             ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+        //             ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+        //             ->where('locks.id', null)
+        //             ->where('tblpelanggan.status', 1);
+        //         // dd($qry);
+        //     } else {
+        //         $qry = Customer::selectRaw('locks.id, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+        //             ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+        //             ->leftJoin('ptabroot_simpletab.locks', 'tblpelanggan.nomorrekening', '=', 'locks.customer_id')
+        //             ->where('locks.id', '!=', null)
+        //             ->where('tblpelanggan.status', 1);
+        //         // dd($qry);
+        //     }
+        // } else {
+        $qry = Customer::selectRaw('tblpelanggan.*, (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) as jumlahtunggakan,  (case when( (((count(tblpembayaran.statuslunas) * 2) - sum(tblpembayaran.statuslunas)) DIV 2) > 1 ) THEN 1 ELSE 0 END) as statusnunggak')
+            ->join('tblpembayaran', 'tblpelanggan.nomorrekening', '=', 'tblpembayaran.nomorrekening')
+            ->where('tblpelanggan.status', 1);
+        // }
         // dd($qry);
         if ($date_now > $date_comp) {
             $qry->having('jumlahtunggakan', '>', 1)
                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<=', date('Y-n-01'))
                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                 ->groupBy('tblpembayaran.nomorrekening')
-                ->FilterStatus(request()->input('status'));
+                ->where('tblpelanggan.status', 1);
         } else {
             $qry->having('jumlahtunggakan', '>', 1)
                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '<', date('Y-n-01'))
                 ->whereDate(DB::raw('concat(tblpembayaran.tahunrekening,"-",tblpembayaran.bulanrekening,"-01")'), '>=', $last_4_month)
                 ->groupBy('tblpembayaran.nomorrekening')
-                ->FilterStatus(request()->input('status'));
+                ->where('tblpelanggan.status', 1);
         }
         $data2 = [];
         $customers = $qry->paginate($request->takeData);
@@ -540,6 +540,11 @@ class WhatsappBlastController extends Controller
         //     }
         // }
         // dd($kumpulan_data);
+
+        // dd($file);
+        // $file = json_encode($file);
+        // dd($file);
+
         return view('admin.waBlast.createMessage', compact('data', 'customers', 'takeData'));
     }
 
@@ -549,7 +554,7 @@ class WhatsappBlastController extends Controller
         abort_unless(\Gate::allows('wablast_access'), 403);
         // pilih channel start
         $deviceWa = [];
-        $channel_list = Channel::get();
+        $channel_list = Channel::where('type', 'tunggakan')->get();
         foreach ($channel_list as $key => $value) {
             $data = WablasTrait::checkOnline($value->token);
             if (json_decode($data)->status) {
@@ -759,7 +764,7 @@ class WhatsappBlastController extends Controller
         // dd($request->pag);
         abort_unless(\Gate::allows('wablast_access'), 403);
         $waTemplate = WaTemplate::get();
-        $customers = Customer::FilterWilayah($request->area)->FilterNomorrekening($request->nomorrekening)->paginate($request->takeData, ['*'], 'page', $request->page);
+        $customers = Customer::FilterWilayah($request->area)->where('tblpelanggan.status', 1)->FilterNomorrekening($request->nomorrekening)->paginate($request->takeData, ['*'], 'page', $request->page);
         $areas = CtmWilayah::select('id as code', 'NamaWilayah')->get();
         $takeFrom = Customer::count();
         $takeData = $request->takeData;

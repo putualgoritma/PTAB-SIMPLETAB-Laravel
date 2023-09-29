@@ -82,7 +82,9 @@
             </div>
         </div>
 <br>
-        <Button  type="submit"  class="btn btn-primary" value="Proses" >Proses</Button>
+        <Button  type="submit"  name="absence_log" class="btn btn-primary" value="Proses" >Proses Absen</Button>
+
+        <Button  type="submit" name="absence_log"  class="btn btn-warning" value="yes" >Proses Absen Log</Button>
 
       </form>
 @endsection

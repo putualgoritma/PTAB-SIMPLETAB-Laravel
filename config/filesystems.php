@@ -84,6 +84,8 @@ return [
             'username' => env('SFTP_USERNAME'),
             'password' => env('SFTP_PASSWORD'),
             'root' => env('SFTP_ROOT'),
+            'permPublic' => 0755,
+            'directoryPerm' => 0755,
           
             // Settings for SSH key based authentication with encryption password...
             //'privateKey' => env('SFTP_PRIVATE_KEY'),

@@ -122,6 +122,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('test-customers', 'TestController');
     Route::get('test-get', 'TestController@getTest');
     Route::get('test-action-staff-store', 'ActionsController@actionStaffStoreTest');
+    Route::get('test-trsf-img', 'TestController@transferImg');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 
@@ -463,6 +464,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('forget/{id}/approve', 'ForgetController@approve')->name('forget.approve');
     Route::post('forget/{id}/reject', 'ForgetController@reject')->name('forget.reject');
     Route::resource('forget', 'ForgetController');
+
+    Route::post('additionalTime/{id}/approve', 'AdditionalTimeController@approve')->name('additionalTime.approve');
+    Route::post('additionalTime/{id}/reject', 'AdditionalTimeController@reject')->name('additionalTime.reject');
+    Route::resource('additionalTime', 'AdditionalTimeController');
+
+
+
+
+    Route::post('location/{id}/approve', 'LocationController@approve')->name('location.approve');
+    Route::post('location/{id}/reject', 'LocationController@reject')->name('location.reject');
+    Route::resource('location', 'LocationController');
 
     // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
     // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');

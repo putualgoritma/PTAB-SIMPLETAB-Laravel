@@ -240,7 +240,7 @@ $(document).ready(function () {
                     data.description+
                     '</textarea>'+
             '</div>'+
-            '<button onclick="myFunction('+id+')">Click me</button>'
+            '<button onclick="myFunction('+id+')">Delete</button>'
             ,
 		focusConfirm: false,
 		preConfirm: () => {

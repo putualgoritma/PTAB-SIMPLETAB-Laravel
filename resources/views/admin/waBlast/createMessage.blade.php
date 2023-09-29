@@ -119,10 +119,10 @@
                         <th scope="row">{{ $item->nomorrekening }}</th>
                         <td name="chk">{{ $item->name}}</td>
                         <td>{{ $item->telp }}</td>
-                        <td>{{ $item->adress }}</td>
+                        <td>{{ $item->address }}</td>
                         <input type="hidden" id="customer_id{{ $n+1 }}" name="customer_id[]" value="{{ $item->nomorrekening }}" disabled>
                         <input type="hidden" id="name{{ $n+1 }}" name="name[]" value="{{ $item->name }}" disabled>
-                        <input type="hidden" id="adress{{ $n+1 }}" name="adress[]" value="{{ $item->adress }}" disabled>
+                        <input type="hidden" id="adress{{ $n+1 }}" name="adress[]" value="{{ $item->address }}" disabled>
                        @php
                           $n = $n+1
                        @endphp
@@ -157,7 +157,8 @@
                      
                         <li class="page-item"><a class="page-link" href="#">2</a></li>
                       </nav> --}}
-                      {{ $customers->appends(['data'=>['message' => $data['message'], 'template' => $data['template'], 'category' => $data['category'],'template_id' => $data['template_id']],'takeData'=>request()->input('takeData'), 'area'=>request()->input('area')])->links() }}
+                      {{-- {{ $customers->appends(['message' => $data['message'],'takeData'=>$takeData, 'area'=>request()->input('area'), 'file' => request()->input('file'), 'image' =>request()->input('image')])->links() }} --}}
+                      {{ $customers->appends(['type'=>$data['type'],'message' => $data['message'], 'template' => $data['template'], 'category' => $data['category'],'template_id' => $data['template_id'],'takeData'=>request()->input('takeData'), 'area'=>request()->input('area')])->links() }}
                 </div>
             <div>
                 <input class="btn btn-danger" type="submit" value="Send">

@@ -72,12 +72,18 @@ class LeaveController extends Controller
                 $checker[] = $data2->title;
             }
         }
+        $subdapertement = Auth::user()->subdapertement_id != '0' ? Auth::user()->subdapertement_id : '';
         if (!in_array('absence_all_access', $checker)) {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
                 ->where('absence_requests.category', 'leave')
                 ->where('staffs.dapertement_id', Auth::user()->dapertement_id)
                 ->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
+
+            if ($subdapertement != '') {
+                $qry = $qry->where('subdapertement_id', Auth::user()->subdapertement_id);
+                // dd($subdapertement, 'nbhgv');
+            }
         } else {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
                 ->where('absence_requests.category', 'leave')

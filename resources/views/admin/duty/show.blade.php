@@ -92,6 +92,26 @@
                 </th>
                 </tr>
 
+                <tr>
+                    <th>
+                        {{-- {{ trans('global.duty.fields.file') }} --}}
+                        Bukti Dinas
+                    </th>
+                    <th>
+                    {{-- <div class="row"> --}}
+                        @foreach ($visit_images as $item)
+                            {{-- @foreach (json_decode($image->image) as $item) --}}
+                            <div class="col-md-5">
+                                <img  height="250px" width="350px"  src="{{"https://simpletabadmin.ptab-vps.com/images/Visit/$item->image"}}" alt="">
+                                <p>{{ $item->type == "request_log_in" ? "Bukti Check In" : "Bukti Check Out" }}</p>
+                                <p class="my-2"><a href="{{"https://simpletabadmin.ptab-vps.com/images/Visit/$item->image"}}" target="_blank" class="btn btn-primary">Tampilkan</a></p>
+                            </div>
+                            {{-- @endforeach --}}
+                        @endforeach
+                    {{-- </div> --}}
+                </th>
+                </tr>
+
             </tbody>
         </table>
     </div>

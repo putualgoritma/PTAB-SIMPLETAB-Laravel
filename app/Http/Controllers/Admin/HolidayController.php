@@ -12,13 +12,14 @@ class HolidayController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(\Gate::allows('absence_all_access'), 403);
         // $holiday =  [
         //     ['id' => '1', 'name' => 'Hari Raya Galungan', 'date' => '10-10-2022'],
         //     ['id' => '2', 'name' => 'Hari Raya Kuningan', 'date' => '10-20-2022'],
         //     ['id' => '3', 'name' => 'Hari Raya Nyepi', 'date' => '10-1-2022'],
 
         // ];
-        // abort_unless(\Gate::allows('holiday_access'), 403);
+
         // $qry = Holiday::selectRaw('holidays.*, days.name as day')->join('days', 'holidays.day_id', '=', 'days.id')->get();
         // // dd($qry);
         // // $qry = TestModel::Filter($request)->Order('id', 'desc')->skip(0)->take(10)->get();
@@ -92,12 +93,14 @@ class HolidayController extends Controller
 
     public function create()
     {
-        abort_unless(\Gate::allows('holiday_create'), 403);
+        // abort_unless(\Gate::allows('holiday_create'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
         return view('admin.holiday.create');
     }
     public function store(Request $request)
     {
-        abort_unless(\Gate::allows('holiday_create'), 403);
+        // abort_unless(\Gate::allows('holiday_create'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
         $checkD = date("w",  strtotime($request->date));
         if ($checkD == "0") {
             $day = 7;

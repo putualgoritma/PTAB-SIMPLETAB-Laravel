@@ -12,6 +12,7 @@ use OneSignal;
 use App\Traits\WablasTrait;
 use App\wa_history;
 use App\User;
+use App\VisitImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,7 @@ class DutyController extends Controller
                 $checker[] = $data2->title;
             }
         }
+        $subdapertement = Auth::user()->subdapertement_id != '0' ? Auth::user()->subdapertement_id : '';
         if (!in_array('absence_all_access', $checker)) {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
@@ -44,6 +46,11 @@ class DutyController extends Controller
                 ->FilterCategory($request->category)->FilterStatus($request->status)
                 ->FilterCategory($request->category)->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
+
+            if ($subdapertement != '') {
+                $qry = $qry->where('subdapertement_id', Auth::user()->subdapertement_id);
+                // dd($subdapertement, 'nbhgv');
+            }
         } else {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
@@ -151,8 +158,11 @@ class DutyController extends Controller
 
         $file = AbsenceRequestLogs::where('absence_request_id', $id)->get();
 
+        $visit_images = VisitImage::join('visits', 'visits.id', '=', 'visit_images.visit_id')
+            ->where('absence_request_id', $id)->get();
+
         // dd($duty, $file);
-        return view('admin.duty.show', compact('duty', 'file'));
+        return view('admin.duty.show', compact('duty', 'file', 'visit_images'));
     }
 
     public function edit($id)

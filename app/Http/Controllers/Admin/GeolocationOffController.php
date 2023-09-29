@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Absence;
-use App\AbsenceLog;
 use App\AbsenceRequest;
 use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
@@ -35,6 +34,9 @@ class GeolocationOffController extends Controller
                 $checker[] = $data2->title;
             }
         }
+
+        $subdapertement = Auth::user()->subdapertement_id != '0' ? Auth::user()->subdapertement_id : '';
+
         if (!in_array('absence_all_access', $checker)) {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
@@ -42,6 +44,11 @@ class GeolocationOffController extends Controller
                 ->where('staffs.dapertement_id', Auth::user()->dapertement_id)
                 ->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
+
+            if ($subdapertement != '') {
+                $qry = $qry->where('subdapertement_id', Auth::user()->subdapertement_id);
+                // dd($subdapertement, 'nbhgv');
+            }
         } else {
 
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
@@ -251,56 +258,52 @@ class GeolocationOffController extends Controller
 
         $d = AbsenceRequest::where('id', $id)->first();
         // penambahan durasi absen start
-        if (date('Y-m-d') >= date('Y-m-d', strtotime($d->start))) {
-            $cek_absen = Absence::with(['absence_logs', 'staffs'])
-                ->whereDate('created_at', date('Y-m-d'))
-                ->where('staff_id', $d->staff_id)
-                ->orderBy('id', 'DESC')
-                ->first();
+        // if (date('Y-m-d') >= date('Y-m-d', strtotime($d->start))) {
+        //     $cek_absen = Absence::with(['absence_logs', 'staffs'])
+        //         ->whereDate('created_at', date('Y-m-d'))
+        //         ->where('staff_id', $d->staff_id)
+        //         ->orderBy('id', 'DESC')
+        //         ->first();
 
-            if ($cek_absen) {
-                // untuk reguler
+        //     if ($cek_absen) {
+        //         // untuk reguler
 
-                if ($cek_absen->staffs->work_type_id != 2) {
-                    $get_absence =  Absence::with(['absence_logs', 'absence_logs.workTypeDays', 'staffs'])
-                        ->where('id', $cek_absen->id)
-                        ->first();
-                    $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
-                    $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
-                    if ($time_cek && $time) {
-                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . (1 * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
+        //         if ($cek_absen->staffs->work_type_id != 2) {
+        //             $get_absence =  Absence::with(['absence_logs', 'absence_logs.workTypeDays', 'staffs'])
+        //                 ->where('id', $cek_absen->id)
+        //                 ->first();
+        //             $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
+        //             $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
+        //             if ($time_cek && $time) {
+        //                 $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($time->workTypeDays->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
 
-                        if ($penambahan_durasi < date('Y-m-d H:i:s')) {
-                            AbsenceLog::where('id',  $time_cek->id)
-                                ->update([
-                                    'expired_date' => date('Y-m-d 23:59:59')
-                                ]);
-                        }
-                    } else {
-                    }
-                    dd($time_cek);
-                } else {
-                    dd($shiftGroupTimeSheets->duration);
-                    $get_absence =  Absence::with(['absence_logs', 'absence_logs.shiftGroupTimeSheets', 'staffs'])
-                        ->where('id',  $cek_absen->id)
-                        ->first();
-                    $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
-                    $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
-                    if ($time_cek && $time) {
-                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($shiftGroupTimeSheets->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
+        //                 if ($penambahan_durasi > date('Y-m-d H:i:s')) {
+        //                 }
+        //             } else {
+        //             }
+        //             dd($penambahan_durasi);
+        //         } else {
+        //             dd($shiftGroupTimeSheets->duration);
+        //             $get_absence =  Absence::with(['absence_logs', 'absence_logs.shiftGroupTimeSheets', 'staffs'])
+        //                 ->where('id',  $cek_absen->id)
+        //                 ->first();
+        //             $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
+        //             $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
+        //             if ($time_cek && $time) {
+        //                 $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($shiftGroupTimeSheets->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
 
-                        if ($penambahan_durasi > date('Y-m-d H:i:s')) {
-                            Absence::where('absences.id',  $cek_absen->id)
-                                ->update([
-                                    'expired_date' => date('Y-m-d 23:59:59')
-                                ]);
-                        }
-                    } else {
-                    }
-                }
-            }
-        }
-        dd('slsls');
+        //                 if ($penambahan_durasi > date('Y-m-d H:i:s')) {
+        //                     Absence::where('absences.id',  $cek_absen->id)
+        //                         ->update([
+        //                             'expired_date' => date('Y-m-d 23:59:59')
+        //                         ]);
+        //                 }
+        //             } else {
+        //             }
+        //         }
+        //     }
+        // }
+        // dd('slsls');
         // penambahan durasi absen start
 
         $message = "Absen diluar anda tanggal " . $d->start . " disetuji";

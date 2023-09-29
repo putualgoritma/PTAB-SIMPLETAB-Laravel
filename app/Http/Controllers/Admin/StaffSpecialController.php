@@ -16,7 +16,7 @@ class StaffSpecialController extends Controller
         //     'message' => "1"
         // ];
         // WaTemplate::create($data);
-        abort_unless(\Gate::allows('staff_access'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
 
         $dapertements = Dapertement::get();
         $staffSpecials = StaffSpecial::selectRaw('staffs.*, staff_specials.*')
@@ -28,7 +28,7 @@ class StaffSpecialController extends Controller
 
     public function create()
     {
-        abort_unless(\Gate::allows('staff_create'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
 
         $staffs = Staff::orderBy('name')->get();
 
@@ -37,7 +37,7 @@ class StaffSpecialController extends Controller
 
     public function store(Request $request)
     {
-        abort_unless(\Gate::allows('staff_create'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
 
         $validated = $request->validate([
             'staff_id' => 'required|unique:staff_specials|max:255'
@@ -51,7 +51,7 @@ class StaffSpecialController extends Controller
 
     public function edit($id)
     {
-        abort_unless(\Gate::allows('staff_edit'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
 
         $staffSpecial = StaffSpecial::where('id', $id)->first();
         // dd($staffSpecial);
@@ -61,7 +61,7 @@ class StaffSpecialController extends Controller
 
     public function update(Request $request, $id)
     {
-        abort_unless(\Gate::allows('staff_edit'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
 
         $staffSpecial = StaffSpecial::where('id', $id);
         $staffSpecial->update($request->except(['_token', '_method']));
@@ -71,7 +71,7 @@ class StaffSpecialController extends Controller
 
     public function show($id)
     {
-        abort_unless(\Gate::allows('staff_show'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
         $staffSpecial = StaffSpecial::where('id', $id)->first();
 
         return view('admin.staffs.show', compact('staff'));
@@ -79,7 +79,7 @@ class StaffSpecialController extends Controller
 
     public function destroy($id)
     {
-        abort_unless(\Gate::allows('staff_delete'), 403);
+        abort_unless(\Gate::allows('absence_all_access'), 403);
         $staffSpecial = StaffSpecial::where('id', $id);
 
         $staffSpecial->delete();

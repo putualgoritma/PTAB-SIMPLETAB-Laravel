@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\CtmPbk;
 use App\Dapertement;
 use App\Http\Controllers\Controller;
@@ -10,6 +12,8 @@ use App\Http\Requests\UpdateStaffRequest;
 use App\Staff;
 use App\CtmWilayah;
 use App\Job;
+use App\ShiftPlannerStaff;
+use App\ShiftPlannerStaffs;
 use App\Subdapertement;
 use App\Traits\TraitModel;
 use App\User;
@@ -43,6 +47,17 @@ class StaffsController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
+
+            $checker = [];
+            $users = User::with(['roles'])
+                ->where('id', Auth::user()->id)
+                ->first();
+            foreach ($users->roles as $data) {
+                foreach ($data->permissions as $data2) {
+                    $checker[] = $data2->title;
+                }
+            }
+
             //user role
             $user_id = Auth::check() ? Auth::user()->id : null;
             $department = '';
@@ -53,14 +68,17 @@ class StaffsController extends Controller
                 $role = $admin->roles[0];
                 $role->load('permissions');
                 $permission = json_decode($role->permissions->pluck('title'));
-                if (!in_array("ticket_all_access", $permission)) {
+                if (!in_array("ticket_all_access", $permission) && !in_array('absence_all_access', $checker)) {
                     $department = $admin->dapertement_id;
                     $subdepartment = $admin->subdapertement_id;
                     $staff = $admin->staff_id;
                 }
             }
             //set query
-            if (request()->input('dapertement_id') != "") {
+
+            if (in_array('absence_all_access', $checker)) {
+                $qry = Staff::with('dapertement')->with('subdapertement')->FilterDapertement($department)->get();
+            } else if (request()->input('dapertement_id') != "") {
                 $dapertement_id = request()->input('dapertement_id');
 
                 $qry = Staff::where('dapertement_id', $dapertement_id)->with('dapertement')->with('subdapertement')->FilterDapertement($department);
@@ -128,6 +146,18 @@ class StaffsController extends Controller
         $code = acc_code_generate($last_code, 8, 3);
 
         abort_unless(\Gate::allows('staff_create'), 403);
+
+
+
+        $checker = [];
+        $users = User::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
         //user role
         $area = CtmWilayah::select('id as code', 'NamaWilayah')->get();
 
@@ -143,7 +173,7 @@ class StaffsController extends Controller
             $role = $admin->roles[0];
             $role->load('permissions');
             $permission = json_decode($role->permissions->pluck('title'));
-            if (!in_array("ticket_all_access", $permission)) {
+            if (!in_array("ticket_all_access", $permission) && !in_array('absence_all_access', $checker)) {
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
                 $staff = $admin->staff_id;
@@ -157,6 +187,12 @@ class StaffsController extends Controller
         } else {
             $dapertements = Dapertement::all();
         }
+
+
+        // if (in_array('absence_all_access', $checker)) {
+        //     $qry = Staff::with('dapertement')->with('subdapertement')->FilterDapertement($department)->get();
+        // }
+
         $work_types = WorkTypes::get();
         $jobs = Job::get();
 
@@ -191,6 +227,16 @@ class StaffsController extends Controller
         $staff = Staff::where('id', $id)->with('area')->first();
         $work_units = WorkUnit::get();
         $pbks = CtmPbk::get();
+
+        $checker = [];
+        $users = User::with(['roles'])
+            ->where('id', Auth::user()->id)
+            ->first();
+        foreach ($users->roles as $data) {
+            foreach ($data->permissions as $data2) {
+                $checker[] = $data2->title;
+            }
+        }
         //user role
         $user_id = Auth::check() ? Auth::user()->id : null;
         $department = '';
@@ -200,7 +246,7 @@ class StaffsController extends Controller
             $role = $admin->roles[0];
             $role->load('permissions');
             $permission = json_decode($role->permissions->pluck('title'));
-            if (!in_array("ticket_all_access", $permission)) {
+            if (!in_array("ticket_all_access", $permission) && !in_array('absence_all_access', $checker)) {
                 $department = $admin->dapertement_id;
                 $subdepartment = $admin->subdapertement_id;
             }
@@ -229,6 +275,32 @@ class StaffsController extends Controller
             'NIK' => 'required|unique:staffs,NIK,' . $staff->id . ',id',
             // 'body' => 'required',
         ]);
+        if ($staff->work_type_id != $request->work_type_id) {
+            // dd("halo");
+            // $shift = ShiftPlannerStaffs::where('staff_id', $staff->id)
+            //     // ->whereDate('start', '>=', date('Y-m-d'))
+            //     ->get();
+
+            // dd($absence);
+            if ($staff->work_type_id == "2") {
+                ShiftPlannerStaffs::where('staff_id', $staff->id)
+                    ->whereDate('start', '>=', date('Y-m-d'))->delete();
+            }
+
+            $absence = Absence::join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
+                ->whereDate('absences.created_at', date('Y-m-d'))
+                ->where('register', '=', null)
+                ->where('absence_category_id', 1)
+                ->where('staff_id', $staff->id)->first();
+            if ($absence) {
+
+                AbsenceLog::where('absence_id', $absence->absence_id)->delete();
+                Absence::where('id', $absence->absence_id)->delete();
+            }
+        } else {
+            // dd("jjj");
+        }
+        // dd($shift);
 
 
         $staff->update($request->all());

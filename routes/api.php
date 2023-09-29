@@ -59,6 +59,9 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     Route::post('register-upd', 'CustomersApiController@register');
 
     //test
+    Route::get('virmach-transfer', 'VirmachApiController@transferImg')->name('virmach.transfer');
+    Route::post('virmach-image-store', 'VirmachApiController@storeImg')->name('virmach.store');
+    
     // Route::get('test', 'CustomersApiController@test');
     Route::get('test', 'TicketsApiController@test');
 });
@@ -284,6 +287,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::delete('requests/imageDelete/{id}', 'RequestApiController@imageDelete');
     Route::get('absence/schedule', 'AbsenceApiController@schedule');
 
+    Route::post('requests/closeLocation', 'RequestApiController@closeLocation');
 
     Route::get('requests/absenceList', 'RequestApiController@absenceList');
     Route::get('checkAbsenceLocation', 'AbsenceApiController@checkAbsenceLocation');
@@ -293,6 +297,7 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('shift', 'ShiftApiController@index');
     Route::get('shift/listChange', 'ShiftApiController@listChange');
     Route::get('requests/getPermissionCat', 'RequestApiController@getPermissionCat');
+    Route::get('requests/getLocation', 'RequestApiController@getLocation');
     Route::post('absence/store', 'AbsenceApiController@store');
     Route::post('absence/storeN3w', 'AbsenceApiController@storeNew');
     Route::post('absence/storeExtra', 'AbsenceApiController@storeExtra');

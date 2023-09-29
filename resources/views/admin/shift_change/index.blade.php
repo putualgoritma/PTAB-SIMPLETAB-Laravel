@@ -65,7 +65,12 @@
                         <th>
                             {{ trans('global.shift_change.fields.status') }}
                         </th>
-                   
+                        <th>
+                            {{ trans('global.shift_change.fields.description') }}
+                        </th>
+                        <th>
+                            Diajukan Tanggal
+                        </th>
                         {{-- <th>
                             {{ trans('global.shift_change.fields.upstartd_at') }}
                         </th> --}}
@@ -145,6 +150,8 @@
         { data: 'name2', name: 'name2' },
         { data: 'shift2', name: 'shift2' },
         { data: 'status', name: 'status' },
+        { data: 'description', name: 'description' },
+        { data: 'created_at', name: 'created_at' },
         // { data: 'upstartd_at', name: 'upstartd_at' },
         { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
