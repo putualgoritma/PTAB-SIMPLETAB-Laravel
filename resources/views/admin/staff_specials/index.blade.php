@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-@can('staff_create')
+@can('absence_all_access')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
             <a class="btn btn-success" href="{{ route("admin.staffSpecials.create") }}">

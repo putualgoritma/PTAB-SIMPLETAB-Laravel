@@ -1392,6 +1392,8 @@ class AbsenceApiController extends Controller
 
             $imgFile = Image::make($image->getRealPath());
 
+            $imgFile->orientate();
+
             $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
 
             $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {

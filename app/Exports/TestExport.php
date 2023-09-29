@@ -25,15 +25,12 @@ class TestExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'Nomor Rekening',
-            'Nama',
-            'Alamat',
-            'Golongan',
-            'Area',
-            'X',
-            'Y',
-            'Periode',
-            'Kubikasi',
+            "FO_nik",
+            "FO_date",
+            "FO_description",
+            "S_nik",
+            "S_date",
+            "S_description"
         ];
     }
 }

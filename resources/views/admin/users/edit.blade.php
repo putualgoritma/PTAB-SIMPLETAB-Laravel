@@ -123,6 +123,16 @@
                     {{ trans('global.user.fields.roles_helper') }}
                 </p>
             </div>
+
+            <div class="form-group {{ $errors->has('login_date') ? 'has-error' : '' }}">
+                <label for="login_date">Tanggal Login(Hapus untuk bisa login kembali)*</label>
+                <input type="text" id="login_date" name="login_date" class="form-control" value="{{ old('login_date', isset($user) ? $user->login_date : '') }}">
+                @if($errors->has('login_date'))
+                    <em class="invalid-feedback">
+                        {{-- {{ $errors->first('login_date') }} --}}
+                    </em>
+                @endif
+            </div>
             <div>
                 <input class="btn btn-danger" type="submit" value="{{ trans('global.save') }}">
             </div>

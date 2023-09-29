@@ -54,8 +54,10 @@ class MenuApiController extends Controller
             }
             $messageM = $messageLogs[0]->memo;
         }
-        if ($request->version != "2023-04-19") {
-            $messageM = "Update ke V 23.04.19";
+        $versionNow = "yes";
+        if ($request->version != "2023-09-19") {
+            $messageM = "Tolong update ke Versi terbaru di App Store atau Playstore";
+            $versionNow = "not";
         }
 
 
@@ -70,8 +72,8 @@ class MenuApiController extends Controller
                 'month1' => "50",
                 'month2' => "70",
                 'month3' => "90",
-                'versionNow' => "yes",
-                'version' => 'Versi Baru 23.04.19',
+                'versionNow' => $versionNow,
+                'version' => 'Versi Baru 23.09.19',
                 'monthName1' => 'Januari',
                 'monthName2' => 'Februari',
                 'monthName3' => 'Maret'
@@ -110,29 +112,41 @@ class MenuApiController extends Controller
         if (date('d') > 20) {
             $awal1 = strtotime('-1 month', strtotime(date('Y-m') . "-21"));
             $akhir1 = strtotime('0 month', strtotime(date('Y-m') . "-20"));
-            $namaB1 = date("F", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
+            $namaB1 = date("F", strtotime('0 month', strtotime(date('Y-m') . "-21")));
 
             $awal2 = strtotime('-2 month', strtotime(date('Y-m') . "-21"));
             $akhir2 = strtotime('-1 month', strtotime(date('Y-m') . "-20"));
 
-            $namaB2 = date("F", strtotime('-2 month', strtotime(date('Y-m') . "-21")));
+            $namaB2 = date("F", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
 
             $awal3 = strtotime('-3 month', strtotime(date('Y-m') . "-21"));
             $akhir3 = strtotime('-2 month', strtotime(date('Y-m') . "-20"));
 
-            $namaB3 = date("F", strtotime('-3 month', strtotime(date('Y-m') . "-21")));
+            $namaB3 = date("F", strtotime('-2 month', strtotime(date('Y-m') . "-21")));
         } else {
+            // $awal1 = strtotime('-2 month', strtotime(date('Y-m') . "-21"));
+            // $akhir1 = strtotime('-1 month', strtotime(date('Y-m') . "-20"));
+            // $namaB1 = date("F", strtotime('-2 month', strtotime(date('Y-m') . "-21")));
+
+            // $awal2 = strtotime('-3 month', strtotime(date('Y-m') . "-21"));
+            // $akhir2 = strtotime('-2 month', strtotime(date('Y-m') . "-20"));
+            // $namaB2 = date("F", strtotime('-3 month', strtotime(date('Y-m') . "-21")));
+
+            // $awal3 = strtotime('-4 month', strtotime(date('Y-m') . "-21"));
+            // $akhir3 = strtotime('-3 month', strtotime(date('Y-m') . "-20"));
+            // $namaB3 = date("F", strtotime('-4 month', strtotime(date('Y-m') . "-21")));
+
             $awal1 = strtotime('-2 month', strtotime(date('Y-m') . "-21"));
             $akhir1 = strtotime('-1 month', strtotime(date('Y-m') . "-20"));
-            $namaB1 = date("F", strtotime('-2 month', strtotime(date('Y-m') . "-21")));
+            $namaB1 = date("F", strtotime('-1 month', strtotime(date('Y-m') . "-21")));
 
             $awal2 = strtotime('-3 month', strtotime(date('Y-m') . "-21"));
             $akhir2 = strtotime('-2 month', strtotime(date('Y-m') . "-20"));
-            $namaB2 = date("F", strtotime('-3 month', strtotime(date('Y-m') . "-21")));
+            $namaB2 = date("F", strtotime('-2 month', strtotime(date('Y-m') . "-21")));
 
             $awal3 = strtotime('-4 month', strtotime(date('Y-m') . "-21"));
             $akhir3 = strtotime('-3 month', strtotime(date('Y-m') . "-20"));
-            $namaB3 = date("F", strtotime('-4 month', strtotime(date('Y-m') . "-21")));
+            $namaB3 = date("F", strtotime('-3 month', strtotime(date('Y-m') . "-21")));
         }
 
         $staff = Staff::selectRaw('work_types.type as work_type')->join('work_types', 'staffs.work_type_id', '=', 'work_types.id')

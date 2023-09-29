@@ -163,6 +163,36 @@
                 @endif
             </div> --}}
 
+            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+                <label for="type">Tipe*</label>
+                <select id="type" name="type" class="form-control" value="{{ old('type', isset($customer) ? $customer->work_unit : '') }}">
+                    <option value="">--Pilih Tipe--</option>
+                        <option value="employee" {{$staff->type == "employee" ? 'selected' : ''}}>employee</option>
+                        <option value="contract" {{$staff->type == "contract" ? 'selected' : ''}}>contract</option>
+                     
+                </select>
+                @if($errors->has('type'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('type') }}
+                    </em>
+                @endif
+            </div>
+
+            <div class="form-group {{ $errors->has('_status') ? 'has-error' : '' }}">
+                <label for="_status">Status*</label>
+                <select id="_status" name="_status" class="form-control" value="{{ old('_status', isset($customer) ? $customer->work_unit : '') }}">
+                    {{-- <option value="">--Pilih Tipe--</option> --}}
+                        <option value="active" {{$staff->_status == "active" ? 'selected' : ''}}>active</option>
+                        <option value="non_active" {{$staff->_status == "non_active" ? 'selected' : ''}}>non_active</option>
+                     
+                </select>
+                @if($errors->has('_status'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('_status') }}
+                    </em>
+                @endif
+            </div>
+
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>
                 <select name="area[]" id="area" class="form-control select2" multiple="multiple">

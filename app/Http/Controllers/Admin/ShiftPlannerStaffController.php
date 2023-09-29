@@ -130,7 +130,9 @@ class ShiftPlannerStaffController extends Controller
         }
         $pgw = Staff::FilterJob($shift_parent->job_id)
             ->FilterWorkUnit($shift_parent->work_unit_id)
-            ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)->get();
+            ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
+            ->where('staffs.work_type_id', '2')
+            ->get();
         $sg = ShiftGroups::where('shift_parent_id', $request->id)->get();
         $id = $shift_parent->job_id;
 
@@ -174,7 +176,9 @@ class ShiftPlannerStaffController extends Controller
             $shift_parent = ShiftParent::where('id', $requests->shift_parent_id)->first();
             $pgw = Staff::select('staffs.*')->FilterJob($shift_parent->job_id)
                 ->FilterWorkUnit($shift_parent->work_unit_id)
-                ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)->get();
+                ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
+                ->where('staffs.work_type_id', '2')
+                ->get();
             foreach ($pgw as $value) {
                 if ($requests->staff_id == $value->id) {
                     $select = "selected";

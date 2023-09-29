@@ -16,7 +16,9 @@ class ShiftChange extends Model
         'description',
         'created_at',
         'updated_at',
-        'status'
+        'status',
+        'staff_id',
+        'staff_change_id'
     ];
     public function scopeFilterDate($query, $from, $to)
     {

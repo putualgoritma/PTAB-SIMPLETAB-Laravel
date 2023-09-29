@@ -37,6 +37,22 @@
                 @endif
             </div>
 
+            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+                <label for="type">Tipe*</label>
+                <select id="type" name="type" class="form-control" value="{{ old('type', isset($absence) ? $absence->type : '') }}">
+                    <option value="">--Pilih tipe--</option>
+                    {{-- @foreach ($staffs as $key=>$staff ) --}}
+                        <option value="other">Izin</option>
+                        <option value="sick">Sakit</option>
+                    {{-- @endforeach --}}
+                </select>
+                @if($errors->has('type'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('type') }}
+                    </em>
+                @endif
+            </div>
+
 
             <div class="form-group {{ $errors->has('date') ? 'has-error' : '' }}">
                 <label for="date">Tanggal*</label>

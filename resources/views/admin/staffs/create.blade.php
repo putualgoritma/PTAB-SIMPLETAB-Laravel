@@ -7,7 +7,7 @@
     </div>
 
     <div class="card-body">
-        <form action="{{ route('admin.virmach.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.staffs.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.staff.fields.code') }}*</label>
@@ -147,6 +147,21 @@
                 </em>
             @endif
         </div> --}}
+
+        <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+            <label for="type">Tipe*</label>
+            <select id="type" name="type" class="form-control" value="{{ old('type', isset($customer) ? $customer->work_unit : '') }}">
+                {{-- <option value="">--Pilih Tipe--</option> --}}
+                    <option value="employee">employee</option>
+                    <option value="contract">contract</option>
+                 
+            </select>
+            @if($errors->has('type'))
+                <em class="invalid-feedback">
+                    {{ $errors->first('type') }}
+                </em>
+            @endif
+        </div>
 
             <div class="form-group {{ $errors->has('area') ? 'has-error' : '' }}">
                 <label for="area">{{ trans('global.staff.fields.area') }}*</label>

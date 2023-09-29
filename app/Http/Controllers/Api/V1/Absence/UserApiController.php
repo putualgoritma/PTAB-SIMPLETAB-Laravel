@@ -14,7 +14,11 @@ class UserApiController extends Controller
     public function login(Request $request)
     {
         try {
-            $admin = User::where('email', request('email'))->with('roles')->with('dapertement')->first();
+            if (!empty($request->login_date)) {
+                $admin = User::where('email', request('email'))->with('roles')->with('dapertement')->first();
+            } else {
+                $admin = User::where('email', request('email'))->where('login_date', null)->with('roles')->with('dapertement')->first();
+            }
             if (empty($admin)) {
                 return response()->json([
                     'success' => false,

@@ -20,7 +20,9 @@ class Staff extends Model
         'job_id',
         'NIK',
         'fingerprint',
-        'image'
+        'image',
+        'type',
+        '_status'
     ];
 
     public function dapertement()

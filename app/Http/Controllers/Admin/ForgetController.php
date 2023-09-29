@@ -35,6 +35,7 @@ class ForgetController extends Controller
                 $checker[] = $data2->title;
             }
         }
+        $subdapertement = Auth::user()->subdapertement_id != '0' ? Auth::user()->subdapertement_id : '';
         if (!in_array('absence_all_access', $checker)) {
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
@@ -42,6 +43,11 @@ class ForgetController extends Controller
                 ->where('staffs.dapertement_id', Auth::user()->dapertement_id)
                 ->FilterStatus($request->status)
                 ->FilterDateStart($request->from, $request->to);
+
+            if ($subdapertement != '') {
+                $qry = $qry->where('subdapertement_id', Auth::user()->subdapertement_id);
+                // dd($subdapertement, 'nbhgv');
+            }
         } else {
 
             $qry = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
@@ -273,7 +279,9 @@ class ForgetController extends Controller
                         if ($penambahan_durasi < date('Y-m-d H:i:s')) {
                             AbsenceLog::where('id',  $time_cek->id)
                                 ->update([
-                                    'expired_date' => date('Y-m-d 23:59:59')
+                                    // 'expired_date' => date('Y-m-d 23:59:59')
+                                    'expired_date' => date("Y-m-d 23:59:59", strtotime($time_cek->expired_date)),
+                                    'absence_request_id' => $id
                                 ]);
                         }
                         // dd('cek');
@@ -288,12 +296,14 @@ class ForgetController extends Controller
                     $time_cek  = $get_absence->absence_logs->where('absence_category_id', 2)->where('status', '1')->first();
                     $time  = $get_absence->absence_logs->where('absence_category_id', 1)->where('status', '0')->first();
                     if ($time_cek && $time) {
-                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($shiftGroupTimeSheets->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->workTypeDays->time))));
+                        $penambahan_durasi = date("Y-m-d H:i:s", strtotime('+ ' . ($time->shiftGroupTimeSheets->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $time->shiftGroupTimeSheets->time))));
 
                         if ($penambahan_durasi > date('Y-m-d H:i:s')) {
-                            Absence::where('absences.id',  $cek_absen->id)
+                            AbsenceLog::where('id',  $time_cek->id)
                                 ->update([
-                                    'expired_date' => date('Y-m-d 23:59:59')
+                                    // 'expired_date' => date('Y-m-d 23:59:59') 
+                                    'expired_date' => date("Y-m-d 23:59:59", strtotime($time_cek->expired_date)),
+                                    'absence_request_id' => $id
                                 ]);
                         }
                     } else {

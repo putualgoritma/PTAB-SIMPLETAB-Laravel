@@ -1,8 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts.admin2')
 @section('content')
 @can('absenceOffline_access')
     <div style="margin-bottom: 10px;" class="row">
-        <div class="col-lg-3">
+        {{-- <div class="col-lg-3">
             <div>
             <a class="btn btn-success" href="{{ route('admin.absence.create') }}">
                 {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Reguler)
@@ -56,7 +56,7 @@
                 {{ trans('global.add') }} {{ trans('global.absence.title_singular') }}(Dinas Luar)
             </a>
         </div>
-        </div>
+        </div> --}}
     </div>
     
 @endcan
@@ -134,9 +134,9 @@
             <table class=" table table-bordered table-striped table-hover datatable ajaxTable datatable-absence">
                 <thead>
                     <tr>
-                        <th width="10">
+                        {{-- <th width="10">
 
-                        </th>
+                        </th> --}}
                         <th>
                             No.
                         </th>
@@ -158,6 +158,9 @@
                         </th>
                         <th>
                             {{ trans('global.absence.fields.lng') }}
+                        </th>
+                        <th>
+                            Map
                         </th>
                         <th>
                             {{ trans('global.absence.fields.register') }}
@@ -281,13 +284,14 @@
       dataType: "JSON"
     },
     columns: [
-        { data: 'placeholder', name: 'placeholder' },
+        // { data: 'placeholder', name: 'placeholder' },
         { data: 'DT_RowIndex', name: 'no', searchable : false },
         { data: 'NIK', name: 'NIK', searchable : false  },
         { data: 'day', name: 'days.name' },
         { data: 'staff', name: 'staffs.name' },
         { data: 'lat', name: 'lat' },
         { data: 'lng', name: 'lng' },
+        { data: 'map', name: 'map', searchable : false  },
         { data: 'register', name: 'register' },
         { data: 'absence_category', name: 'absence_category_id' },
         // { data: 'value', name: 'value' },
@@ -301,7 +305,7 @@
                         return "<img src=\"{{ asset('') }}"+ data + "\" width=\"150\"/>";
                     }, searchable : false},
         // { data: 'updated_at', name: 'updated_at' },
-        { data: 'actions', name: '{{ trans('global.actions') }}' }
+        { data: 'actions', name: '{{ trans('global.actions') }}', searchable : false  }
     ],
     pageLength: 100,
   };
