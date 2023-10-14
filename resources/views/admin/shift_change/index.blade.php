@@ -144,7 +144,7 @@
     },
     columns: [
         { data: 'placeholder', name: 'placeholder' },
-        { data: 'DT_RowIndex', name: 'no' },
+        { data: 'DT_RowIndex', name: 'no', searchable : false },
         { data: 'name1', name: 'name1' },
         { data: 'shift1', name: 'shift1' },
         { data: 'name2', name: 'name2' },
