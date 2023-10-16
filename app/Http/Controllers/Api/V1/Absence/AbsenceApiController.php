@@ -2166,119 +2166,119 @@ class AbsenceApiController extends Controller
             ]);
         }
 
-        try {
-            // cek absen sudah ada atau tidak ada
-            // $check = AbsenceLog::where('absence_id', $request->absence_id)
-            //     ->where('absence_request_id', $request->absence_request_id)
-            //     ->where('absence_category_id', $request->absence_category_id_end)->first();
-            $check = AbsenceLog::where('absence_id', $request->absence_id)
-                ->where('absence_request_id', $request->absence_request_id)
-                // ->where('absence_category_id', $request->absence_category_id_end)
+        // try {
+        // cek absen sudah ada atau tidak ada
+        // $check = AbsenceLog::where('absence_id', $request->absence_id)
+        //     ->where('absence_request_id', $request->absence_request_id)
+        //     ->where('absence_category_id', $request->absence_category_id_end)->first();
+        $check = AbsenceLog::where('absence_id', $request->absence_id)
+            ->where('absence_request_id', $request->absence_request_id)
+            // ->where('absence_category_id', $request->absence_category_id_end)
+            ->first();
+        if (!$check) {
+            $upload_image = new AbsenceLog;
+            $upload_image->image = $data_image;
+            // sementara start
+            $upload_image->created_by_staff_id = $request->satff_id;
+            $upload_image->updated_by_staff_id = $request->satff_id;
+            $upload_image->register = date('Y-m-d H:i:s');
+            $upload_image->absence_id = $request->absence_id;
+            $upload_image->absence_request_id = $request->absence_request_id;
+            // $upload_image->late = $late;
+            // $upload_image->early = $early;
+            // $upload_image->duration = $duration;
+            // sementara end
+            $upload_image->register = date('Y-m-d H:i:s');
+            $upload_image->created_at = date('Y-m-d H:i:s');
+            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->absence_category_id = $request->absence_category_id;
+            $upload_image->lat = $request->lat;
+            $upload_image->lng = $request->lng;
+            $upload_image->status =  0;
+            $upload_image->expired_date = $request->expired_date;
+            $upload_image->start_date = date('Y-m-d H:i:10');
+            $upload_image->accuracy = $request->accuracy;
+            $upload_image->distance = $request->distance;
+            // $upload_image->shift_id = $request->shift_id;
+
+            $upload_image->save();
+
+            $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', 'presence')
+                ->orderBy('queue', 'DESC')
                 ->first();
-            if (!$check) {
-                $upload_image = new AbsenceLog;
-                $upload_image->image = $data_image;
-                // sementara start
-                $upload_image->created_by_staff_id = $request->satff_id;
-                $upload_image->updated_by_staff_id = $request->satff_id;
-                $upload_image->register = date('Y-m-d H:i:s');
-                $upload_image->absence_id = $request->absence_id;
-                $upload_image->absence_request_id = $request->absence_request_id;
-                // $upload_image->late = $late;
-                // $upload_image->early = $early;
-                // $upload_image->duration = $duration;
-                // sementara end
-                $upload_image->register = date('Y-m-d H:i:s');
-                $upload_image->created_at = date('Y-m-d H:i:s');
-                $upload_image->updated_at = date('Y-m-d H:i:s');
-                $upload_image->absence_category_id = $request->absence_category_id;
-                $upload_image->lat = $request->lat;
-                $upload_image->lng = $request->lng;
-                $upload_image->status =  0;
-                $upload_image->expired_date = $request->expired_date;
-                $upload_image->start_date = date('Y-m-d H:i:10');
-                $upload_image->accuracy = $request->accuracy;
-                $upload_image->distance = $request->distance;
-                // $upload_image->shift_id = $request->shift_id;
 
-                $upload_image->save();
+            AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration]);
 
-                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'presence')
-                    ->orderBy('queue', 'DESC')
-                    ->first();
+            $breakin = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', 'break')
+                ->where('status', 1)
+                ->where('queue', '1')
+                ->first();
+            if ($breakin) {
+                AbsenceLog::where('id', $breakin->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
+            }
+            $breakout = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+                ->where('absence_id', $request->absence_id)
+                ->where('type', 'break')
+                ->where('status', 1)
+                ->where('queue', '2')
+                ->first();
 
-                AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration]);
-
-                $breakin = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'break')
-                    ->where('status', 1)
-                    ->where('queue', '1')
-                    ->first();
-                if ($breakin) {
-                    AbsenceLog::where('id', $breakin->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-                }
-                $breakout = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'break')
-                    ->where('status', 1)
-                    ->where('queue', '2')
-                    ->first();
-
-                if ($breakout) {
-                    AbsenceLog::where('id', $breakout->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-                }
-                // buat absen endnya
-                $absenceR = AbsenceRequest::where('id', $request->absence_request_id)->first();
+            if ($breakout) {
+                AbsenceLog::where('id', $breakout->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
+            }
+            // buat absen endnya
+            $absenceR = AbsenceRequest::where('id', $request->absence_request_id)->first();
 
 
-                if ($request->absence_category_id == "11" && $absenceR->type == "out") {
-                    AbsenceLog::create([
-                        'absence_id' => $request->absence_id,
-                        'absence_category_id' => $request->absence_category_id_end,
-                        'status' => '0',
-                        'register' => date('Y-m-d H:i:s'),
-                        'absence_request_id' => $request->absence_request_id,
-                        'expired_date' => $request->expired_date,
-                        'start_date' => date('Y-m-d H:i:10'),
+            if ($request->absence_category_id == "11" && $absenceR->type == "out") {
+                AbsenceLog::create([
+                    'absence_id' => $request->absence_id,
+                    'absence_category_id' => $request->absence_category_id_end,
+                    'status' => '0',
+                    'register' => date('Y-m-d H:i:s'),
+                    'absence_request_id' => $request->absence_request_id,
+                    'expired_date' => $request->expired_date,
+                    'start_date' => date('Y-m-d H:i:10'),
 
-                    ]);
-                    AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration, 'status' => '0']);
-                } else {
-                    AbsenceLog::create([
-                        'absence_id' => $request->absence_id,
-                        'absence_category_id' => $request->absence_category_id_end,
-                        'status' => '1',
-                        'absence_request_id' => $request->absence_request_id,
-                        'expired_date' => $request->expired_date,
-                        'start_date' => date('Y-m-d H:i:10'),
-
-                    ]);
-                }
-
-
-                // cek absen sudah ada atau tidak ada
-
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
-                if ($request->absence_category_id == "11" && $absenceR->type == "out") {
-                    AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close']);
-                }
-                return response()->json([
-                    'message' => 'Absen Terkirim',
-                    'data' => $upload_image,
                 ]);
+                AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration, 'status' => '0']);
             } else {
-                return response()->json([
-                    'message' => 'Tadi Sudah Absen',
+                AbsenceLog::create([
+                    'absence_id' => $request->absence_id,
+                    'absence_category_id' => $request->absence_category_id_end,
+                    'status' => '1',
+                    'absence_request_id' => $request->absence_request_id,
+                    'expired_date' => $request->expired_date,
+                    'start_date' => date('Y-m-d H:i:10'),
+
                 ]);
             }
-        } catch (QueryException $ex) {
+
+
+            // cek absen sudah ada atau tidak ada
+
+            AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
+            if ($request->absence_category_id == "11" && $absenceR->type == "out") {
+                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close']);
+            }
             return response()->json([
-                'message' => 'gagal',
+                'message' => 'Absen Terkirim',
+                'data' => $upload_image,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Tadi Sudah Absen',
             ]);
         }
+        // } catch (QueryException $ex) {
+        //     return response()->json([
+        //         'message' => 'gagal',
+        //     ]);
+        // }
     }
 
     // absen lokasi end
@@ -2396,6 +2396,11 @@ class AbsenceApiController extends Controller
             // $upload_image->shift_id = $request->shift_id;
 
             $upload_image->save();
+
+            // untuk menutup absen error akibat double data input start
+            AbsenceLog::where('absence_id', $request->absence_id)->where('absence_request_id', $request->absence_request_id)->update(['status' => 0]);
+            // untuk menutup absen error akibat double data input end
+
 
             if ($request->queue == "1") {
                 $end = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')
