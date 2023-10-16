@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\CtmGambarmetersms;
 use App\CtmGambarmeter;
 use Illuminate\Support\Facades\Storage;
+use DB;
 
 class CtmRequestController extends Controller
 {
@@ -75,6 +76,16 @@ class CtmRequestController extends Controller
         //update status
         $ctmrequest->status = 'approve';
         $ctmrequest->save();
+
+        //get operator 
+        $tblopp = DB::connection('mysql2')->table('tblopp')->where('nomorrekening', '=', $ctmrequest->norek)
+        ->select('operator')
+        ->first();
+        $operator = $ctmrequest->operator;
+        if($tblopp){
+            $operator = $tblopp->operator;
+        }
+
         //get var
         $var['norek'] = $ctmrequest->norek;
         $var['wmmeteran'] = $request->wmmeteran; //$ctmrequest->wmmeteran
@@ -83,7 +94,7 @@ class CtmRequestController extends Controller
         $var['lat'] = $ctmrequest->lat;
         $var['lng'] = $ctmrequest->lng;
         $var['accuracy'] = $ctmrequest->accuracy;
-        $var['operator'] = $ctmrequest->operator;
+        $var['operator'] = $operator;
         $var['nomorpengirim'] = $ctmrequest->nomorpengirim;
         $var['statusonoff'] = $ctmrequest->statusonoff;
         $var['description'] = $ctmrequest->description;
@@ -126,18 +137,18 @@ class CtmRequestController extends Controller
         $basepath = str_replace("laravel-simpletab", "public_html/pdam/", \base_path());
         $path_old = $basepath . $img_path_old . "/" . $year_catat . $month_catat . "/";
         $path = $basepath . $img_path . "/" . $year_catat . $month_catat . "/";
-        // if (!is_dir($path)) {
-        //     mkdir($path, 0777, true);
-        // }
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
         $new_image_name = $var['norek'] . "_" . $var['tahunrekening'] . "_" . $month_catat . ".jpg";
 
-        //move into new server
-        $path_old_new_server = "/pdam-test/gambar-test/" . $year_catat . $month_catat . "/";
-        $path_new_server = "/pdam-test/gambar/" . $year_catat . $month_catat . "/";
-        Storage::disk('sftp')->put($path_new_server . $new_image_name, Storage::disk('sftp')->get($path_old_new_server . $new_image_name));
+        // //move into new server
+        // $path_old_new_server = "/pdam/gambar-test/" . $year_catat . $month_catat . "/";
+        // $path_new_server = "/pdam/gambar/" . $year_catat . $month_catat . "/";
+        // Storage::disk('sftp')->put($path_new_server . $new_image_name, Storage::disk('sftp')->get($path_old_new_server . $new_image_name));
          
         //move into old server
-        //copy($path_old . $new_image_name, $path . $new_image_name);
+        copy($path_old . $new_image_name, $path . $new_image_name);
 
         //get meterawal
         $getCtmMeterPrev = $this->getCtmMeterPrev($var['norek'], $var['bulanrekening'], $var['tahunrekening']);
