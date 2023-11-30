@@ -120,6 +120,7 @@ class AbsenceApiController extends Controller
 
         $lat = $coordinat->lat;
         $lng = $coordinat->lng;
+        $radius = $coordinat->radius;
 
         $Rlocation = AbsenceRequest::join('work_units', 'work_units.id', '=', 'absence_requests.work_unit_id')
             ->where('start', '<=', date('Y-m-d H:i:s'))
@@ -138,6 +139,7 @@ class AbsenceApiController extends Controller
 
             $lat = $Rlocation->lat;
             $lng = $Rlocation->lng;
+            $radius = $Rlocation->radius;
         }
 
 
@@ -335,7 +337,7 @@ class AbsenceApiController extends Controller
                 'selfie' => $camera,
                 'gps' => $gps,
                 'lng' => $lng,
-                'radius' => $coordinat->radius,
+                'radius' => $radius,
             ]);
         }
 
@@ -621,7 +623,7 @@ class AbsenceApiController extends Controller
                 'selfie' => $camera,
                 'gps' => $gps,
                 'lng' => $lng,
-                'radius' => $coordinat->radius,
+                'radius' => $radius,
             ]);
         }
         // cek jadwal kerja
@@ -1043,7 +1045,7 @@ class AbsenceApiController extends Controller
                                 'selfie' => $camera,
                                 'gps' => $gps,
                                 'lng' => $lng,
-                                'radius' => $coordinat->radius,
+                                'radius' => $radius,
                                 'reguler' => $reguler,
                                 'work_type' => $coordinat->work_type_id,
                                 'menu' => [
@@ -1143,7 +1145,7 @@ class AbsenceApiController extends Controller
                                     'gps' => $gps,
                                     'selfie' => $camera,
                                     'lng' => $lng,
-                                    'radius' => $coordinat->radius,
+                                    'radius' => $radius,
                                 ]);
                             } else {
                                 $menuWaiting = "ON";
@@ -1151,7 +1153,7 @@ class AbsenceApiController extends Controller
                                     'message' => 'Absen Terkirim',
                                     'message' => 'sudah pulang',
                                     'data' =>   $c,
-                                    'radius' => $coordinat->radius,
+                                    'radius' => $radius,
                                     'reguler' => $reguler,
                                     'break' => $break,
                                     'menu' => [
@@ -1185,7 +1187,7 @@ class AbsenceApiController extends Controller
                                 'selfie' => $camera,
                                 'gps' => $gps,
                                 'lng' => $lng,
-                                'radius' => $coordinat->radius,
+                                'radius' => $radius,
                                 'reguler' => $reguler,
                                 'break' => $break,
                                 'absenceOut' => $absenceOut,
@@ -1375,7 +1377,7 @@ class AbsenceApiController extends Controller
                                             'selfie' => $camera,
                                             'gps' => $gps,
                                             'lng' => $lng,
-                                            'radius' => $coordinat->radius,
+                                            'radius' => $radius,
                                             'reguler' => $reguler,
                                             'work_type' => $coordinat->work_type_id,
                                             'menu' => [
@@ -1478,7 +1480,7 @@ class AbsenceApiController extends Controller
                                         'selfie' => $camera,
                                         'gps' => $gps,
                                         'lng' => $lng,
-                                        'radius' => $coordinat->radius,
+                                        'radius' => $radius,
                                     ]);
                                 } else {
                                     $menuWaiting = "ON";
@@ -1486,7 +1488,7 @@ class AbsenceApiController extends Controller
                                         'message' => 'Absen Terkirim',
                                         'message' => 'sudah pulang',
                                         'data' =>   $c,
-                                        'radius' => $coordinat->radius,
+                                        'radius' => $radius,
                                         'reguler' => $reguler,
                                         'break' => $break,
                                         'menu' => [
@@ -1519,7 +1521,7 @@ class AbsenceApiController extends Controller
                                     'selfie' => $camera,
                                     'gps' => $gps,
                                     'lng' => $lng,
-                                    'radius' => $coordinat->radius,
+                                    'radius' => $radius,
                                     'reguler' => $reguler,
                                     'break' => $break,
                                     'absenceOut' => $absenceOut,
@@ -1562,7 +1564,7 @@ class AbsenceApiController extends Controller
                 'selfie' => $camera,
                 'gps' => $gps,
                 'lng' => $lng,
-                'radius' => $coordinat->radius,
+                'radius' => $radius,
                 'reguler' => $reguler,
                 'break' => $break,
                 'absenceOut' => $absenceOut,
@@ -2558,34 +2560,70 @@ class AbsenceApiController extends Controller
                     ->whereDate('absences.created_at', $absenceRequest->start)
                     ->first();
                 if (!$check) {
-                    Absence::whereDate('created_at', '>', date('Y-m-d'))->delete();
-                    AbsenceLog::whereDate('register', '>', date('Y-m-d'))->delete();
                     $begin = strtotime($absenceRequest->start);
-                    $end   = strtotime(date('Y-m-d'));
+                    // $end   = strtotime(date('Y-m-d'));
+                    $end   = strtotime($absenceRequest->end);
+
+                    // Absence::join('absence_logs', 'absences.id', '=', 'absence_logs.absence_id')
+                    //     ->where('absences.staff_id', $request->staff_id)
+                    //     ->whereDate('absences.created_at', '>=', $absenceRequest->start)
+                    //     // ->where('absence_logs.absence_request_id', $request->absence_request_id)
+                    //     // ->where('absence_category_id', $absenceRequest->category)
+                    //     ->delete();
+                    // AbsenceLog::join('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                    //     ->where('absences.staff_id', $request->staff_id)
+                    //     ->whereDate('register', '>=', $absenceRequest->start)
+                    //     // ->where('absence_logs.absence_request_id', $request->absence_request_id)
+                    //     ->where('absence_category_id', $absenceRequest->category)
+                    //     ->delete();
+                    $list_abs = Absence::select('absences.*')->join('absence_logs', 'absences.id', '=', 'absence_logs.absence_id')
+                        ->where('absences.staff_id', $request->staff_id)
+                        ->whereDate('absences.created_at', '>=', $absenceRequest->start)
+                        // ->where('absence_logs.absence_request_id', $request->absence_request_id)
+                        // ->where('absence_category_id', $absenceRequest->category == "duty" ? 7 : 8)
+                        ->get();
+                    foreach ($list_abs as $data) {
+
+                        AbsenceLog::where('absence_id', $data->id)->delete();
+                        // dd('error');
+                        $data->delete();
+                        # code...
+                    }
+                    // AbsenceLog::join('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                    //     ->where('absence_logs.id', '94811')->delete('absence_logs');
+
+                    // $q = 'DELETE absence_logs, absences FROM absences LEFT JOIN absence_logs ON `absences`.id = `absence_logs`.absence_id where absence_logs.id = "94811"';
+                    // $status = DB::delete($q);
+
 
                     for ($i = $begin; $i <= $end; $i = $i + 86400) {
-                        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
-                        if (!$holiday) {
-                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
-
-                                Absence::create([
-                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                    'staff_id' => $request->staff_id,
-                                    'created_at' => date('Y-m-d H:i:s', $i),
-                                    'updated_at' => date('Y-m-d H:i:s')
-                                ]);
-                                AbsenceLog::create([
-                                    'absence_category_id' => $absenceRequest->category == "duty" ? 7 : 8,
-                                    'lat' => '',
-                                    'lng' => '',
-                                    'register' => date('Y-m-d', $i),
-                                    'absence_id' => '',
-                                    'duration' => '',
-                                    'status' => ''
-                                ]);
-                            }
+                        // $holiday = Holiday::whereDate('start', '=', date('Y-m-d', $i))->first();
+                        // if (!$holiday) {
+                        if (date("w", strtotime(date('Y-m-d', $i))) != 0) {
+                            $day =  date("w", strtotime(date('Y-m-d', $i)));
+                        } else {
+                            $day = 7;
                         }
+
+                        $ab1 =  Absence::create([
+                            'day_id' => $day,
+                            'staff_id' => $request->staff_id,
+                            'created_at' => date('Y-m-d H:i:s', $i),
+                            'updated_at' => date('Y-m-d H:i:s')
+                        ]);
+                        AbsenceLog::create([
+                            'absence_category_id' => $absenceRequest->category == "duty" ? 7 : 8,
+                            'absence_request_id' => $request->absence_request_id,
+                            'lat' => '',
+                            'lng' => '',
+                            'register' => date('Y-m-d', $i),
+                            'absence_id' => $ab1->id,
+                            'duration' => '',
+                            'status' => ''
+                        ]);
                     }
+                    //     }
+                    // }
                 } else {
                     return response()->json([
                         'message' => 'Tadi Sudah Absen',

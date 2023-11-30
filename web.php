@@ -122,6 +122,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('test-customers', 'TestController');
     Route::get('test-get', 'TestController@getTest');
     Route::get('test-action-staff-store', 'ActionsController@actionStaffStoreTest');
+    Route::get('test-trsf-img', 'TestController@transferImg');
 
     Route::resource('subdapertements', 'SubdapertementsController');
 
@@ -341,10 +342,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
 
+    Route::get('absence/getShiftPlanner', 'AbsenceController@getShiftPlanner')->name('absence.getShiftPlanner');
     Route::get('absence/reportAbsenceExcelView', 'AbsenceController@reportAbsenceExcelView')->name('absence.reportAbsenceExcelView');
     Route::get('absence/reportAbsenceView', 'AbsenceController@reportAbsenceView')->name('absence.reportAbsenceView');
 
+    Route::get('absence/createImport', 'AbsenceController@createImport')->name('absence.createImport');
+    Route::post('absence/storeImport', 'AbsenceController@storeImport')->name('absence.storeImport');
 
+    Route::get('absence/createExtra', 'AbsenceController@createExtra')->name('absence.createExtra');
+    Route::post('absence/storeExtra', 'AbsenceController@storeExtra')->name('absence.storeExtra');
+    Route::get('absence/createDuty', 'AbsenceController@createDuty')->name('absence.createDuty');
+    Route::post('absence/storeDuty', 'AbsenceController@storeDuty')->name('absence.storeDuty');
+    Route::get('absence/createLeave', 'AbsenceController@createLeave')->name('absence.createLeave');
+    Route::post('absence/storeLeave', 'AbsenceController@storeLeave')->name('absence.storeLeave');
+    Route::get('absence/createPermit', 'AbsenceController@createPermit')->name('absence.createPermit');
+    Route::post('absence/storePermit', 'AbsenceController@storePermit')->name('absence.storePermit');
+    Route::get('absence/createShift', 'AbsenceController@createShift')->name('absence.createShift');
+    Route::post('absence/storeShift', 'AbsenceController@storeShift')->name('absence.storeShift');
+    Route::get('absence/createImportShift', 'AbsenceController@createImportShift')->name('absence.createImportShift');
+    Route::post('absence/storeImportShift', 'AbsenceController@storeImportShift')->name('absence.storeImportShift');
 
     Route::get('absence/absenceMenu', 'AbsenceController@absenceMenu')->name('absence.absenceMenu');
     Route::resource('absence', 'AbsenceController');
@@ -445,10 +461,33 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('geolocation_off', 'GeolocationOffController');
 
 
-    Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
+    Route::post('forget/{id}/approve', 'ForgetController@approve')->name('forget.approve');
+    Route::post('forget/{id}/reject', 'ForgetController@reject')->name('forget.reject');
+    Route::resource('forget', 'ForgetController');
+
+    Route::post('additionalTime/{id}/approve', 'AdditionalTimeController@approve')->name('additionalTime.approve');
+    Route::post('additionalTime/{id}/reject', 'AdditionalTimeController@reject')->name('additionalTime.reject');
+    Route::resource('additionalTime', 'AdditionalTimeController');
+
+
+
+
+    Route::post('location/{id}/approve', 'LocationController@approve')->name('location.approve');
+    Route::post('location/{id}/reject', 'LocationController@reject')->name('location.reject');
+    Route::resource('location', 'LocationController');
+
+    // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
+    // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
+    Route::resource('absencegroup', 'AbsenceGroupController');
 
     Route::get('cronjob', 'CronJobController@index');
     Route::get('cronjob/problem', 'CronJobController@problemRemainer');
+    Route::post('gawatdarurat/import', 'GawatDaruratController@import')->name('gawatdarurat.import');
+    Route::get('gawatdarurat', 'GawatDaruratController@index');
+
+    //virmach
+    Route::get('virmach-image', 'VirmachController@index')->name('virmach.index');
+    Route::post('virmach-image-store', 'VirmachController@store')->name('virmach.store');
 });
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin'], function () {

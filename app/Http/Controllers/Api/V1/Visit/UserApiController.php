@@ -36,22 +36,22 @@ class UserApiController extends Controller
                 $token = Auth::user()->createToken('authToken')->accessToken;
 
                 if (!empty($request->_id_onesignal)) {
-                    if ($admin->staffs->pbk != null && $admin->staffs->pbk != "") {
-                        $admin->update(['_id_onesignal' => $request->_id_onesignal]);
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'success login',
-                            'token' => $token,
-                            'data' => $admin,
-                            'password' => $request->password,
-                            'permission' => $permission,
-                        ]);
-                    } else {
-                        return response()->json([
-                            'success' => false,
-                            'message' => $admin->id,
-                        ]);
-                    }
+                    // if ($admin->staffs->pbk != null && $admin->staffs->pbk != "") {
+                    $admin->update(['_id_onesignal' => $request->_id_onesignal]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'success login',
+                        'token' => $token,
+                        'data' => $admin,
+                        'password' => $request->password,
+                        'permission' => $permission,
+                    ]);
+                    // } else {
+                    //     return response()->json([
+                    //         'success' => false,
+                    //         'message' => $admin->id,
+                    //     ]);
+                    // }
                 } else {
                     return response()->json([
                         'success' => false,

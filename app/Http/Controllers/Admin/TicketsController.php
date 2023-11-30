@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use App\Subdapertement;
+use Image;
 
 class TicketsController extends Controller
 {
@@ -312,7 +313,8 @@ class TicketsController extends Controller
 
             $video_path = "/videos/complaint";
 
-            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            // $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            $basepath = base_path();
 
             // upload image
 
@@ -320,17 +322,22 @@ class TicketsController extends Controller
 
                 foreach ($request->file('image') as $key => $image) {
 
-                    $resourceImage = $image;
-
                     $nameImage = strtolower($request->code);
-
                     $file_extImage = $image->extension();
-
                     $nameImage = str_replace(" ", "-", $nameImage);
-
                     $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . $key . "." . $file_extImage;
+                    $image = $image;
 
-                    $resourceImage->move($basepath . $img_path, $img_name);
+                    $imgFile = Image::make($image->getRealPath());
+
+                    // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                    $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
+                        // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                        $font->size(14);
+                        $font->color('#000000');
+                        $font->valign('top');
+                    })->save($basepath . '/' . $img_name);
 
                     $dataImageName[] = $img_name;
                 }

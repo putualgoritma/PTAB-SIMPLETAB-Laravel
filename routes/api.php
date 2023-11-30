@@ -61,7 +61,7 @@ Route::group(['prefix' => 'open/customer', 'namespace' => 'Api\V1\Customer'], fu
     //test
     Route::get('virmach-transfer', 'VirmachApiController@transferImg')->name('virmach.transfer');
     Route::post('virmach-image-store', 'VirmachApiController@storeImg')->name('virmach.store');
-    
+
     // Route::get('test', 'CustomersApiController@test');
     Route::get('test', 'TicketsApiController@test');
 });
@@ -349,6 +349,7 @@ Route::group(['prefix' => 'close/cronjob', 'namespace' => 'Api\V1\CronJob'], fun
 
 // sementara
 Route::group(['prefix' => 'close/visit', 'namespace' => 'Api\V1\Visit'], function () {
+    Route::post('login', 'UserApiController@login');
     Route::get('visit', 'VisitApiController@index');
     Route::get('show/{id}', 'VisitApiController@show');
     Route::post('store', 'VisitApiController@store');

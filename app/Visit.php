@@ -40,14 +40,33 @@ class Visit extends Model
         }
         return $query;
     }
+    public function scopeFilterType($query, $type)
+    {
+        if ($type != '') {
+            $query->where('status_wm', '!=', null);
+        } else {
+            return $query;
+        }
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'nomorrekening');
     }
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class, 'staff_id', 'id');
+    }
     public function scopeFilterCustomer($query, $nomorrekening)
     {
         if ($nomorrekening != '') {
-            $query->where('created_at', $nomorrekening);
+            $query->where('nomorrekening', $nomorrekening);
+        }
+        return $query;
+    }
+    public function scopeFilterArea($query, $area)
+    {
+        if ($area != '') {
+            $query->where('idareal', $area);
         }
         return $query;
     }

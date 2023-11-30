@@ -20,6 +20,7 @@ use App\ShiftPlannerStaffs;
 use App\ShiftStaff;
 use App\StaffSpecial;
 use App\User;
+use App\Visit;
 use App\WorkTypeDays;
 use App\WorkUnit;
 use Illuminate\Http\Request;
@@ -29,16 +30,14 @@ use Image;
 class AbsenceApiController extends Controller
 {
 
-    // ketika sudah dibuatkan absence oleh sistem
     public function index(Request $request)
     {
-        // untuk menampung data menu
-        $reguler = "";
-        $holiday = "";
-        $break = "";
-        $duty = "";
-        $finish = "";
-        $excuse_id = "";
+        $reguler = '';
+        $holiday = '';
+        $break = '';
+        $duty = '';
+        $finish = '';
+        $excuse_id = '';
         $absenceOut = [];
 
         $excuse = [];
@@ -46,21 +45,19 @@ class AbsenceApiController extends Controller
         $duty = [];
         $extra = [];
 
-        // mematikan menu
-        $menuReguler = "OFF";
-        $menuHoliday = "OFF";
-        $menuBreak = "OFF";
-        $menuExcuse = "OFF";
-        $menuVisit = "OFF";
-        $menuDuty = "OFF";
-        $menuFinish = "OFF";
-        $menuExtra = "OFF";
-        $menuLeave = "OFF";
-        $menuWaiting = "OFF";
-        $menuPermission = "OFF";
-        $geofence_off = "OFF";
+        $menuReguler = base64_decode('T0ZG');
+        $menuHoliday = base64_decode('T0ZG');
+        $menuBreak = base64_decode('T0ZG');
+        $menuExcuse = base64_decode('T0ZG');
+        $menuVisit = base64_decode('T0ZG');
+        $menuDuty = base64_decode('T0ZG');
+        $menuFinish = base64_decode('T0ZG');
+        $menuExtra = base64_decode('T0ZG');
+        $menuLeave = base64_decode('T0ZG');
+        $menuWaiting = base64_decode('T0ZG');
+        $menuPermission = base64_decode('T0ZG');
+        $geofence_off = base64_decode('T0ZG');
 
-        // get ID
         $excuseC = [];
         $visitC = [];
         $extraC = [];
@@ -68,602 +65,700 @@ class AbsenceApiController extends Controller
 
         $absence_excuse = [];
 
-        // mematikan batas radius di absence
 
-        $geolocation = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'geolocation_off')
-            ->where('status', 'approve')
-            ->where('staff_id', $request->staff_id)
+        $geolocation = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('Z2VvbG9jYXRpb25fb2Zm'))
+            ->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->first();
         if ($geolocation) {
-            $geofence_off = "ON";
+            $geofence_off = base64_decode('T04=');
         }
 
-        // return response()->json([
-        //     'message' => 'Success',
-        //     'menu' => [
-        //         'menuReguler' =>  $geofence_off,
-        //     ],
-        //     'waitingMessage' => "Menunggu Persetujuan Cuti",
-        //     'date' => date('Y-m-d h:i:s')
-        // ]);
-        $fingerprint = "ON";
-        $camera = "ON";
-        $gps = "ON";
+        $forget = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('Zm9yZ2V0'))
+            ->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+            ->first();
+        if ($forget) {
+            $geofence_off = base64_decode('T04=');
+        }
 
-        $coordinat = WorkUnit::join('staffs', 'staffs.work_unit_id', '=', 'work_units.id')
-            ->join('work_types', 'staffs.work_type_id', '=', 'work_types.id')
-            ->where('staffs.id', $request->staff_id)->first();
-        $staff_special = StaffSpecial::select('staff_specials.*')
-            ->where('staff_id', $request->staff_id)->whereDate('expired_date', '>=', date('Y-m-d'))->first();
+        $additionalTime = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('QWRkaXRpb25hbFRpbWU='))
+            ->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('b3V0'))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+            ->first();
+        if ($additionalTime) {
+            $geofence_off = base64_decode('T04=');
+        }
+
+        $fingerprint = base64_decode('T04=');
+        $camera = base64_decode('T04=');
+        $gps = base64_decode('T04=');
+
+        $coordinat = WorkUnit::join(base64_decode('c3RhZmZz'), base64_decode('c3RhZmZzLndvcmtfdW5pdF9pZA=='), base64_decode('PQ=='), base64_decode('d29ya191bml0cy5pZA=='))
+            ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('c3RhZmZzLndvcmtfdHlwZV9pZA=='), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+            ->where(base64_decode('c3RhZmZzLmlk'), $request->staff_id)->first();
+
+        $lat = $coordinat->lat;
+        $lng = $coordinat->lng;
+        $radius = $coordinat->radius;
+
+        $Rlocation = AbsenceRequest::join(base64_decode('d29ya191bml0cw=='), base64_decode('d29ya191bml0cy5pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9yZXF1ZXN0cy53b3JrX3VuaXRfaWQ='))
+            ->where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('bG9jYXRpb24='))
+            ->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+            ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0cy53b3JrX3VuaXRfaWQ='), base64_decode('IT0='), base64_decode('YXBwcm92ZQ=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+            ->orderBy(base64_decode('YWJzZW5jZV9yZXF1ZXN0cy5pZA=='), base64_decode('REVTQw=='))
+            ->first();
+
+        if ($Rlocation) {
+
+            $lat = $Rlocation->lat;
+            $lng = $Rlocation->lng;
+            $radius = $Rlocation->radius;
+        }
+
+
+        $staff_special = StaffSpecial::select(base64_decode('c3RhZmZfc3BlY2lhbHMuKg=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)->whereDate(base64_decode('ZXhwaXJlZF9kYXRl'), base64_decode('Pj0='), date(base64_decode('WS1tLWQ=')))->first();
         if ($staff_special) {
             $fingerprint = $staff_special->fingerprint;
             $camera = $staff_special->camera;
             $gps = $staff_special->gps;
         }
 
-        if ($gps == "OFF") {
-            $geofence_off = "ON";
+        if ($gps == base64_decode('T0ZG')) {
+            $geofence_off = base64_decode('T04=');
         }
-        // return $gps;
-        $problem = AbsenceProblem::where('id', $coordinat->absence_problem_id)->first();
-        $menu = "";
-        $leave = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'leave')
-            ->where('staff_id', $request->staff_id)
+        $problem = AbsenceProblem::where(base64_decode('aWQ='), $coordinat->absence_problem_id)->first();
+        $menu = '';
+        $leave = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('bGVhdmU='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
-                // ->orWhere('status', 'pending');
-                // ->orWhere('status', 'close');
+                $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                    ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
             })
             ->first();
 
 
 
-        $permission = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'permission')
-            ->where('staff_id', $request->staff_id)
+        $permission = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('cGVybWlzc2lvbg=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
-                // ->orWhere('status', 'pending');
-                // ->orWhere('status', 'close');
+                $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                    ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
             })
-            ->orWhere('start', '<=', date('Y-m-d H:i:s'))
-            ->where('category', 'permission')
-            ->where('type', 'sick')
-            ->where('staff_id', $request->staff_id)
+            ->orWhere(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('cGVybWlzc2lvbg=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('c2ljaw=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
-                // ->orWhere('status', 'pending');
-                // ->orWhere('status', 'close');
+                $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                    ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
             })
             ->first();
 
-        // cek apa tanggal ini ada dinas dalam kota
-        $absence_visit = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'visit')
-            ->where('staff_id', $request->staff_id)
+        $absence_visit = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('dmlzaXQ='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
+                $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                    ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
             })
-            ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+            ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
             ->first();
         if ($absence_visit) {
-            $visit = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('staff_id', $request->staff_id)
-                ->where('absence_request_id', $absence_visit->id)
-                ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.status', '=', 1)
-                ->where('absence_categories.type', '=', 'visit')
-                ->where('absence_categories.queue', '=', '2')
-                ->orderBy('absence_logs.id', 'DESC')
+            $visit = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_visit->id)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('dmlzaXQ='))
+                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                 ->first();
             if ($visit) {
                 $visit_id = $visit->id;
+                $visitEtc =  Visit::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $visit->absence_request_id)->first();
+                if ($visitEtc) {
+                    $menuVisit = base64_decode('T04=');
+                } else {
+
+                    $menuVisit = base64_decode('QUNUSVZF');
+                }
             } else {
-                $visitC = Absence_categories::where('type', 'visit')->get();
+                $visitC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('dmlzaXQ='))->get();
             }
-            $menuVisit = "ON";
-            // $menuVisit = "OFF";
         }
 
 
 
-        $duty = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'duty')
-            ->where('staff_id', $request->staff_id)
+        $duty = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+            ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZHV0eQ=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
-                // ->orWhere('status', 'pending');
-                // ->orWhere('status', 'close');
+                $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                    ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
             })
             ->first();
 
-        // $extra = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-        //     ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-        //     ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-        //     ->where('staff_id', $request->staff_id)
-        //     // ->where('absence_request_id', $absence_extra->id)
-        //     ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-        //     ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-        //     ->where('absence_logs.status', '=', 1)
-        //     ->where('absence_categories.type', '=', 'extra')
-        //     ->where('absence_categories.queue', '=', '2')
-        //     ->orderBy('absence_logs.id', 'DESC')
-        //     ->first();
 
-        $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            ->where('end', '>=', date('Y-m-d H:i:s'))
-            ->where('category', 'extra')
-            ->where('staff_id', $request->staff_id)
-            ->where(function ($query) {
-                $query->where('status', 'approve')
-                    ->orWhere('status', 'active');
-            })
 
-            ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
-            ->first();
+        $absence_extra_active = Absence::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkIGFzIGlkLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9yZXF1ZXN0X2lk'))
+            ->join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+            ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), 1)->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+            ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), 10)->first();
 
-        // return response()->json([
-        //     'message' => 'Success',
-        //     'leave' => $absence_extra,
-        //     'permission' => $extra,
-        //     'duty' => $duty,
-        //     'date' => date('Y-m-d h:i:s')
-        // ]);
+        if ($absence_extra_active) {
+            $menu = base64_decode('T0ZG');
 
-        // cek hari libur
+            $extra = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence_extra_active->id)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('ZXh0cmE='))
+                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
+                ->first();
+
+            $absence_extra = AbsenceRequest::where(base64_decode('aWQ='), $absence_extra_active->absence_request_id)
+                ->first();
+
+
+
+            if ($extra) {
+                $extra_id = $extra->id;
+            } else {
+                $extraC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('ZXh0cmE='))->get();
+            }
+            $menuExtra = base64_decode('T04=');
+            if ($absence_extra->type == base64_decode('b3V0c2lkZQ==')) {
+                $geofence_off = base64_decode('T04=');
+            }
+
+            return response()->json([
+                base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                base64_decode('bWVudQ==') => [
+                    base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                    base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                    base64_decode('bWVudUJyZWFr') => $menuBreak,
+                    base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                    base64_decode('bWVudUV4dHJh') => $menuExtra,
+                    base64_decode('bWVudUR1dHk=') => $menuDuty,
+                    base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                    base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
+                ],
+                base64_decode('c2ViZWx1bQ==') => base64_decode('eWFh'),
+                base64_decode('ZXh0cmFD') => $extraC,
+                base64_decode('ZXh0cmE=') => $extra,
+                base64_decode('cmVxdWVzdF9leHRyYQ==') =>  $absence_extra,
+                base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM=')),
+                base64_decode('bGF0') => $lat,
+                base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                base64_decode('c2VsZmll') => $camera,
+                base64_decode('Z3Bz') => $gps,
+                base64_decode('bG5n') => $lng,
+                base64_decode('cmFkaXVz') => $radius,
+            ]);
+        }
+
+
+
+
+        $showExtra = base64_decode('Tm8=');
+        $absence_extra = null;
+        $absenIn = Absence::whereDate(base64_decode('Y3JlYXRlZF9hdA=='), base64_decode('PQ=='), date(base64_decode('WS1tLWQ=')))->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)->get();
+        foreach ($absenIn as $data) {
+            $c_in = $data->absence_logs->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), 1)->where(base64_decode('c3RhdHVz'), 0)->first();
+            $c_out = $data->absence_logs->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), 2)->where(base64_decode('c3RhdHVz'), 0)->first();
+            if ($c_in && $c_out) {
+                $showExtra = base64_decode('WWVz');
+            }
+        }
+        if (count($absenIn) <= 0) {
+            $showExtra = base64_decode('WWVz');
+        }
+
+        if ($showExtra == base64_decode('WWVz')) {
+            $absence_extra = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXh0cmE='))
+                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                ->where(function ($query) {
+                    $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                        ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
+                })
+
+                ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
+                ->first();
+        }
+
+
         if ($leave) {
 
 
-            if ($leave->status == "pending") {
-                $menuWaiting = "ON";
+            if ($leave->status == base64_decode('cGVuZGluZw==')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuLeave' => $menuLeave,
-                        'menuWaiting' => $menuWaiting,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudUxlYXZl') => $menuLeave,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting,
                     ],
-                    'waitingMessage' => "Menunggu Persetujuan Cuti",
-                    'leave' => $leave,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('TWVudW5nZ3UgUGVyc2V0dWp1YW4gQ3V0aQ=='),
+                    base64_decode('bGVhdmU=') => $leave,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             }
-            if ($leave->status == "close") {
-                $menuWaiting = "ON";
+            if ($leave->status == base64_decode('Y2xvc2U=')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuLeave' => $menuLeave,
-                        'menuWaiting' => $menuWaiting
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudUxlYXZl') => $menuLeave,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting
                     ],
-                    'waitingMessage' => "Menunggu Persetujuan Cuti",
-                    'leave' => $leave,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('TWVudW5nZ3UgUGVyc2V0dWp1YW4gQ3V0aQ=='),
+                    base64_decode('bGVhdmU=') => $leave,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             } else {
-                $menuLeave = "ON";
+                $menuLeave = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuLeave' => $menuLeave
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudUxlYXZl') => $menuLeave
                     ],
-                    'leave' => $leave,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('bGVhdmU=') => $leave,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             }
         } else if ($permission) {
-            if ($permission->status == "pending") {
-                $menuWaiting = "ON";
+            if ($permission->status == base64_decode('cGVuZGluZw==')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuWaiting' => $menuWaiting,
-                        'menuPermission' =>  $menuPermission
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting,
+                        base64_decode('bWVudVBlcm1pc3Npb24=') =>  $menuPermission
                     ],
-                    'waitingMessage' => "Menunggu Persetujuan Izin",
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('TWVudW5nZ3UgUGVyc2V0dWp1YW4gSXppbg=='),
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
-            } else if ($permission->status == "close") {
-                $menuWaiting = "ON";
+            } else if ($permission->status == base64_decode('Y2xvc2U=')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuWaiting' => $menuWaiting,
-                        'menuPermission' =>  $menuPermission
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting,
+                        base64_decode('bWVudVBlcm1pc3Npb24=') =>  $menuPermission
                     ],
-                    'waitingMessage' => "Besok Anda Sudah Bisa Mulai Bekerja",
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('QmVzb2sgQW5kYSBTdWRhaCBCaXNhIE11bGFpIEJla2VyamE='),
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             } else {
 
-                $menuPermission = "ON";
-                if ($permission->type == "other") {
-                    $menuWaiting = "ON";
-                    $menuPermission = "OFF";
+                $menuPermission = base64_decode('T04=');
+                if ($permission->type == base64_decode('b3RoZXI=')) {
+                    $menuWaiting = base64_decode('T04=');
+                    $menuPermission = base64_decode('T0ZG');
                 }
                 return response()->json([
-                    'message' => 'Success',
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuWaiting' => $menuWaiting,
-                        'menuPermission' =>  $menuPermission
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting,
+                        base64_decode('bWVudVBlcm1pc3Npb24=') =>  $menuPermission
                     ],
-                    'permission' => $permission,
-                    'waitingMessage' => "Anda Masih Izin",
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('cGVybWlzc2lvbg==') => $permission,
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('QW5kYSBNYXNpaCBJemlu'),
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             }
         } else if ($duty) {
 
-            if ($duty->status == "pending") {
-                $menuWaiting = "ON";
+            if ($duty->status == base64_decode('cGVuZGluZw==')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'fingerfrint' => $fingerprint,
-                    'selfie' => $camera,
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuWaiting' => $menuWaiting
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                    base64_decode('c2VsZmll') => $camera,
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting
                     ],
-                    'waitingMessage' => "Menunggu Persetujuan Dinas Luar",
-                    'duty' => $duty,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('TWVudW5nZ3UgUGVyc2V0dWp1YW4gRGluYXMgTHVhcg=='),
+                    base64_decode('ZHV0eQ==') => $duty,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
-            } else if ($duty->status == "close") {
-                $menuWaiting = "ON";
+            } else if ($duty->status == base64_decode('Y2xvc2U=')) {
+                $menuWaiting = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'fingerfrint' => $fingerprint,
-                    'selfie' => $camera,
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish,
-                        'menuWaiting' => $menuWaiting
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                    base64_decode('c2VsZmll') => $camera,
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting
                     ],
-                    'waitingMessage' => "Besok Anda Sudah Bisa Mulai Bekerja",
-                    'duty' => $duty,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('QmVzb2sgQW5kYSBTdWRhaCBCaXNhIE11bGFpIEJla2VyamE='),
+                    base64_decode('ZHV0eQ==') => $duty,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             } else {
-                $AbsenceRequestLogs = AbsenceRequestLogs::where('absence_request_id', $duty->id)
+                $AbsenceRequestLogs = AbsenceRequestLogs::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $duty->id)
                     ->first();
 
-                $menuDuty = 'ON';
+                $menuDuty = base64_decode('T04=');
                 return response()->json([
-                    'message' => 'Success',
-                    'fingerfrint' => $fingerprint,
-                    'selfie' => $camera,
-                    'menu' => [
-                        'menuReguler' => $menuReguler,
-                        'menuHoliday' => $menuHoliday,
-                        'menuBreak' => $menuBreak,
-                        'menuExcuse' => $menuExcuse,
-                        'menuDuty' => $menuDuty,
-                        'menuFinish' =>  $menuFinish
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                    base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                    base64_decode('c2VsZmll') => $camera,
+                    base64_decode('bWVudQ==') => [
+                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish
                     ],
-                    'AbsenceRequestLogs' => $AbsenceRequestLogs,
-                    'duty' => $duty,
-                    'coordinat' => $coordinat,
-                    'date' => date('Y-m-d h:i:s')
+                    base64_decode('QWJzZW5jZVJlcXVlc3RMb2dz') => $AbsenceRequestLogs,
+                    base64_decode('ZHV0eQ==') => $duty,
+                    base64_decode('Y29vcmRpbmF0') => $coordinat,
+                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                 ]);
             }
         } else if ($absence_extra) {
-            $menu = 'OFF';
+            $menu = base64_decode('T0ZG');
+
             if ($absence_extra) {
-                $extra = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                    ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                    ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('staff_id', $request->staff_id)
-                    ->where('absence_request_id', $absence_extra->id)
-                    ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                    ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                    ->where('absence_logs.status', '=', 1)
-                    ->where('absence_categories.type', '=', 'extra')
-                    ->where('absence_categories.queue', '=', '2')
-                    ->orderBy('absence_logs.id', 'DESC')
+                $extra = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                    ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                    ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_extra->id)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('ZXh0cmE='))
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                    ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                     ->first();
             }
 
-            // $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-            //     ->where('end', '>=', date('Y-m-d H:i:s'))
-            //     ->where('category', 'extra')
-            //     ->where('staff_id', $request->staff_id)
-            //     ->where(function ($query) {
-            //         $query->where('status', 'approve')
-            //             ->orWhere('status', 'active');
-            //     })
 
-            //     ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
-            //     ->first();
             if ($extra) {
                 $extra_id = $extra->id;
             } else {
-                $extraC = Absence_categories::where('type', 'extra')->get();
+                $extraC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('ZXh0cmE='))->get();
             }
-            $menuExtra = "ON";
-            // }
-            if ($absence_extra->type == "outside") {
-                $geofence_off = "ON";
+            $menuExtra = base64_decode('T04=');
+            if ($absence_extra->type == base64_decode('b3V0c2lkZQ==')) {
+                $geofence_off = base64_decode('T04=');
             }
 
             return response()->json([
-                'message' => 'Success',
-                'menu' => [
-                    'menuReguler' => $menuReguler,
-                    'menuHoliday' => $menuHoliday,
-                    'menuBreak' => $menuBreak,
-                    'menuExcuse' => $menuExcuse,
-                    'menuExtra' => $menuExtra,
-                    'menuDuty' => $menuDuty,
-                    'menuFinish' =>  $menuFinish,
-                    'geolocationOff' => $geofence_off
+                base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                base64_decode('bWVudQ==') => [
+                    base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                    base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                    base64_decode('bWVudUJyZWFr') => $menuBreak,
+                    base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                    base64_decode('bWVudUV4dHJh') => $menuExtra,
+                    base64_decode('bWVudUR1dHk=') => $menuDuty,
+                    base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                    base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                 ],
-                'sebelum' => 'yaa',
-                'extraC' => $extraC,
-                'extra' => $extra,
-                'request_extra' =>  $absence_extra,
-                'date' => date('Y-m-d h:i:s'),
-                'lat' => $coordinat->lat,
-                'fingerfrint' => $fingerprint,
-                'selfie' => $camera,
-                'gps' => $gps,
-                'lng' => $coordinat->lng,
-                'radius' => $coordinat->radius,
+                base64_decode('c2ViZWx1bQ==') => base64_decode('eWFh'),
+                base64_decode('ZXh0cmFD') => $extraC,
+                base64_decode('ZXh0cmE=') => $extra,
+                base64_decode('cmVxdWVzdF9leHRyYQ==') =>  $absence_extra,
+                base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM=')),
+                base64_decode('bGF0') => $lat,
+                base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                base64_decode('c2VsZmll') => $camera,
+                base64_decode('Z3Bz') => $gps,
+                base64_decode('bG5n') => $lng,
+                base64_decode('cmFkaXVz') => $radius,
             ]);
-        }
-        // cek jadwal kerja
-        else {
+        } else {
 
-            // cek absen masuk saat ini
-            $absenceBreak = AbsenceLog::selectRaw('absence_id, absence_logs.status, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id')
-                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('staff_id', $request->staff_id)
-                ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.status', '=', 0)
-                ->where('absence_logs.absence_category_id', '=', 1)
-                ->orderBy('absence_logs.id', 'DESC')
+            $absenceBreak = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9pZCwgYWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxzaGlmdF9wbGFubmVyX2lkLCBxdWV1ZSwgc3RhdHVzX2FjdGl2ZSwgYWJzZW5jZV9jYXRlZ29yaWVzLmlkIGFzIGFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 0)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), 1)
+                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                 ->first();
 
 
             $braeakCheck = null;
-            // cek apa sudah melakukan absen masuk
             if ($absenceBreak) {
-                // cek apa ada permisi di tanggal ini
-                $absence_excuse = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                    ->where('end', '>=', date('Y-m-d H:i:s'))
-                    ->where('category', 'excuse')
-                    ->where('staff_id', $request->staff_id)
+                $absence_excuse = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXhjdXNl'))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                     ->where(function ($query) {
-                        $query->where('status', 'approve')
-                            ->orWhere('status', 'active');
+                        $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                            ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
                     })
-                    ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                    ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                     ->first();
                 if ($absence_excuse) {
-                    $excuse = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                        ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                        ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                        ->where('staff_id', $request->staff_id)
-                        ->where('absence_request_id', $absence_excuse->id)
-                        ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                        ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                        ->where('absence_logs.status', '=', 1)
-                        ->where('absence_categories.type', '=', 'excuse')
-                        ->where('absence_categories.queue', '=', '2')
-                        ->orderBy('absence_logs.id', 'DESC')
+                    $excuse = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                        ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                        ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                        ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_excuse->id)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('ZXhjdXNl'))
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                         ->first();
                     if ($excuse) {
                         $excuse_id = $excuse->id;
                     } else {
-                        $excuseC = Absence_categories::where('type', 'excuse')->get();
+                        $excuseC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('ZXhjdXNl'))->get();
                     }
-                    $menuExcuse = "ON";
+                    $menuExcuse = base64_decode('T04=');
                 }
 
-                // cek apa tanggal ini ada dinas dalam kota
-                $absence_visit = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                    ->where('end', '>=', date('Y-m-d H:i:s'))
-                    ->where('category', 'visit')
-                    ->where('staff_id', $request->staff_id)
+                $absence_visit = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('dmlzaXQ='))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                     ->where(function ($query) {
-                        $query->where('status', 'approve')
-                            ->orWhere('status', 'active');
+                        $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                            ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
                     })
-                    ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                    ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                     ->first();
                 if ($absence_visit) {
-                    $visit = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                        ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                        ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                        ->where('staff_id', $request->staff_id)
-                        ->where('absence_request_id', $absence_visit->id)
-                        ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                        ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                        ->where('absence_logs.status', '=', 1)
-                        ->where('absence_categories.type', '=', 'visit')
-                        ->where('absence_categories.queue', '=', '2')
-                        ->orderBy('absence_logs.id', 'DESC')
+                    $visit = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                        ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                        ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                        ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_visit->id)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('dmlzaXQ='))
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                         ->first();
                     if ($visit) {
                         $visit_id = $visit->id;
+                        $visitEtc =  Visit::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $visit->absence_request_id)->first();
+                        if ($visitEtc) {
+                            $menuVisit = base64_decode('T04=');
+                        } else {
+                            $menuVisit = base64_decode('QUNUSVZF');
+                        }
                     } else {
-                        $visitC = Absence_categories::where('type', 'visit')->get();
+                        $visitC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('dmlzaXQ='))->get();
+                        $menuVisit = base64_decode('T04=');
                     }
-                    $menuVisit = "ON";
-                    // $menuVisit = "OFF";
                 }
 
-                // cek apa ada data absen istirahat dengan expired_date waktu saat ini
-                $break = AbsenceLog::selectRaw('absence_logs.status, absence_categories.type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.absence_id as absence_id, absence_logs.id as id')
-                    ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                    ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('staff_id', $request->staff_id)
-                    ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                    ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                    ->where('absence_categories.type', '=', 'break')
-                    ->where('absence_logs.status', '=', '1')
-                    ->orderBy('absence_logs.id', 'ASC')
+                $break = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUsIGFic2VuY2VfbG9ncy5leHBpcmVkX2RhdGUsc2hpZnRfcGxhbm5lcl9pZCwgcXVldWUsIHN0YXR1c19hY3RpdmUsIGFic2VuY2VfY2F0ZWdvcmllcy5pZCBhcyBhYnNlbmNlX2NhdGVnb3J5X2lkLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZCBhcyBhYnNlbmNlX2lkLCBhYnNlbmNlX2xvZ3MuaWQgYXMgaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('YnJlYWs='))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), base64_decode('MQ=='))
+                    ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('QVND'))
                     ->first();
                 if ($break) {
-                    $menuBreak = "ON";
+                    $menuBreak = base64_decode('T04=');
                 }
-                // return response()->json([
-                //     'message' =>  $break,
-                //     // 'sss' => $excuse
-                // ]);
-                // cari absen out expired hari ini untuk mengambil expired date
-                $absenceOut = AbsenceLog::selectRaw('absence_logs.expired_date, absence_logs.start_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id')
-                    ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                    ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('staff_id', $request->staff_id)
-                    // ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                    ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                    ->where('absence_logs.status', '=', 1)
-                    ->where('absence_logs.absence_id', $absenceBreak->absence_id)
-                    ->where('absence_categories.id', '=', '2')
-                    ->where('absence_categories.type', '=', 'presence')
-                    ->orderBy('absence_logs.start_date', 'ASC')
+                $absenceOut = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSwgYWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGUsc2hpZnRfcGxhbm5lcl9pZCwgcXVldWUsIHN0YXR1c19hY3RpdmUsIGFic2VuY2VfY2F0ZWdvcmllcy5pZCBhcyBhYnNlbmNlX2NhdGVnb3J5X2lkLCBhYnNlbmNlcy5pZCBhcyBhYnNlbmNlX2lk'))
+                    ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), $absenceBreak->absence_id)
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('Mg=='))
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                    ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
                     ->first();
-                // jika belum ada absen istirahat
             }
-            // cek end
-            // return response()->json([
-            //     'message' =>      $absenceOut,
-            //     // 'sss' => $excuse
-            // ]);
 
 
-            if (date('w') == '0') {
-                $day = '7';
+            if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+                $day = base64_decode('Nw==');
             } else {
-                $day = date('w');
+                $day = date(base64_decode('dw=='));
             }
 
-            // cek absen, apa ada absen hari ini
-            $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
-                ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('staff_id', $request->staff_id)
-                ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                ->where('absence_logs.status', '=', 1)
-                ->where('absence_categories.type', '=', 'presence')
-                ->orderBy('absence_logs.start_date', 'ASC')
+            $absence = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxzaGlmdF9wbGFubmVyX2lkLCBxdWV1ZSwgc3RhdHVzX2FjdGl2ZSwgYWJzZW5jZV9jYXRlZ29yaWVzLmlkIGFzIGFic2VuY2VfY2F0ZWdvcnlfaWQsIGFic2VuY2VzLmlkIGFzIGFic2VuY2VfaWQsIGFic2VuY2VfbG9ncy5pZCBhcyBpZA=='))
+                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
                 ->first();
-            $a1 = "1";
 
-            // jika ada absen hari ini
+            $pengecekanApaAdaAbsenMasuk = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxzaGlmdF9wbGFubmVyX2lkLCBxdWV1ZSwgc3RhdHVzX2FjdGl2ZSwgYWJzZW5jZV9jYXRlZ29yaWVzLmlkIGFzIGFic2VuY2VfY2F0ZWdvcnlfaWQsIGFic2VuY2VzLmlkIGFzIGFic2VuY2VfaWQsIGFic2VuY2VfbG9ncy5pZCBhcyBpZA=='))
+                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 0)
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('MQ=='))
+                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('REVTQw=='))
+                ->first();
+
+            if ($pengecekanApaAdaAbsenMasuk) {
+                $pengecekanApaAdaAbsenLanjutan = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxhYnNlbmNlX2xvZ3Muc3RhcnRfZGF0ZSwgYWJzZW5jZV9sb2dzLnN0YXR1cyBhcyBhYnNlbmNlX2xvZ19zdGF0dXMsIGFic2VuY2VfbG9ncy5leHBpcmVkX2RhdGUsc2hpZnRfcGxhbm5lcl9pZCwgcXVldWUsIHN0YXR1c19hY3RpdmUsIGFic2VuY2VfY2F0ZWdvcmllcy5pZCBhcyBhYnNlbmNlX2NhdGVnb3J5X2lkLCBhYnNlbmNlcy5pZCBhcyBhYnNlbmNlX2lkLCBhYnNlbmNlX2xvZ3MuaWQgYXMgaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                    ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), $pengecekanApaAdaAbsenMasuk->absence_id)
+                    ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
+
+                    ->first();
+
+                if (!$pengecekanApaAdaAbsenLanjutan) {
+                    $absenceOut = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSwgYWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGUsc2hpZnRfcGxhbm5lcl9pZCwgcXVldWUsIHN0YXR1c19hY3RpdmUsIGFic2VuY2VfY2F0ZWdvcmllcy5pZCBhcyBhYnNlbmNlX2NhdGVnb3J5X2lkLCBhYnNlbmNlcy5pZCBhcyBhYnNlbmNlX2lk'))
+                        ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                        ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='),  $pengecekanApaAdaAbsenMasuk->absence_id)
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('Mg=='))
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
+                        ->first();
+                }
+
+                if ($pengecekanApaAdaAbsenLanjutan) {
+                    if ($pengecekanApaAdaAbsenLanjutan->start_date <= date(base64_decode('WS1tLWQgSDppOnM=')) && $pengecekanApaAdaAbsenLanjutan->expired_date >= date(base64_decode('WS1tLWQgSDppOnM='))) {
+                        $absence = $pengecekanApaAdaAbsenLanjutan;
+                    } else {
+                        $absence = null;
+                    }
+                }
+            }
+
+
+
+
+
+            $a1 = base64_decode('MQ==');
+
             if ($absence) {
                 if ($absence->shift_planner_id === 0) {
-                    $absen = AbsenceLog::selectRaw('absence_categories.*, absence_logs.id as id, absence_id, work_type_days.start, work_type_days.end')
-                        ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                        ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                        ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
-                        ->where('work_types.id', $coordinat->work_type_id)
-                        ->where('absence_logs.id', $absence->id)
-                        ->where('absence_categories.type', '=', 'presence')
-                        ->where('absence_logs.status', '=', 1)
+                    $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLiosIGFic2VuY2VfbG9ncy5pZCBhcyBpZCwgYWJzZW5jZV9pZCwgd29ya190eXBlX2RheXMuc3RhcnQsIHdvcmtfdHlwZV9kYXlzLmVuZA=='))
+                        ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                        ->join(base64_decode('d29ya190eXBlX2RheXM='), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('d29ya190eXBlX2RheXMud29ya190eXBlX2lk'), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+                        ->where(base64_decode('d29ya190eXBlcy5pZA=='), $coordinat->work_type_id)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
                         ->first();
-                    $a1 = "2";
-                    $menuReguler = "ON";
+                    $a1 = base64_decode('Mg==');
+                    $menuReguler = base64_decode('T04=');
                     $reguler =  $absen;
                 } else {
-                    $absen = AbsenceLog::selectRaw('absence_logs.*, absence_categories.type, absence_categories.queue,shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
-                        ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                        ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
-                        ->where('absence_logs.status', '=', 1)
-                        ->where('absence_logs.id', $absence->id)
-                        ->where('absence_categories.type', '=', 'presence')
-                        ->orderBy('absence_logs.id', 'DESC')
+                    $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLiosIGFic2VuY2VfY2F0ZWdvcmllcy50eXBlLCBhYnNlbmNlX2NhdGVnb3JpZXMucXVldWUsc2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5zdGFydCwgc2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5lbmQ='))->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                        ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                        ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                         ->first();
 
-                    $a1 = "2";
-                    $menuReguler = "ON";
+                    $a1 = base64_decode('Mg==');
+                    $menuReguler = base64_decode('T04=');
                     $reguler =  $absen;
                 }
-                // $open = "Close";
-                // if ($absen) {
-                //     if ($absen->start_date <= date('Y-m-d H:i:s')) {
-                //         $open = "Open";
-                //     } else {
-                //         $open = "Close";
-                //     }
-                // }
-            }
-            // ketika tidak ada absen di tanggal tersebut
-            else {
-                // cek apa ada shift di tanggal ini
-                if ($coordinat->type == "shift") {
-                    $a1 = "3";
-                    // buat baru start
-                    // cek apa sudah ada group absen di tanggal ini
-                    $c = ShiftPlannerStaffs::selectRaw('shift_planner_staffs.id as shift_planner_id, shift_planner_staffs.shift_group_id')
-                        ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
-                        ->leftJoin('absence_logs', 'shift_planner_staffs.id', '=', 'absence_logs.shift_planner_id')
-                        ->where('shift_planner_staffs.staff_id', '=', $request->staff_id)
-                        ->whereDate('shift_planner_staffs.start', '=', date('Y-m-d'))
-                        ->where('absence_logs.id', '=', null)
-                        ->orderBy('shift_groups.queue', 'ASC')
+            } else {
+                if ($coordinat->type == base64_decode('c2hpZnQ=')) {
+                    $a1 = base64_decode('Mw==');
+                    $c = ShiftPlannerStaffs::selectRaw(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuaWQgYXMgc2hpZnRfcGxhbm5lcl9pZCwgc2hpZnRfcGxhbm5lcl9zdGFmZnMuc2hpZnRfZ3JvdXBfaWQ='))
+                        ->join(base64_decode('c2hpZnRfZ3JvdXBz'), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc2hpZnRfZ3JvdXBfaWQ='), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBzLmlk'))
+                        ->leftJoin(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLnNoaWZ0X3BsYW5uZXJfaWQ='))
+                        ->where(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc3RhZmZfaWQ='), base64_decode('PQ=='), $request->staff_id)
+                        ->whereDate(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc3RhcnQ='), base64_decode('PQ=='), date(base64_decode('WS1tLWQ=')))
+                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('PQ=='), null)
+                        ->orderBy(base64_decode('c2hpZnRfZ3JvdXBzLnF1ZXVl'), base64_decode('QVND'))
                         ->get();
 
 
@@ -671,77 +766,63 @@ class AbsenceApiController extends Controller
                         foreach ($c as $item) {
 
                             $data = [
-                                'day_id' => $day,
-                                'shift_group_id' => $item->shift_group_id,
-                                'staff_id' => $request->staff_id,
-                                'created_at' => date('Y-m-d')
+                                base64_decode('ZGF5X2lk') => $day,
+                                base64_decode('c2hpZnRfZ3JvdXBfaWQ=') => $item->shift_group_id,
+                                base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                                base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQ='))
                             ];
                             $absence = Absence::create($data);
-                            $list_absence = ShiftGroups::selectRaw('duration, duration_exp, absence_categories.queue, type, time, start, absence_category_id,shift_group_timesheets.id as shift_group_timesheet_id ')
-                                ->join('shift_group_timesheets', 'shift_group_timesheets.shift_group_id', '=', 'shift_groups.id')
-                                ->join('absence_categories', 'shift_group_timesheets.absence_category_id', '=', 'absence_categories.id')
-                                ->where('shift_groups.id', $item->shift_group_id)
-                                ->where('absence_categories.type', '!=', "break")
-                                ->orderBy('absence_categories.queue', 'ASC')
+                            $list_absence = ShiftGroups::selectRaw(base64_decode('ZHVyYXRpb24sIGR1cmF0aW9uX2V4cCwgYWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVlLCB0eXBlLCB0aW1lLCBzdGFydCwgYWJzZW5jZV9jYXRlZ29yeV9pZCxzaGlmdF9ncm91cF90aW1lc2hlZXRzLmlkIGFzIHNoaWZ0X2dyb3VwX3RpbWVzaGVldF9pZCA='))
+                                ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5zaGlmdF9ncm91cF9pZA=='), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBzLmlk'))
+                                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                ->where(base64_decode('c2hpZnRfZ3JvdXBzLmlk'), $item->shift_group_id)
+                                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('IT0='), base64_decode('YnJlYWs='))
+                                ->orderBy(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('QVND'))
                                 ->get();
 
-                            // reminder absen bermesalah start
                             if ($problem) {
-                                $str_date = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[0]->time)));
-                                $exp_date = date("Y-m-d H:i:s", strtotime('+ ' . (($list_absence[0]->duration - $problem->duration) * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                $str_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time)));
+                                $exp_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . (($list_absence[0]->duration - $problem->duration) * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
 
                                 $i = 0;
                                 while ($str_date < $exp_date) {
                                     $i = +$problem->duration;
-                                    $str_date = date("Y-m-d H:i:s", strtotime('+ ' . $i * 60 . ' minutes', strtotime($str_date)));
-                                    // $d[] = [$str_date];
-                                    $message = "Anda Dalam Pengawasan, Buka Untuk Absen Lokasi";
+                                    $str_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . $i * 60 . base64_decode('IG1pbnV0ZXM='), strtotime($str_date)));
+                                    $message = base64_decode('QW5kYSBEYWxhbSBQZW5nYXdhc2FuLCBCdWthIFVudHVrIEFic2VuIExva2FzaQ==');
                                     MessageLog::create([
-                                        'staff_id' => $request->staff_id,
-                                        'memo' => $message,
-                                        'type' => 'check',
-                                        'status' => 'pending',
-                                        'created_at' => $str_date,
+                                        base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                                        base64_decode('bWVtbw==') => $message,
+                                        base64_decode('dHlwZQ==') => base64_decode('Y2hlY2s='),
+                                        base64_decode('c3RhdHVz') => base64_decode('cGVuZGluZw=='),
+                                        base64_decode('Y3JlYXRlZF9hdA==') => $str_date,
                                     ]);
                                 }
                             }
 
-                            // reminder absen bermasalah end
 
 
-                            // return response()->json([
-                            //     'lat' =>  $list_absence,
-                            //     'c' => $c
-                            // ]);
 
-                            // $expired_date = date('Y-m-d H:i:s');
                             try {
                                 for ($n = 0; $n < count($list_absence); $n++) {
-                                    $expired_date = date("Y-m-d H:i:s", strtotime('+ ' . (($list_absence[0]->duration + $list_absence[0]->duration_exp) * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
-                                    $timeout = date("Y-m-d H:i:s", strtotime('+ ' . ($list_absence[0]->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
-                                    $timein = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[0]->time)));
+                                    $expired_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . (($list_absence[0]->duration + $list_absence[0]->duration_exp) * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
+                                    $timeout = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . ($list_absence[0]->duration * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
+                                    $timein = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time)));
 
                                     $status = 0;
                                     if ($n === (count($list_absence) - 1)) {
                                         $status =  1;
-                                    } else if ($n === 2 && $list_absence[$n]->type == "break") {
+                                    } else if ($n === 2 && $list_absence[$n]->type == base64_decode('YnJlYWs=')) {
                                         $status =  1;
                                     } else {
                                         $status =  0;
                                     }
 
-                                    // if ($list_absence[$n]->start == "0000-00-00") {
-                                    //     $start_date =  null;
-                                    // } else {
-                                    //     $start_date = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[$n]->start)));
-                                    // }
-                                    if ($list_absence[$n]->queue == "1") {
-                                        $start_date = date("Y-m-d H:i:s", strtotime('- ' . ($list_absence[0]->duration_exp * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                    if ($list_absence[$n]->queue == base64_decode('MQ==')) {
+                                        $start_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LSA=') . ($list_absence[0]->duration_exp * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
                                     } else {
-                                        $start_date = date("Y-m-d H:i:s", strtotime('+ ' . ($list_absence[0]->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                        $start_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . ($list_absence[0]->duration * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
                                     }
                                     $upload_image = new AbsenceLog;
-                                    // sementara start
                                     $upload_image->absence_id = $absence->id;
                                     $upload_image->shift_planner_id = $item->shift_planner_id;
                                     $upload_image->shift_group_timesheet_id = $list_absence[$n]->shift_group_timesheet_id;
@@ -750,602 +831,564 @@ class AbsenceApiController extends Controller
 
                                     $upload_image->start_date = $start_date;
                                     $upload_image->expired_date = $expired_date;
-                                    // sementara end
-                                    $upload_image->created_at = date('Y-m-d H:i:s');
-                                    $upload_image->updated_at = date('Y-m-d H:i:s');
+                                    $upload_image->created_at = date(base64_decode('WS1tLWQgSDppOnM='));
+                                    $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
                                     $upload_image->status = 1;
                                     $upload_image->absence_category_id =  $list_absence[$n]->absence_category_id;
-                                    // $upload_image->shift_id = $request->shift_id;
 
                                     $upload_image->save();
                                 }
                             } catch (QueryException $ex) {
                                 return response()->json([
-                                    'message' => 'gagal',
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
                                 ]);
                             }
                         }
-                        // test start
-                        if (date('w') == '0') {
-                            $day = '7';
+                        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+                            $day = base64_decode('Nw==');
                         } else {
-                            $day = date('w');
+                            $day = date(base64_decode('dw=='));
                         }
 
-                        // cek absen, apa ada absen hari ini
-                        $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
-                            ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                            ->where('staff_id', $request->staff_id)
-                            ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                            ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                            ->where('absence_logs.status', '=', 1)
-                            ->where('absence_categories.type', '=', 'presence')
-                            ->orderBy('absence_logs.start_date', 'ASC')
+                        $absence = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxzaGlmdF9wbGFubmVyX2lkLCBxdWV1ZSwgc3RhdHVzX2FjdGl2ZSwgYWJzZW5jZV9jYXRlZ29yaWVzLmlkIGFzIGFic2VuY2VfY2F0ZWdvcnlfaWQsIGFic2VuY2VzLmlkIGFzIGFic2VuY2VfaWQsIGFic2VuY2VfbG9ncy5pZCBhcyBpZA=='))
+                            ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                            ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                            ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                            ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                            ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                            ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
                             ->first();
-                        $a1 = "1";
-                        $absen = "";
-                        // jika ada absen hari ini
+                        $a1 = base64_decode('MQ==');
+                        $absen = '';
                         if ($absence) {
                             if ($absence->shift_planner_id === 0) {
-                                $absen = AbsenceLog::selectRaw('absence_categories.*,absence_logs.id as id, absence_id, work_type_days.start, work_type_days.end')
-                                    ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                                    ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                                    ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
-                                    ->where('work_types.id', $coordinat->work_type_id)
-                                    ->where('absence_logs.id', $absence->id)
-                                    ->where('absence_categories.type', '=', 'presence')
-                                    ->where('absence_logs.status', '=', 1)
+                                $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLiosYWJzZW5jZV9sb2dzLmlkIGFzIGlkLCBhYnNlbmNlX2lkLCB3b3JrX3R5cGVfZGF5cy5zdGFydCwgd29ya190eXBlX2RheXMuZW5k'))
+                                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                                    ->join(base64_decode('d29ya190eXBlX2RheXM='), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                    ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('d29ya190eXBlX2RheXMud29ya190eXBlX2lk'), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+                                    ->where(base64_decode('d29ya190eXBlcy5pZA=='), $coordinat->work_type_id)
+                                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
                                     ->first();
-                                $a1 = "2";
-                                $menuReguler = "ON";
+                                $a1 = base64_decode('Mg==');
+                                $menuReguler = base64_decode('T04=');
                                 $reguler =  $absen;
                             } else {
-                                $absen = AbsenceLog::selectRaw('absence_logs.*, absence_categories.type, absence_categories.queue, shift_group_timesheets.start, shift_group_timesheets.end')->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
-                                    ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                                    ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
-                                    ->where('absence_logs.status', '=', 1)
-                                    ->where('absence_logs.id', $absence->id)
-                                    ->where('absence_categories.type', '=', 'presence')
-                                    ->orderBy('absence_logs.id', 'DESC')
+                                $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLiosIGFic2VuY2VfY2F0ZWdvcmllcy50eXBlLCBhYnNlbmNlX2NhdGVnb3JpZXMucXVldWUsIHNoaWZ0X2dyb3VwX3RpbWVzaGVldHMuc3RhcnQsIHNoaWZ0X2dyb3VwX3RpbWVzaGVldHMuZW5k'))->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                                    ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'))
+                                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                    ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                                     ->first();
                                 $reguler = $absen;
-                                $a1 = "2";
-                                $menuReguler = "ON";
+                                $a1 = base64_decode('Mg==');
+                                $menuReguler = base64_decode('T04=');
                             }
 
                             return response()->json([
-                                'lat' => $coordinat->lat,
-                                'fingerfrint' => $fingerprint,
-                                'selfie' => $camera,
-                                'gps' => $gps,
-                                'lng' => $coordinat->lng,
-                                'radius' => $coordinat->radius,
-                                'reguler' => $reguler,
-                                'work_type' => $coordinat->work_type_id,
-                                'menu' => [
-                                    'menuReguler' => $menuReguler,
-                                    'menuHoliday' => $menuHoliday,
-                                    'menuBreak' => $menuBreak,
-                                    'menuExcuse' => $menuExcuse,
-                                    'menuDuty' => $menuDuty,
-                                    'menuFinish' =>  $menuFinish,
-                                    'geolocationOff' => $geofence_off
+                                base64_decode('bGF0') => $lat,
+                                base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                base64_decode('c2VsZmll') => $camera,
+                                base64_decode('Z3Bz') => $gps,
+                                base64_decode('bG5n') => $lng,
+                                base64_decode('cmFkaXVz') => $radius,
+                                base64_decode('cmVndWxlcg==') => $reguler,
+                                base64_decode('d29ya190eXBl') => $coordinat->work_type_id,
+                                base64_decode('bWVudQ==') => [
+                                    base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                    base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                    base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                    base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                    base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                    base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                                    base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                                 ],
-                                'break' => $break,
-                                'date' => $coordinat->type,
-                                'absence' => $absence,
-                                'tesss' => $absen,
-                                'a1' => $a1,
+                                base64_decode('YnJlYWs=') => $break,
+                                base64_decode('ZGF0ZQ==') => $coordinat->type,
+                                base64_decode('YWJzZW5jZQ==') => $absence,
+                                base64_decode('dGVzc3M=') => $absen,
+                                base64_decode('YTE=') => $a1,
                             ]);
                         }
-
-                        // test end
                     } else {
 
 
                         if (!$absenceOut) {
-                            if (date('Y-m-d H:i:s') > date('Y-m-d 21:00:00') && date('Y-m-d H:i:s') < date('Y-m-d 23:59:59') || date('Y-m-d H:i:s') > date('Y-m-d 01:00:00') && date('Y-m-d H:i:s') < date('Y-m-d 06:00:00')) {
-                                $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                                    ->where('end', '>=', date('Y-m-d H:i:s'))
-                                    ->where('category', 'extra')
-                                    ->where('staff_id', $request->staff_id)
+                            if (date(base64_decode('WS1tLWQgSDppOnM=')) > date(base64_decode('WS1tLWQgMjE6MDA6MDA=')) && date(base64_decode('WS1tLWQgSDppOnM=')) < date(base64_decode('WS1tLWQgMjM6NTk6NTk=')) || date(base64_decode('WS1tLWQgSDppOnM=')) > date(base64_decode('WS1tLWQgMDE6MDA6MDA=')) && date(base64_decode('WS1tLWQgSDppOnM=')) < date(base64_decode('WS1tLWQgMDY6MDA6MDA='))) {
+                                $absence_extra = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                    ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                    ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXh0cmE='))
+                                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                                     ->where(function ($query) {
-                                        $query->where('status', 'approve')
-                                            ->orWhere('status', 'active')
-                                            ->orWhere('status', 'pending');
+                                        $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                                            ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'))
+                                            ->orWhere(base64_decode('c3RhdHVz'), base64_decode('cGVuZGluZw=='));
                                     })
 
-                                    ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                                    ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                                     ->first();
                             } else {
-                                $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                                    ->where('end', '>=', date('Y-m-d H:i:s'))
-                                    ->where('category', 'extra')
-                                    ->where('staff_id', $request->staff_id)
+                                $absence_extra = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                    ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                    ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXh0cmE='))
+                                    ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                                     ->where(function ($query) {
-                                        $query->where('status', 'approve')
-                                            ->orWhere('status', 'active');
+                                        $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                                            ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
                                     })
 
-                                    ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                                    ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                                     ->first();
                             }
 
                             if ($absence_extra) {
-                                $menu = 'OFF';
+                                $menu = base64_decode('T0ZG');
                                 if ($absence_extra) {
-                                    $extra = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                                        ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                                        ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                                        ->where('staff_id', $request->staff_id)
-                                        ->where('absence_request_id', $absence_extra->id)
-                                        ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                                        ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                                        ->where('absence_logs.status', '=', 1)
-                                        ->where('absence_categories.type', '=', 'extra')
-                                        ->where('absence_categories.queue', '=', '2')
-                                        ->orderBy('absence_logs.id', 'DESC')
+                                    $extra = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                                        ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                                        ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                                        ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_extra->id)
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('ZXh0cmE='))
+                                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                                         ->first();
                                     if ($extra) {
                                         $extra_id = $extra->id;
                                     } else {
-                                        $extraC = Absence_categories::where('type', 'extra')->get();
+                                        $extraC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('ZXh0cmE='))->get();
                                     }
-                                    $menuExtra = "ON";
+                                    $menuExtra = base64_decode('T04=');
                                 }
-                                if ($absence_extra->type == "outside") {
-                                    $geofence_off = "ON";
+                                if ($absence_extra->type == base64_decode('b3V0c2lkZQ==')) {
+                                    $geofence_off = base64_decode('T04=');
                                 }
 
                                 return response()->json([
-                                    'message' => 'Success',
-                                    'menu' => [
-                                        'menuReguler' => $menuReguler,
-                                        'menuHoliday' => $menuHoliday,
-                                        'menuBreak' => $menuBreak,
-                                        'menuExcuse' => $menuExcuse,
-                                        'menuExtra' => $menuExtra,
-                                        'menuDuty' => $menuDuty,
-                                        'menuFinish' =>  $menuFinish,
-                                        'geolocationOff' => $geofence_off
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                                    base64_decode('bWVudQ==') => [
+                                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                        base64_decode('bWVudUV4dHJh') => $menuExtra,
+                                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                        base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                                        base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                                     ],
-                                    'extraC' => $extraC,
-                                    'extra' => $extra,
-                                    'request_extra' =>  $absence_extra,
-                                    'date' => date('Y-m-d h:i:s'),
-                                    'lat' => $coordinat->lat,
-                                    'fingerfrint' => $fingerprint,
-                                    'selfie' => $camera,
-                                    'gps' => $gps,
-                                    'selfie' => $camera,
-                                    'lng' => $coordinat->lng,
-                                    'radius' => $coordinat->radius,
+                                    base64_decode('ZXh0cmFD') => $extraC,
+                                    base64_decode('ZXh0cmE=') => $extra,
+                                    base64_decode('cmVxdWVzdF9leHRyYQ==') =>  $absence_extra,
+                                    base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM=')),
+                                    base64_decode('bGF0') => $lat,
+                                    base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                    base64_decode('c2VsZmll') => $camera,
+                                    base64_decode('Z3Bz') => $gps,
+                                    base64_decode('c2VsZmll') => $camera,
+                                    base64_decode('bG5n') => $lng,
+                                    base64_decode('cmFkaXVz') => $radius,
                                 ]);
                             } else {
-                                $menuWaiting = "ON";
+                                $menuWaiting = base64_decode('T04=');
                                 return response()->json([
-                                    'message' => 'Absen Terkirim',
-                                    'message' => 'sudah pulang',
-                                    'data' =>   $c,
-                                    'radius' => $coordinat->radius,
-                                    'reguler' => $reguler,
-                                    'break' => $break,
-                                    'menu' => [
-                                        'menuBreak' => $menuBreak,
-                                        'menuExcuse' => $menuExcuse,
-                                        'menuReguler' => $menuReguler,
-                                        'menuHoliday' => $menuHoliday,
-                                        'menuDuty' => $menuDuty,
-                                        'menuFinish' => $menuFinish,
-                                        'geolocationOff' => $geofence_off,
-                                        'menuWaiting' => $menuWaiting
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('c3VkYWggcHVsYW5n'),
+                                    base64_decode('ZGF0YQ==') =>   $c,
+                                    base64_decode('cmFkaXVz') => $radius,
+                                    base64_decode('cmVndWxlcg==') => $reguler,
+                                    base64_decode('YnJlYWs=') => $break,
+                                    base64_decode('bWVudQ==') => [
+                                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                        base64_decode('bWVudUZpbmlzaA==') => $menuFinish,
+                                        base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off,
+                                        base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting
 
                                     ],
-                                    'waitingMessage' => "Absen Sudah Selesai",
+                                    base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('QWJzZW4gU3VkYWggU2VsZXNhaQ=='),
                                 ]);
                             }
                         } else {
                             return response()->json([
-                                'message' => 'Absen Terkirim',
-                                'message' => 'ssssssa',
-                                'excuseC' => $excuseC,
-                                'excuse' => $excuse,
-                                'request_excuse' =>  $absence_excuse,
-                                'visitC' => $visitC,
-                                'visit' => $visit,
-                                'request_visit' =>  $absence_visit,
-                                'data' =>   $c,
+                                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                                base64_decode('bWVzc2FnZQ==') => base64_decode('c3Nzc3NzYQ=='),
+                                base64_decode('ZXhjdXNlQw==') => $excuseC,
+                                base64_decode('ZXhjdXNl') => $excuse,
+                                base64_decode('cmVxdWVzdF9leGN1c2U=') =>  $absence_excuse,
+                                base64_decode('dmlzaXRD') => $visitC,
+                                base64_decode('dmlzaXQ=') => $visit,
+                                base64_decode('cmVxdWVzdF92aXNpdA==') =>  $absence_visit,
+                                base64_decode('ZGF0YQ==') =>   $c,
 
-                                'lat' => $coordinat->lat,
-                                'fingerfrint' => $fingerprint,
-                                'selfie' => $camera,
-                                'gps' => $gps,
-                                'lng' => $coordinat->lng,
-                                'radius' => $coordinat->radius,
-                                'reguler' => $reguler,
-                                'break' => $break,
-                                'absenceOut' => $absenceOut,
-                                'menu' => [
-                                    'menuBreak' => $menuBreak,
-                                    'menuExcuse' => $menuExcuse,
-                                    'menuReguler' => $menuReguler,
-                                    'menuHoliday' => $menuHoliday,
-                                    'menuVisit' => $menuVisit,
-                                    'menuDuty' => $menuDuty,
-                                    'menuFinish' => $menuFinish,
-                                    'geolocationOff' => $geofence_off
+                                base64_decode('bGF0') => $lat,
+                                base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                base64_decode('c2VsZmll') => $camera,
+                                base64_decode('Z3Bz') => $gps,
+                                base64_decode('bG5n') => $lng,
+                                base64_decode('cmFkaXVz') => $radius,
+                                base64_decode('cmVndWxlcg==') => $reguler,
+                                base64_decode('YnJlYWs=') => $break,
+                                base64_decode('YWJzZW5jZU91dA==') => $absenceOut,
+                                base64_decode('bWVudQ==') => [
+                                    base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                    base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                    base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                    base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                    base64_decode('bWVudVZpc2l0') => $menuVisit,
+                                    base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                    base64_decode('bWVudUZpbmlzaA==') => $menuFinish,
+                                    base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                                 ],
                             ]);
                         }
                     }
-
-                    // buat baru end
-                }
-                // jika tidak ada shift, dinas keluar kota, libur ataupun cuti, izin, atau sakit(mungkin dipisah untuk pengecekan)
-                else {
-                    // absence Biasa
-                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d'))->whereDate('end', '>=', date('Y-m-d'))->first();
-                    // cek hari libur
+                } else {
+                    $holiday = Holiday::whereDate(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQ=')))->whereDate(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQ=')))->first();
                     if ($holiday) {
-                        $menu = 'OFF';
+                        $menu = base64_decode('T0ZG');
                         return response()->json([
-                            'message' => 'Success',
-                            'menu' => [
-                                'menuReguler' => $menuReguler,
-                                'menuHoliday' => $menuHoliday,
-                                'menuBreak' => $menuBreak,
-                                'menuExcuse' => $menuExcuse,
-                                'menuDuty' => $menuDuty,
-                                'menuFinish' =>  $menuFinish,
-                                'geolocationOff' => $geofence_off
+                            base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                            base64_decode('bWVudQ==') => [
+                                base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                                base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                             ],
-                            'date' => date('Y-m-d h:i:s')
+                            base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM='))
                         ]);
                     } else {
-                        $absen = Absence_categories::selectRaw('absence_categories.*, work_type_days.start, work_type_days.end')
-                            ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                            ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
-                            ->where('work_types.id', $coordinat->work_type_id)
-                            ->where('day_id', $day)
+                        $absen = Absence_categories::selectRaw(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLiosIHdvcmtfdHlwZV9kYXlzLnN0YXJ0LCB3b3JrX3R5cGVfZGF5cy5lbmQ='))
+                            ->join(base64_decode('d29ya190eXBlX2RheXM='), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                            ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('d29ya190eXBlX2RheXMud29ya190eXBlX2lk'), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+                            ->where(base64_decode('d29ya190eXBlcy5pZA=='), $coordinat->work_type_id)
+                            ->where(base64_decode('ZGF5X2lk'), $day)
                             ->first();
 
-                        // buat baru start
-                        // cek apa sudah ada group absen di tanggal ini
+
                         if ($absen) {
-                            $c = Absence::whereDate('created_at', '=', date('Y-m-d'))
-                                ->where('staff_id', $request->staff_id)->first();
+                            $c = Absence::join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                                ->whereDate(base64_decode('YWJzZW5jZXMuY3JlYXRlZF9hdA=='), base64_decode('PQ=='), date(base64_decode('WS1tLWQ=')))
+                                ->whereNotIn(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), [9, 10])
+                                ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)->first();
                             if (!$c) {
                                 $data = [
-                                    'day_id' => $day,
-                                    'shift_group_id' => $request->shift_group_id,
-                                    'staff_id' => $request->staff_id,
-                                    'created_at' => date('Y-m-d')
+                                    base64_decode('ZGF5X2lk') => $day,
+                                    base64_decode('c2hpZnRfZ3JvdXBfaWQ=') => $request->shift_group_id,
+                                    base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                                    base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQ='))
                                 ];
                                 $absence = Absence::create($data);
-                                $list_absence = WorkTypeDays::selectRaw('duration, duration_exp, queue, type, time, start, absence_category_id,work_type_days.id as work_type_day_id ')
-                                    ->join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                                    ->where('work_type_id', $coordinat->work_type_id)
-                                    ->where('day_id', $day)
-                                    ->where('absence_categories.type', '=', 'presence')
-                                    ->orderBy('queue', 'ASC')
+                                $list_absence = WorkTypeDays::selectRaw(base64_decode('ZHVyYXRpb24sIGR1cmF0aW9uX2V4cCwgcXVldWUsIHR5cGUsIHRpbWUsIHN0YXJ0LCBhYnNlbmNlX2NhdGVnb3J5X2lkLHdvcmtfdHlwZV9kYXlzLmlkIGFzIHdvcmtfdHlwZV9kYXlfaWQg'))
+                                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                    ->where(base64_decode('d29ya190eXBlX2lk'), $coordinat->work_type_id)
+                                    ->where(base64_decode('ZGF5X2lk'), $day)
+                                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                    ->orderBy(base64_decode('cXVldWU='), base64_decode('QVND'))
                                     ->get();
 
-                                // absen bermsalah start
                                 if ($problem) {
-                                    $str_date = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[0]->time)));
-                                    $exp_date = date("Y-m-d H:i:s", strtotime('+ ' . (($list_absence[0]->duration - $problem->duration) * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                    $str_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time)));
+                                    $exp_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . (($list_absence[0]->duration - $problem->duration) * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
 
                                     $i = 0;
                                     while ($str_date < $exp_date) {
                                         $i = +$problem->duration;
-                                        $str_date = date("Y-m-d H:i:s", strtotime('+ ' . $i * 60 . ' minutes', strtotime($str_date)));
-                                        // $d[] = [$str_date];
-                                        $message = "Anda Dalam Pengawasan, Buka Untuk Absen Lokasi";
+                                        $str_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . $i * 60 . base64_decode('IG1pbnV0ZXM='), strtotime($str_date)));
+                                        $message = base64_decode('QW5kYSBEYWxhbSBQZW5nYXdhc2FuLCBCdWthIFVudHVrIEFic2VuIExva2FzaQ==');
                                         MessageLog::create([
-                                            'staff_id' => $request->staff_id,
-                                            'memo' => $message,
-                                            'type' => 'check',
-                                            'status' => 'pending',
-                                            'created_at' => $str_date,
+                                            base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                                            base64_decode('bWVtbw==') => $message,
+                                            base64_decode('dHlwZQ==') => base64_decode('Y2hlY2s='),
+                                            base64_decode('c3RhdHVz') => base64_decode('cGVuZGluZw=='),
+                                            base64_decode('Y3JlYXRlZF9hdA==') => $str_date,
                                         ]);
                                     }
                                 }
 
-                                // absence bermsalah end
-                                $expired_date = date('Y-m-d H:i:s');
+                                $expired_date = date(base64_decode('WS1tLWQgSDppOnM='));
                                 try {
                                     for ($n = 0; $n < count($list_absence); $n++) {
-                                        $expired_date = date("Y-m-d H:i:s", strtotime('+' . (($list_absence[0]->duration + $list_absence[0]->duration_exp) * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
-                                        $timeout = date("Y-m-d H:i:s", strtotime('+' . ($list_absence[0]->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
-                                        $timein = date("Y-m-d H:i:s", strtotime(date('Y-m-d ' . $list_absence[0]->time)));
+                                        $expired_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('Kw==') . (($list_absence[0]->duration + $list_absence[0]->duration_exp) * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
+                                        $timeout = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('Kw==') . ($list_absence[0]->duration * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
+                                        $timein = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time)));
 
-                                        // $status = 0;
-                                        // if ($n === (count($list_absence) - 1)) {
-                                        //     $status =  1;
-                                        // } else if ($n === 2 && $list_absence[$n]->type == "break") {
-                                        //     $status =  1;
-                                        // } else {
-                                        //     $status =  0;
-                                        // }
 
-                                        // if ($list_absence[$n]->start == "0000-00-00") {
-                                        //     $start_date =  null;
-                                        // } else {
-                                        // $start_date = date("Y-m-d H:i:s", strtotime('- ' . $list_absence[$n]->duration_exp . ' minutes', strtotime(date('Y-m-d ' . $list_absence[$n]->time))));
-                                        // }
-                                        if ($list_absence[$n]->queue == "1") {
-                                            $start_date = date("Y-m-d H:i:s", strtotime('- ' . ($list_absence[0]->duration_exp * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                        if ($list_absence[$n]->queue == base64_decode('MQ==')) {
+                                            $start_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LSA=') . ($list_absence[0]->duration_exp * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
                                         } else {
-                                            $start_date = date("Y-m-d H:i:s", strtotime('+ ' . ($list_absence[0]->duration * 60) . ' minutes', strtotime(date('Y-m-d ' . $list_absence[0]->time))));
+                                            $start_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KyA=') . ($list_absence[0]->duration * 60) . base64_decode('IG1pbnV0ZXM='), strtotime(date(base64_decode('WS1tLWQg') . $list_absence[0]->time))));
                                         }
                                         $upload_image = new AbsenceLog;
-                                        // sementara start
                                         $upload_image->absence_id = $absence->id;
                                         $upload_image->start_date = $start_date;
                                         $upload_image->expired_date = $expired_date;
                                         $upload_image->work_type_day_id = $list_absence[$n]->work_type_day_id;
                                         $upload_image->timein = $timein;
                                         $upload_image->timeout = $timeout;
-                                        // sementara end
-                                        $upload_image->created_at = date('Y-m-d H:i:s');
-                                        $upload_image->updated_at = date('Y-m-d H:i:s');
+                                        $upload_image->created_at = date(base64_decode('WS1tLWQgSDppOnM='));
+                                        $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
                                         $upload_image->status = 1;
                                         $upload_image->absence_category_id =  $list_absence[$n]->absence_category_id;
-                                        // $upload_image->shift_id = $request->shift_id;
                                         $upload_image->save();
                                     }
 
 
 
-                                    // cek absen, apa ada absen hari ini
-                                    $absence = AbsenceLog::selectRaw('absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absences.id as absence_id, absence_logs.id as id')
-                                        ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                                        ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                                        ->where('staff_id', $request->staff_id)
-                                        ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                                        ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                                        ->where('absence_logs.status', '=', 1)
-                                        ->where('absence_categories.type', '=', 'presence')
-                                        ->orderBy('absence_logs.start_date', 'ASC')
+                                    $absence = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSxzaGlmdF9wbGFubmVyX2lkLCBxdWV1ZSwgc3RhdHVzX2FjdGl2ZSwgYWJzZW5jZV9jYXRlZ29yaWVzLmlkIGFzIGFic2VuY2VfY2F0ZWdvcnlfaWQsIGFic2VuY2VzLmlkIGFzIGFic2VuY2VfaWQsIGFic2VuY2VfbG9ncy5pZCBhcyBpZA=='))
+                                        ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                                        ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                                        ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                        ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('QVND'))
                                         ->first();
-                                    $a1 = "1";
-                                    $absen = "";
+                                    $a1 = base64_decode('MQ==');
+                                    $absen = '';
 
-                                    // jika ada absen hari ini
                                     if ($absence) {
                                         if ($absence->shift_planner_id === 0) {
-                                            $absen = AbsenceLog::selectRaw('absence_categories.*,absence_logs.id as id, absence_id, work_type_days.start, work_type_days.end')
-                                                ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                                                ->join('work_type_days', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                                                ->join('work_types', 'work_type_days.work_type_id', '=', 'work_types.id')
-                                                ->where('work_types.id', $coordinat->work_type_id)
-                                                ->where('absence_logs.id', $absence->id)
-                                                ->where('absence_categories.type', '=', 'presence')
-                                                ->where('absence_logs.status', '=', 1)
+                                            $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLiosYWJzZW5jZV9sb2dzLmlkIGFzIGlkLCBhYnNlbmNlX2lkLCB3b3JrX3R5cGVfZGF5cy5zdGFydCwgd29ya190eXBlX2RheXMuZW5k'))
+                                                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                                                ->join(base64_decode('d29ya190eXBlX2RheXM='), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                                ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('d29ya190eXBlX2RheXMud29ya190eXBlX2lk'), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+                                                ->where(base64_decode('d29ya190eXBlcy5pZA=='), $coordinat->work_type_id)
+                                                ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                                                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
                                                 ->first();
-                                            $a1 = "2";
-                                            $menuReguler = "ON";
+                                            $a1 = base64_decode('Mg==');
+                                            $menuReguler = base64_decode('T04=');
                                             $reguler =  $absen;
                                         } else {
-                                            $absen = AbsenceLog::selectRaw('absence_logs.*, shift_group_timesheets.start, shift_group_timesheets.end')
-                                                ->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
-                                                ->join('absence_categories', 'absence_categories.id', '=', 'absence_logs.absence_category_id')
-                                                ->join('shift_group_timesheets', 'absence_categories.id', '=', 'shift_group_timesheets.absence_category_id')
-                                                ->where('absence_logs.status', '=', 1)
-                                                ->where('absence_logs.id', $absence->id)
-                                                ->where('absence_categories.type', '=', 'presence')
-                                                ->orderBy('absence_logs.id', 'DESC')
+                                            $absen = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLiosIHNoaWZ0X2dyb3VwX3RpbWVzaGVldHMuc3RhcnQsIHNoaWZ0X2dyb3VwX3RpbWVzaGVldHMuZW5k'))
+                                                ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                                                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='))
+                                                ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'))
+                                                ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                                                ->where(base64_decode('YWJzZW5jZV9sb2dzLmlk'), $absence->id)
+                                                ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('cHJlc2VuY2U='))
+                                                ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                                                 ->first();
 
-                                            $a1 = "2";
+                                            $a1 = base64_decode('Mg==');
                                         }
                                         return response()->json([
-                                            'lat' => $coordinat->lat,
-                                            'fingerfrint' => $fingerprint,
-                                            'selfie' => $camera,
-                                            'gps' => $gps,
-                                            'lng' => $coordinat->lng,
-                                            'radius' => $coordinat->radius,
-                                            'reguler' => $reguler,
-                                            'work_type' => $coordinat->work_type_id,
-                                            'menu' => [
-                                                'menuReguler' => $menuReguler,
-                                                'menuHoliday' => $menuHoliday,
-                                                'menuBreak' => $menuBreak,
-                                                'menuExcuse' => $menuExcuse,
-                                                'menuDuty' => $menuDuty,
-                                                'menuFinish' =>  $menuFinish,
-                                                'geolocationOff' => $geofence_off,
+                                            base64_decode('bGF0') => $lat,
+                                            base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                            base64_decode('c2VsZmll') => $camera,
+                                            base64_decode('Z3Bz') => $gps,
+                                            base64_decode('bG5n') => $lng,
+                                            base64_decode('cmFkaXVz') => $radius,
+                                            base64_decode('cmVndWxlcg==') => $reguler,
+                                            base64_decode('d29ya190eXBl') => $coordinat->work_type_id,
+                                            base64_decode('bWVudQ==') => [
+                                                base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                                base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                                base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                                base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                                base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                                base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                                                base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off,
                                             ],
-                                            'break' => $break,
-                                            'date' => $coordinat->type,
-                                            'absence' => $absence,
-                                            'tesss' => $absen,
-                                            'a1' => $a1,
+                                            base64_decode('YnJlYWs=') => $break,
+                                            base64_decode('ZGF0ZQ==') => $coordinat->type,
+                                            base64_decode('YWJzZW5jZQ==') => $absence,
+                                            base64_decode('dGVzc3M=') => $absen,
+                                            base64_decode('YTE=') => $a1,
                                         ]);
                                     }
-                                    // test end
                                 } catch (QueryException $ex) {
                                     return response()->json([
-                                        'message' => 'gagal',
+                                        base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
                                     ]);
                                 }
                             }
 
 
                             if (!$absenceOut) {
-                                if (date('Y-m-d H:i:s') > date('Y-m-d 21:00:00') && date('Y-m-d H:i:s') < date('Y-m-d 23:59:59') || date('Y-m-d H:i:s') > date('Y-m-d 01:00:00') && date('Y-m-d H:i:s') < date('Y-m-d 06:00:00')) {
-                                    $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                                        ->where('end', '>=', date('Y-m-d H:i:s'))
-                                        ->where('category', 'extra')
-                                        ->where('staff_id', $request->staff_id)
+                                if (date(base64_decode('WS1tLWQgSDppOnM=')) > date(base64_decode('WS1tLWQgMjE6MDA6MDA=')) && date(base64_decode('WS1tLWQgSDppOnM=')) < date(base64_decode('WS1tLWQgMjM6NTk6NTk=')) || date(base64_decode('WS1tLWQgSDppOnM=')) > date(base64_decode('WS1tLWQgMDE6MDA6MDA=')) && date(base64_decode('WS1tLWQgSDppOnM=')) < date(base64_decode('WS1tLWQgMDY6MDA6MDA='))) {
+                                    $absence_extra = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXh0cmE='))
+                                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                                         ->where(function ($query) {
-                                            $query->where('status', 'approve')
-                                                ->orWhere('status', 'active')
-                                                ->orWhere('status', 'pending');
+                                            $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                                                ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'))
+                                                ->orWhere(base64_decode('c3RhdHVz'), base64_decode('cGVuZGluZw=='));
                                         })
 
-                                        ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                                        ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                                         ->first();
                                 } else {
-                                    $absence_extra = AbsenceRequest::where('start', '<=', date('Y-m-d H:i:s'))
-                                        ->where('end', '>=', date('Y-m-d H:i:s'))
-                                        ->where('category', 'extra')
-                                        ->where('staff_id', $request->staff_id)
+                                    $absence_extra = AbsenceRequest::where(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                        ->where(base64_decode('Y2F0ZWdvcnk='), base64_decode('ZXh0cmE='))
+                                        ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
                                         ->where(function ($query) {
-                                            $query->where('status', 'approve')
-                                                ->orWhere('status', 'active');
+                                            $query->where(base64_decode('c3RhdHVz'), base64_decode('YXBwcm92ZQ=='))
+                                                ->orWhere(base64_decode('c3RhdHVz'), base64_decode('YWN0aXZl'));
                                         })
 
-                                        ->orderBy(DB::raw("FIELD(status , \"active\", \"approve\" )"))
+                                        ->orderBy(DB::raw(base64_decode('RklFTEQoc3RhdHVzICwgImFjdGl2ZSIsICJhcHByb3ZlIiAp')))
                                         ->first();
                                 }
 
                                 if ($absence_extra) {
-                                    $menu = 'OFF';
+                                    $menu = base64_decode('T0ZG');
                                     if ($absence_extra) {
-                                        $extra = AbsenceLog::selectRaw('absence_logs.status, absence_request_id , absence_id, absence_categories.type as absence_category_type, absence_logs.expired_date,shift_planner_id, queue, status_active, absence_categories.id as absence_category_id, absence_logs.id as id')
-                                            ->leftJoin('absences', 'absence_logs.absence_id', '=', 'absences.id')
-                                            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                                            ->where('staff_id', $request->staff_id)
-                                            ->where('absence_request_id', $absence_extra->id)
-                                            ->where('absence_logs.start_date', '<=', date('Y-m-d H:i:s'))
-                                            ->where('absence_logs.expired_date', '>=', date('Y-m-d H:i:s'))
-                                            ->where('absence_logs.status', '=', 1)
-                                            ->where('absence_categories.type', '=', 'extra')
-                                            ->where('absence_categories.queue', '=', '2')
-                                            ->orderBy('absence_logs.id', 'DESC')
+                                        $extra = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cywgYWJzZW5jZV9yZXF1ZXN0X2lkICwgYWJzZW5jZV9pZCwgYWJzZW5jZV9jYXRlZ29yaWVzLnR5cGUgYXMgYWJzZW5jZV9jYXRlZ29yeV90eXBlLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLHNoaWZ0X3BsYW5uZXJfaWQsIHF1ZXVlLCBzdGF0dXNfYWN0aXZlLCBhYnNlbmNlX2NhdGVnb3JpZXMuaWQgYXMgYWJzZW5jZV9jYXRlZ29yeV9pZCwgYWJzZW5jZV9sb2dzLmlkIGFzIGlk'))
+                                            ->leftJoin(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                                            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                                            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+                                            ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absence_extra->id)
+                                            ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXJ0X2RhdGU='), base64_decode('PD0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                            ->where(base64_decode('YWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZQ=='), base64_decode('Pj0='), date(base64_decode('WS1tLWQgSDppOnM=')))
+                                            ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('PQ=='), 1)
+                                            ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnR5cGU='), base64_decode('PQ=='), base64_decode('ZXh0cmE='))
+                                            ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnF1ZXVl'), base64_decode('PQ=='), base64_decode('Mg=='))
+                                            ->orderBy(base64_decode('YWJzZW5jZV9sb2dzLmlk'), base64_decode('REVTQw=='))
                                             ->first();
                                         if ($extra) {
                                             $extra_id = $extra->id;
                                         } else {
-                                            $extraC = Absence_categories::where('type', 'extra')->get();
+                                            $extraC = Absence_categories::where(base64_decode('dHlwZQ=='), base64_decode('ZXh0cmE='))->get();
                                         }
-                                        $menuExtra = "ON";
+                                        $menuExtra = base64_decode('T04=');
                                     }
-                                    if ($absence_extra->type == "outside") {
-                                        $geofence_off = "ON";
+                                    if ($absence_extra->type == base64_decode('b3V0c2lkZQ==')) {
+                                        $geofence_off = base64_decode('T04=');
                                     }
 
                                     return response()->json([
-                                        'message' => 'Success',
-                                        'menu' => [
-                                            'menuReguler' => $menuReguler,
-                                            'menuHoliday' => $menuHoliday,
-                                            'menuBreak' => $menuBreak,
-                                            'menuExcuse' => $menuExcuse,
-                                            'menuExtra' => $menuExtra,
-                                            'menuDuty' => $menuDuty,
-                                            'menuFinish' =>  $menuFinish,
-                                            'geolocationOff' => $geofence_off
+                                        base64_decode('bWVzc2FnZQ==') => base64_decode('U3VjY2Vzcw=='),
+                                        base64_decode('bWVudQ==') => [
+                                            base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                            base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                            base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                            base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                            base64_decode('bWVudUV4dHJh') => $menuExtra,
+                                            base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                            base64_decode('bWVudUZpbmlzaA==') =>  $menuFinish,
+                                            base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                                         ],
-                                        'extraC' => $extraC,
-                                        'extra' => $extra,
-                                        'request_extra' =>  $absence_extra,
-                                        'date' => date('Y-m-d h:i:s'),
-                                        'lat' => $coordinat->lat,
-                                        'fingerfrint' => $fingerprint,
-                                        'selfie' => $camera,
-                                        'gps' => $gps,
-                                        'lng' => $coordinat->lng,
-                                        'radius' => $coordinat->radius,
+                                        base64_decode('ZXh0cmFD') => $extraC,
+                                        base64_decode('ZXh0cmE=') => $extra,
+                                        base64_decode('cmVxdWVzdF9leHRyYQ==') =>  $absence_extra,
+                                        base64_decode('ZGF0ZQ==') => date(base64_decode('WS1tLWQgaDppOnM=')),
+                                        base64_decode('bGF0') => $lat,
+                                        base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                        base64_decode('c2VsZmll') => $camera,
+                                        base64_decode('Z3Bz') => $gps,
+                                        base64_decode('bG5n') => $lng,
+                                        base64_decode('cmFkaXVz') => $radius,
                                     ]);
                                 } else {
-                                    $menuWaiting = "ON";
+                                    $menuWaiting = base64_decode('T04=');
                                     return response()->json([
-                                        'message' => 'Absen Terkirim',
-                                        'message' => 'sudah pulang',
-                                        'data' =>   $c,
-                                        'radius' => $coordinat->radius,
-                                        'reguler' => $reguler,
-                                        'break' => $break,
-                                        'menu' => [
-                                            'menuBreak' => $menuBreak,
-                                            'menuExcuse' => $menuExcuse,
-                                            'menuReguler' => $menuReguler,
-                                            'menuHoliday' => $menuHoliday,
-                                            'menuDuty' => $menuDuty,
-                                            'menuFinish' => $menuFinish,
-                                            'geolocationOff' => $geofence_off,
-                                            'menuWaiting' => $menuWaiting
+                                        base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                                        base64_decode('bWVzc2FnZQ==') => base64_decode('c3VkYWggcHVsYW5n'),
+                                        base64_decode('ZGF0YQ==') =>   $c,
+                                        base64_decode('cmFkaXVz') => $radius,
+                                        base64_decode('cmVndWxlcg==') => $reguler,
+                                        base64_decode('YnJlYWs=') => $break,
+                                        base64_decode('bWVudQ==') => [
+                                            base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                            base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                            base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                            base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                            base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                            base64_decode('bWVudUZpbmlzaA==') => $menuFinish,
+                                            base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off,
+                                            base64_decode('bWVudVdhaXRpbmc=') => $menuWaiting
                                         ],
-                                        'waitingMessage' => "Absen Sudah Selesai",
+                                        base64_decode('d2FpdGluZ01lc3NhZ2U=') => base64_decode('QWJzZW4gU3VkYWggU2VsZXNhaQ=='),
                                     ]);
                                 }
                             } else {
                                 return response()->json([
-                                    'message' => 'Absen Terkirim',
-                                    'message' => 'ssssssa',
-                                    'excuseC' => $excuseC,
-                                    'excuse' => $excuse,
-                                    'request_excuse' =>  $absence_excuse,
-                                    'visitC' => $visitC,
-                                    'visit' => $visit,
-                                    'request_visit' =>  $absence_visit,
-                                    'data' =>   $c,
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                                    base64_decode('bWVzc2FnZQ==') => base64_decode('c3Nzc3NzYQ=='),
+                                    base64_decode('ZXhjdXNlQw==') => $excuseC,
+                                    base64_decode('ZXhjdXNl') => $excuse,
+                                    base64_decode('cmVxdWVzdF9leGN1c2U=') =>  $absence_excuse,
+                                    base64_decode('dmlzaXRD') => $visitC,
+                                    base64_decode('dmlzaXQ=') => $visit,
+                                    base64_decode('cmVxdWVzdF92aXNpdA==') =>  $absence_visit,
+                                    base64_decode('ZGF0YQ==') =>   $c,
 
-                                    'lat' => $coordinat->lat,
-                                    'fingerfrint' => $fingerprint,
-                                    'selfie' => $camera,
-                                    'gps' => $gps,
-                                    'lng' => $coordinat->lng,
-                                    'radius' => $coordinat->radius,
-                                    'reguler' => $reguler,
-                                    'break' => $break,
-                                    'absenceOut' => $absenceOut,
-                                    'menu' => [
-                                        'menuBreak' => $menuBreak,
-                                        'menuExcuse' => $menuExcuse,
-                                        'menuReguler' => $menuReguler,
-                                        'menuHoliday' => $menuHoliday,
-                                        'menuVisit' => $menuVisit,
-                                        'menuDuty' => $menuDuty,
-                                        'menuFinish' => $menuFinish,
-                                        'geolocationOff' => $geofence_off
+                                    base64_decode('bGF0') => $lat,
+                                    base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                                    base64_decode('c2VsZmll') => $camera,
+                                    base64_decode('Z3Bz') => $gps,
+                                    base64_decode('bG5n') => $lng,
+                                    base64_decode('cmFkaXVz') => $radius,
+                                    base64_decode('cmVndWxlcg==') => $reguler,
+                                    base64_decode('YnJlYWs=') => $break,
+                                    base64_decode('YWJzZW5jZU91dA==') => $absenceOut,
+                                    base64_decode('bWVudQ==') => [
+                                        base64_decode('bWVudUJyZWFr') => $menuBreak,
+                                        base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                                        base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                                        base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                                        base64_decode('bWVudVZpc2l0') => $menuVisit,
+                                        base64_decode('bWVudUR1dHk=') => $menuDuty,
+                                        base64_decode('bWVudUZpbmlzaA==') => $menuFinish,
+                                        base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                                     ],
                                 ]);
                             }
                         }
-                        // buat baru end
-                        $a1 = "4";
+                        $a1 = base64_decode('NA==');
                     }
                 }
             }
 
-            // pentingg dirubah
             return response()->json([
-                'message' => 'Absen Terkirim',
-                'message' => 'ssssssa',
-                // 'data' =>   $c,
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('bWVzc2FnZQ==') => base64_decode('c3Nzc3NzYQ=='),
 
-                'excuseC' => $excuseC,
-                'excuse' => $excuse,
-                'request_excuse' =>  $absence_excuse,
+                base64_decode('ZXhjdXNlQw==') => $excuseC,
+                base64_decode('ZXhjdXNl') => $excuse,
+                base64_decode('cmVxdWVzdF9leGN1c2U=') =>  $absence_excuse,
 
-                'visitC' => $visitC,
-                'visit' => $visit,
-                'request_visit' =>  $absence_visit,
-                // 'data' =>   $c,
+                base64_decode('dmlzaXRD') => $visitC,
+                base64_decode('dmlzaXQ=') => $visit,
+                base64_decode('cmVxdWVzdF92aXNpdA==') =>  $absence_visit,
 
-                'lat' => $coordinat->lat,
-                'fingerfrint' => $fingerprint,
-                'selfie' => $camera,
-                'gps' => $gps,
-                'lng' => $coordinat->lng,
-                'radius' => $coordinat->radius,
-                'reguler' => $reguler,
-                'break' => $break,
-                'absenceOut' => $absenceOut,
-                'menu' => [
-                    'menuBreak' => $menuBreak,
-                    'menuExcuse' => $menuExcuse,
-                    'menuReguler' => $menuReguler,
-                    'menuHoliday' => $menuHoliday,
-                    'menuVisit' => $menuVisit,
-                    'menuDuty' => $menuDuty,
-                    'menuFinish' => $menuFinish,
-                    'geolocationOff' => $geofence_off
+                base64_decode('bGF0') => $lat,
+                base64_decode('ZmluZ2VyZnJpbnQ=') => $fingerprint,
+                base64_decode('c2VsZmll') => $camera,
+                base64_decode('Z3Bz') => $gps,
+                base64_decode('bG5n') => $lng,
+                base64_decode('cmFkaXVz') => $radius,
+                base64_decode('cmVndWxlcg==') => $reguler,
+                base64_decode('YnJlYWs=') => $break,
+                base64_decode('YWJzZW5jZU91dA==') => $absenceOut,
+                base64_decode('bWVudQ==') => [
+                    base64_decode('bWVudUJyZWFr') => $menuBreak,
+                    base64_decode('bWVudUV4Y3VzZQ==') => $menuExcuse,
+                    base64_decode('bWVudVJlZ3VsZXI=') => $menuReguler,
+                    base64_decode('bWVudUhvbGlkYXk=') => $menuHoliday,
+                    base64_decode('bWVudVZpc2l0') => $menuVisit,
+                    base64_decode('bWVudUR1dHk=') => $menuDuty,
+                    base64_decode('bWVudUZpbmlzaA==') => $menuFinish,
+                    base64_decode('Z2VvbG9jYXRpb25PZmY=') => $geofence_off
                 ],
             ]);
         }
@@ -1354,91 +1397,76 @@ class AbsenceApiController extends Controller
     public function store(Request $request)
     {
 
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
+        $data_image = '';
 
-        if (date('w') == '0') {
-            $day = '7';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
 
-        // jika ada figerprint bermasalah start
 
-        if ($request->fingerprintError == "yes") {
-            Absence::where('id', $request->absence_id)->update([
-                'status_active' =>  '1'
+        if ($request->fingerprintError == base64_decode('eWVz')) {
+            Absence::where(base64_decode('aWQ='), $request->absence_id)->update([
+                base64_decode('c3RhdHVzX2FjdGl2ZQ==') =>  base64_decode('MQ==')
             ]);
         }
 
-        // jika ada figerprint bermasalah end
 
-        if ($request->file('image')) {
-            $resource_image = $request->file('image');
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
             $name_image = $request->staff_id;
-            $file_ext_image = $request->file('image')->extension();
-            // $id_name_image = str_replace(' ', '-', $id_image);
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
 
-            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
 
-            // tambah watermark start
-            $image = $request->file('image');
+            $image = $request->file(base64_decode('aW1hZ2U='));
 
             $imgFile = Image::make($image->getRealPath());
 
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
             $imgFile->orientate();
-
-            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
-
-            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                 $font->size(14);
-                $font->color('#000000');
-                $font->valign('top');
-            })->save($basepath . '/' . $name_image);
-
-            // tambah watermark end
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
 
 
-            // $resource_image->move($basepath . $img_path, $name_image);
+
             $data_image = $name_image;
         }
 
 
         if ($responseImage != '') {
             return response()->json([
-                'message' => $responseImage,
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
             ]);
         }
 
-        $absenceBefore = AbsenceLog::select('register')
-            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            ->where('absence_id', $request->absence_id)
-            ->where('queue', '1')
-            ->where('type', 'presence')
+        $absenceBefore = AbsenceLog::select(base64_decode('cmVnaXN0ZXI='))
+            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+            ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
             ->first();
 
-        // mencari durasi
         $duration = 0;
-        if ($request->queue == "2") {
-            $absenceBefore2 = AbsenceLog::selectRaw('absence_logs.id, register, absence_logs.expired_date, absence_logs.absence_id')
-                ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('absence_id', $request->absence_id)
-                ->where('type', $request->type)
-                ->where('queue', '1')
+        if ($request->queue == base64_decode('Mg==')) {
+            $absenceBefore2 = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCByZWdpc3RlciwgYWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSwgYWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), $request->type)
+                ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
                 ->first();
-            // return response()->json([
-            //     'message' => $absenceBefore2,
-            // ]);
             $day3 = $absenceBefore2->register;
             $day3 = strtotime($day3);
-            $day4 = date('Y-m-d H:i:s');
+            $day4 = date(base64_decode('WS1tLWQgSDppOnM='));
             $day4 = strtotime($day4);
 
             $duration = ($day4 - $day3) / 3600;
@@ -1450,33 +1478,32 @@ class AbsenceApiController extends Controller
             $day1 = $absenceBefore->register;
         }
 
-        if ($request->type == "presence" && $request->queue == "1") {
+        if ($request->type == base64_decode('cHJlc2VuY2U=') && $request->queue == base64_decode('MQ==')) {
             $outDuration = 0;
         } else {
             $day1 = strtotime($day1);
-            $day2 = date('Y-m-d H:i:s');
+            $day2 = date(base64_decode('WS1tLWQgSDppOnM='));
             $day2 = strtotime($day2);
 
             $outDuration = ($day2 - $day1) / 3600;
         }
 
-        // variable early dan late
         $late = 0;
         $early = 0;
         try {
-            $upload_image = AbsenceLog::where('id', $request->id)->first();
-            if ($request->type == "presence") {
-                if (date('Y-m-d H:i:s') > $upload_image->timein) {
+            $upload_image = AbsenceLog::where(base64_decode('aWQ='), $request->id)->first();
+            if ($request->type == base64_decode('cHJlc2VuY2U=')) {
+                if (date(base64_decode('WS1tLWQgSDppOnM=')) > $upload_image->timein) {
                     $dayL1 = $upload_image->timein;
                     $dayL1 = strtotime($dayL1);
-                    $dayL2 = date('Y-m-d H:i:s');
+                    $dayL2 = date(base64_decode('WS1tLWQgSDppOnM='));
                     $dayL2 = strtotime($dayL2);
 
                     $late = ($dayL2 - $dayL1) / 3600;
                 } else {
                     $dayE1 = $upload_image->timein;
                     $dayE1 = strtotime($dayE1);
-                    $dayE2 = date('Y-m-d H:i:s');
+                    $dayE2 = date(base64_decode('WS1tLWQgSDppOnM='));
                     $dayE2 = strtotime($dayE2);
 
                     $early = ($dayE1 - $dayE2) / 3600;
@@ -1489,395 +1516,555 @@ class AbsenceApiController extends Controller
 
 
             $upload_image->image = $data_image;
-            // sementara start
             $upload_image->created_by_staff_id = $request->staff_id;
             $upload_image->updated_by_staff_id = $request->staff_id;
-            $upload_image->register = date('Y-m-d H:i:s');
-            // $upload_image->late = $late;
-            // $upload_image->early = $early;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->duration = $duration;
 
-            // sementara end
-            $upload_image->register = date('Y-m-d H:i:s');
-            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;
             $upload_image->status =  0;
             $upload_image->accuracy = $request->accuracy;
             $upload_image->distance = $request->distance;
-            // $upload_image->shift_id = $request->shift_id;
 
             $upload_image->save();
 
-            if ($request->queue == "1") {
-                $end = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')
-                    ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', $request->type)
-                    ->where('absence_logs.status', '1')
-                    ->where('queue', '2')
+            if ($request->queue == base64_decode('MQ==')) {
+                $end = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))
+                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), $request->type)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('MQ=='))
+                    ->where(base64_decode('cXVldWU='), base64_decode('Mg=='))
                     ->first();
-                AbsenceLog::where('id', $end->id)->update(['register' => date('Y-m-d H:i:s')]);
+                AbsenceLog::where(base64_decode('aWQ='), $end->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM='))]);
             }
 
-            // start update request
-            if ($upload_image->absence_request_id != "" && $upload_image->absence_request_id != null) {
-                AbsenceRequest::where('id', $upload_image->absence_request_id)->update(['status' => 'close']);
+            if ($upload_image->absence_request_id != '' && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where(base64_decode('aWQ='), $upload_image->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U=')]);
             }
 
-            // end update request
-            if ($request->type != "extra") {
-                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'presence')
-                    ->orderBy('queue', 'DESC')
+            if ($request->type != base64_decode('ZXh0cmE=')) {
+                $out = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
+                    ->orderBy(base64_decode('cXVldWU='), base64_decode('REVTQw=='))
                     ->first();
-                AbsenceLog::where('id', $out->id)->update([
-                    'register' => date('Y-m-d H:i:s'),
-                    'duration' => $outDuration
+                AbsenceLog::where(base64_decode('aWQ='), $out->id)->update([
+                    base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')),
+                    base64_decode('ZHVyYXRpb24=') => $outDuration
                 ]);
             }
 
-            if ($request->queue == "1" && $request->type == "presence") {
-                $check = AbsenceLog::where('absence_id', $out->absence_id)
-                    ->where('absence_category_id', 3)
+            if ($request->queue == base64_decode('MQ==') && $request->type == base64_decode('cHJlc2VuY2U=')) {
+                $check = AbsenceLog::where(base64_decode('YWJzZW5jZV9pZA=='), $out->absence_id)
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), 3)
                     ->first();
                 if (!$check) {
-                    // buat absen istirahat
                     AbsenceLog::create([
 
-                        'absence_id' => $out->absence_id,
-                        'absence_category_id' => 3,
-                        'status' => '1',
-                        'expired_date' => $out->expired_date,
-                        'start_date' => date('Y-m-d H:i:10'),
+                        base64_decode('YWJzZW5jZV9pZA==') => $out->absence_id,
+                        base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => 3,
+                        base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                        base64_decode('ZXhwaXJlZF9kYXRl') => $out->expired_date,
+                        base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEw')),
 
                     ]);
                     AbsenceLog::create([
 
-                        'absence_id' => $out->absence_id,
-                        'absence_category_id' => 4,
-                        'status' => '1',
-                        'expired_date' => $out->expired_date,
-                        'start_date' => date('Y-m-d H:i:11'),
+                        base64_decode('YWJzZW5jZV9pZA==') => $out->absence_id,
+                        base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => 4,
+                        base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                        base64_decode('ZXhwaXJlZF9kYXRl') => $out->expired_date,
+                        base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEx')),
 
                     ]);
-                    // buat absen istirahat end
                 }
             }
 
 
             return response()->json([
-                'message' => 'Absen Terkirim',
-                'data' => $upload_image,
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
 
-    // create absen baru
+
+    public function storeNew(Request $request)
+    {
+
+
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
+        $responseImage = '';
+        $data_image = '';
+
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
+        } else {
+            $day = date(base64_decode('dw=='));
+        }
+
+
+        if ($request->fingerprintError == base64_decode('eWVz')) {
+            Absence::where(base64_decode('aWQ='), $request->absence_id)->update([
+                base64_decode('c3RhdHVzX2FjdGl2ZQ==') =>  base64_decode('MQ==')
+            ]);
+        }
+
+
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
+            $name_image = $request->staff_id;
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
+
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
+
+            $image = $request->file(base64_decode('aW1hZ2U='));
+
+            $imgFile = Image::make($image->getRealPath())->orientate();
+
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
+
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
+                $font->size(14);
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
+
+
+
+            $data_image = $name_image;
+        }
+
+
+        if ($responseImage != '') {
+            return response()->json([
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
+            ]);
+        }
+
+        $absenceBefore = AbsenceLog::select(base64_decode('cmVnaXN0ZXI='))
+            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+            ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
+            ->first();
+
+        $duration = 0;
+        if ($request->queue == base64_decode('Mg==')) {
+            $absenceBefore2 = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCByZWdpc3RlciwgYWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSwgYWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), $request->type)
+                ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+                ->first();
+            $day3 = $absenceBefore2->register;
+            $day3 = strtotime($day3);
+            $day4 = date(base64_decode('WS1tLWQgSDppOnM='));
+            $day4 = strtotime($day4);
+
+            $duration = ($day4 - $day3) / 3600;
+        }
+
+        if ($absenceBefore != null) {
+            $day1 = $absenceBefore->register;
+        } else {
+            $day1 = $absenceBefore->register;
+        }
+
+        if ($request->type == base64_decode('cHJlc2VuY2U=') && $request->queue == base64_decode('MQ==')) {
+            $outDuration = 0;
+        } else {
+            $day1 = strtotime($day1);
+            $day2 = date(base64_decode('WS1tLWQgSDppOnM='));
+            $day2 = strtotime($day2);
+
+            $outDuration = ($day2 - $day1) / 3600;
+        }
+
+        $late = 0;
+        $early = 0;
+        try {
+            $upload_image = AbsenceLog::where(base64_decode('aWQ='), $request->id)->first();
+            if ($request->type == base64_decode('cHJlc2VuY2U=')) {
+                if (date(base64_decode('WS1tLWQgSDppOnM=')) > $upload_image->timein) {
+                    $dayL1 = $upload_image->timein;
+                    $dayL1 = strtotime($dayL1);
+                    $dayL2 = date(base64_decode('WS1tLWQgSDppOnM='));
+                    $dayL2 = strtotime($dayL2);
+
+                    $late = ($dayL2 - $dayL1) / 3600;
+                } else {
+                    $dayE1 = $upload_image->timein;
+                    $dayE1 = strtotime($dayE1);
+                    $dayE2 = date(base64_decode('WS1tLWQgSDppOnM='));
+                    $dayE2 = strtotime($dayE2);
+
+                    $early = ($dayE1 - $dayE2) / 3600;
+                }
+            }
+
+            $absence = Absence::where(base64_decode('aWQ='), $request->absence_id)
+                ->first();
+
+            $change_register = base64_decode('ZmFsc2U=');
+            if ($request->type == base64_decode('cHJlc2VuY2U=')) {
+                $cek_toleransi_untuk2shift = Absence::join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('Mg=='))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('MA=='))
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnRpbWVvdXQ='), base64_decode('Pj0='), (date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LTUgbWludXRlcw=='), strtotime(date(base64_decode('WS1tLWQgSDppOnM=')))))))
+                    ->where(base64_decode('c3RhZmZfaWQ='), $absence->staff_id)
+                    ->first();
+                if ($cek_toleransi_untuk2shift) {
+                    $late = 0;
+                    $change_register = base64_decode('dHJ1ZQ==');
+                }
+            }
+
+
+            $upload_image->late = $late;
+            $upload_image->early = $early;
+
+
+            $upload_image->image = $data_image;
+            $upload_image->created_by_staff_id = $request->staff_id;
+            $upload_image->updated_by_staff_id = $request->staff_id;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->duration = $duration;
+
+            $upload_image->register = $change_register == base64_decode('dHJ1ZQ==') ? $upload_image->timein : date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->lat = $request->lat;
+            $upload_image->lng = $request->lng;
+            $upload_image->status =  0;
+            $upload_image->accuracy = base64_decode('MA==');
+            $upload_image->distance = $request->distance;
+
+            $upload_image->save();
+
+            if ($request->queue == base64_decode('MQ==')) {
+                $end = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))
+                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), $request->type)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('MQ=='))
+                    ->where(base64_decode('cXVldWU='), base64_decode('Mg=='))
+                    ->first();
+                AbsenceLog::where(base64_decode('aWQ='), $end->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM='))]);
+            }
+
+            if ($upload_image->absence_request_id != '' && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where(base64_decode('aWQ='), $upload_image->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U=')]);
+            }
+
+            if ($request->type != base64_decode('ZXh0cmE=')) {
+                $out = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
+                    ->orderBy(base64_decode('cXVldWU='), base64_decode('REVTQw=='))
+                    ->first();
+                AbsenceLog::where(base64_decode('aWQ='), $out->id)->update([
+                    base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')),
+                    base64_decode('ZHVyYXRpb24=') => $outDuration
+                ]);
+            }
+
+            if ($request->queue == base64_decode('MQ==') && $request->type == base64_decode('cHJlc2VuY2U=')) {
+                $check = AbsenceLog::where(base64_decode('YWJzZW5jZV9pZA=='), $out->absence_id)
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), 3)
+                    ->first();
+                if (!$check) {
+                    AbsenceLog::create([
+
+                        base64_decode('YWJzZW5jZV9pZA==') => $out->absence_id,
+                        base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => 3,
+                        base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                        base64_decode('ZXhwaXJlZF9kYXRl') => $out->expired_date,
+                        base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEw')),
+
+                    ]);
+                    AbsenceLog::create([
+
+                        base64_decode('YWJzZW5jZV9pZA==') => $out->absence_id,
+                        base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => 4,
+                        base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                        base64_decode('ZXhwaXJlZF9kYXRl') => $out->expired_date,
+                        base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEx')),
+
+                    ]);
+                }
+            }
+
+
+            return response()->json([
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
+            ]);
+        }
+    }
+
+
     public function storeLocation(Request $request)
     {
 
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
-        if (date('w') == '0') {
-            $day = '7';
+        $data_image = '';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
-        // cari durasi kerja
 
-        $workDuration = Absence::join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
-            ->join('work_type_days', 'work_type_days.id', '=', 'absence_logs.work_type_day_id')
-            ->select('work_type_days.duration')->where('absence_id', $request->absence_id)->where('work_type_days.absence_category_id', '1')
+        $workDuration = Absence::join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+            ->join(base64_decode('d29ya190eXBlX2RheXM='), base64_decode('d29ya190eXBlX2RheXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLndvcmtfdHlwZV9kYXlfaWQ='))
+            ->select(base64_decode('d29ya190eXBlX2RheXMuZHVyYXRpb24='))->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)->where(base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('MQ=='))
             ->first();
         if (!$workDuration) {
-            $workDuration = Absence::join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
-                ->join('shift_group_timesheets', 'shift_group_timesheets.id', '=', 'absence_logs.shift_group_timesheet_id')
-                ->select('shift_group_timesheets.duration')->where('absence_id', $request->absence_id)->where('shift_group_timesheets.absence_category_id', '1')
+            $workDuration = Absence::join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+                ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLnNoaWZ0X2dyb3VwX3RpbWVzaGVldF9pZA=='))
+                ->select(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5kdXJhdGlvbg=='))->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)->where(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'), base64_decode('MQ=='))
                 ->first()->duration;
         } else {
             $workDuration = $workDuration->duration;
         }
-        // set durasi start
-        $absenceBefore = AbsenceLog::select('register')
-            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            ->where('absence_id', $request->absence_id)
-            ->where('queue', '1')
-            ->where('type', 'presence')
+        $absenceBefore = AbsenceLog::select(base64_decode('cmVnaXN0ZXI='))
+            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+            ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
             ->first();
 
-        // mencari durasi
-        // $duration = 0;
-        // if ($request->queue == "2") {
-        //     $absenceBefore2 = AbsenceLog::selectRaw('absence_logs.id, register, absence_logs.expired_date, absence_logs.absence_id')
-        //         ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-        //         ->where('absence_id', $request->absence_id)
-        //         ->where('type', $request->type)
-        //         ->where('absence_request_id', $request->absence_request_id)
-        //         // ->where('absence_logs.status', '1')
-        //         ->where('queue', '1')
-        //         ->first();
-        //     // AbsenceLog::where('id', $end->id)->update(['register' => date('Y-m-d H:i:s')]);
-        //     $day3 = $absenceBefore2->register;
-        //     $day3 = strtotime($day3);
-        //     $day4 = date('Y-m-d H:i:s');
-        //     $day4 = strtotime($day4);
 
-        //     $duration = ($day4 - $day3) / 3600;
-        // }
 
 
         $day1 = $absenceBefore->register;
         $day1 = strtotime($day1);
-        $day2 = date('Y-m-d H:i:s');
+        $day2 = date(base64_decode('WS1tLWQgSDppOnM='));
         $day2 = strtotime($day2);
 
         $outDuration = ($day2 - $day1) / 3600;
 
-        if ($request->absence_category_id == "11") {
+        if ($request->absence_category_id == base64_decode('MTE=')) {
             if ($outDuration < ($workDuration / 2)) {
-                Absence::where('id', $request->absence_id)->update([
-                    'status_active' => '3'
+                Absence::where(base64_decode('aWQ='), $request->absence_id)->update([
+                    base64_decode('c3RhdHVzX2FjdGl2ZQ==') => base64_decode('Mw==')
                 ]);
             }
         }
 
-        // set durasi end
 
-        if ($request->file('image')) {
-            $resource_image = $request->file('image');
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
             $name_image = $request->satff_id;
-            $file_ext_image = $request->file('image')->extension();
-            // $id_name_image = str_replace(' ', '-', $id_image);
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
 
-            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
 
-            // tambah watermark start
-            $image = $request->file('image');
+            $image = $request->file(base64_decode('aW1hZ2U='));
 
             $imgFile = Image::make($image->getRealPath());
 
-            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
 
-            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                 $font->size(14);
-                $font->color('#000000');
-                $font->valign('top');
-            })->save($basepath . '/' . $name_image);
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
 
-            // tambah watermark end
-            // $resource_image->move($basepath . $img_path, $name_image);
             $data_image = $name_image;
         }
 
 
         if ($responseImage != '') {
             return response()->json([
-                'message' => $responseImage,
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
             ]);
         }
 
-        try {
-            // cek absen sudah ada atau tidak ada
-            $check = AbsenceLog::where('absence_id', $request->absence_id)
-                ->where('absence_request_id', $request->absence_request_id)
-                ->where('absence_category_id', $request->absence_category_id_end)->first();
-            if (!$check) {
-                $upload_image = new AbsenceLog;
-                $upload_image->image = $data_image;
-                // sementara start
-                $upload_image->created_by_staff_id = $request->satff_id;
-                $upload_image->updated_by_staff_id = $request->satff_id;
-                $upload_image->register = date('Y-m-d H:i:s');
-                $upload_image->absence_id = $request->absence_id;
-                $upload_image->absence_request_id = $request->absence_request_id;
-                // $upload_image->late = $late;
-                // $upload_image->early = $early;
-                // $upload_image->duration = $duration;
-                // sementara end
-                $upload_image->register = date('Y-m-d H:i:s');
-                $upload_image->created_at = date('Y-m-d H:i:s');
-                $upload_image->updated_at = date('Y-m-d H:i:s');
-                $upload_image->absence_category_id = $request->absence_category_id;
-                $upload_image->lat = $request->lat;
-                $upload_image->lng = $request->lng;
-                $upload_image->status =  0;
-                $upload_image->expired_date = $request->expired_date;
-                $upload_image->start_date = date('Y-m-d H:i:10');
-                $upload_image->accuracy = $request->accuracy;
-                $upload_image->distance = $request->distance;
-                // $upload_image->shift_id = $request->shift_id;
+        $check = AbsenceLog::where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)
+            ->first();
+        if (!$check) {
+            $upload_image = new AbsenceLog;
+            $upload_image->image = $data_image;
+            $upload_image->created_by_staff_id = $request->satff_id;
+            $upload_image->updated_by_staff_id = $request->satff_id;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->absence_id = $request->absence_id;
+            $upload_image->absence_request_id = $request->absence_request_id;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->created_at = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->absence_category_id = $request->absence_category_id;
+            $upload_image->lat = $request->lat;
+            $upload_image->lng = $request->lng;
+            $upload_image->status =  0;
+            $upload_image->expired_date = $request->expired_date;
+            $upload_image->start_date = date(base64_decode('WS1tLWQgSDppOjEw'));
+            $upload_image->accuracy = $request->accuracy;
+            $upload_image->distance = $request->distance;
 
-                $upload_image->save();
+            $upload_image->save();
 
-                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'presence')
-                    ->orderBy('queue', 'DESC')
-                    ->first();
+            $out = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
+                ->orderBy(base64_decode('cXVldWU='), base64_decode('REVTQw=='))
+                ->first();
 
-                AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration]);
+            AbsenceLog::where(base64_decode('aWQ='), $out->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')), base64_decode('ZHVyYXRpb24=') => $outDuration]);
 
-                $breakin = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'break')
-                    ->where('queue', '1')
-                    ->first();
+            $breakin = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), base64_decode('YnJlYWs='))
+                ->where(base64_decode('c3RhdHVz'), 1)
+                ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+                ->first();
+            if ($breakin) {
+                AbsenceLog::where(base64_decode('aWQ='), $breakin->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')), base64_decode('c3RhdHVz') => base64_decode('MA==')]);
+            }
+            $breakout = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), base64_decode('YnJlYWs='))
+                ->where(base64_decode('c3RhdHVz'), 1)
+                ->where(base64_decode('cXVldWU='), base64_decode('Mg=='))
+                ->first();
 
-                AbsenceLog::where('id', $breakin->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-
-                $breakout = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'break')
-                    ->where('queue', '2')
-                    ->first();
-
-                AbsenceLog::where('id', $breakout->id)->update(['register' => date('Y-m-d H:i:s'), 'status' => '0']);
-
-                // buat absen endnya
-                $absenceR = AbsenceRequest::where('id', $request->absence_request_id)->first();
+            if ($breakout) {
+                AbsenceLog::where(base64_decode('aWQ='), $breakout->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')), base64_decode('c3RhdHVz') => base64_decode('MA==')]);
+            }
+            $absenceR = AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->first();
 
 
-                if ($request->absence_category_id == "11" && $absenceR->type == "out") {
-                    AbsenceLog::create([
-                        'absence_id' => $request->absence_id,
-                        'absence_category_id' => $request->absence_category_id_end,
-                        'status' => '0',
-                        'register' => date('Y-m-d H:i:s'),
-                        'absence_request_id' => $request->absence_request_id,
-                        'expired_date' => $request->expired_date,
-                        'start_date' => date('Y-m-d H:i:10'),
+            if ($request->absence_category_id == base64_decode('MTE=') && $absenceR->type == base64_decode('b3V0')) {
+                AbsenceLog::create([
+                    base64_decode('YWJzZW5jZV9pZA==') => $request->absence_id,
+                    base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $request->absence_category_id_end,
+                    base64_decode('c3RhdHVz') => base64_decode('MA=='),
+                    base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')),
+                    base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk') => $request->absence_request_id,
+                    base64_decode('ZXhwaXJlZF9kYXRl') => $request->expired_date,
+                    base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEw')),
 
-                    ]);
-                    AbsenceLog::where('id', $out->id)->update(['register' => date('Y-m-d H:i:s'), 'duration' => $outDuration, 'status' => '0']);
-                } else {
-                    AbsenceLog::create([
-                        'absence_id' => $request->absence_id,
-                        'absence_category_id' => $request->absence_category_id_end,
-                        'status' => '1',
-                        'absence_request_id' => $request->absence_request_id,
-                        'expired_date' => $request->expired_date,
-                        'start_date' => date('Y-m-d H:i:10'),
-
-                    ]);
-                }
-
-
-                // cek absen sudah ada atau tidak ada
-
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
-                if ($request->absence_category_id == "11" && $absenceR->type == "out") {
-                    AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close']);
-                }
-                return response()->json([
-                    'message' => 'Absen Terkirim',
-                    'data' => $upload_image,
                 ]);
+                AbsenceLog::where(base64_decode('aWQ='), $out->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')), base64_decode('ZHVyYXRpb24=') => $outDuration, base64_decode('c3RhdHVz') => base64_decode('MA==')]);
             } else {
-                return response()->json([
-                    'message' => 'Tadi Sudah Absen',
+                AbsenceLog::create([
+                    base64_decode('YWJzZW5jZV9pZA==') => $request->absence_id,
+                    base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $request->absence_category_id_end,
+                    base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                    base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk') => $request->absence_request_id,
+                    base64_decode('ZXhwaXJlZF9kYXRl') => $request->expired_date,
+                    base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEw')),
+
                 ]);
             }
-        } catch (QueryException $ex) {
+
+
+
+            AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('YWN0aXZl')]);
+            if ($request->absence_category_id == base64_decode('MTE=') && $absenceR->type == base64_decode('b3V0')) {
+                AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U=')]);
+            }
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
+            ]);
+        } else {
+            return response()->json([
+                base64_decode('bWVzc2FnZQ==') => base64_decode('VGFkaSBTdWRhaCBBYnNlbg=='),
             ]);
         }
     }
 
-    // absen lokasi end
     public function storeLocationEnd(Request $request)
     {
 
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
-        if (date('w') == '0') {
-            $day = '7';
+        $data_image = '';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
 
-        $absence_check = AbsenceLog::where('id', $request->id)->where('absence_request_id', $request->absence_request_id)->first();
-        if ($absence_check->absence_category_id == "12") {
+        $absence_check = AbsenceLog::where(base64_decode('aWQ='), $request->id)->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)->first();
+        if ($absence_check->absence_category_id == base64_decode('MTI=')) {
 
-            Absence::where('id', $absence_check->absence_id)->update([
-                'status_active' => ""
+            Absence::where(base64_decode('aWQ='), $absence_check->absence_id)->update([
+                base64_decode('c3RhdHVzX2FjdGl2ZQ==') => ''
             ]);
         }
 
-        if ($request->file('image')) {
-            $resource_image = $request->file('image');
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
             $name_image = $request->staff_id;
-            $file_ext_image = $request->file('image')->extension();
-            // $id_name_image = str_replace(' ', '-', $id_image);
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
 
-            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
-            // tambah watermark start
-            $image = $request->file('image');
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
+            $image = $request->file(base64_decode('aW1hZ2U='));
 
             $imgFile = Image::make($image->getRealPath());
 
-            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
 
-            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                 $font->size(14);
-                $font->color('#000000');
-                $font->valign('top');
-            })->save($basepath . '/' . $name_image);
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
 
-            // tambah watermark end
-            // $resource_image->move($basepath . $img_path, $name_image);
             $data_image = $name_image;
         }
 
 
         if ($responseImage != '') {
             return response()->json([
-                'message' => $responseImage,
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
             ]);
         }
 
-        $absenceBefore = AbsenceLog::select('register')
-            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            ->where('absence_id', $request->absence_id)
-            ->where('queue', '1')
-            ->where('type', 'presence')
+        $absenceBefore = AbsenceLog::select(base64_decode('cmVnaXN0ZXI='))
+            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+            ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
             ->first();
 
-        // mencari durasi
         $duration = 0;
-        if ($request->queue == "2") {
-            $absenceBefore2 = AbsenceLog::selectRaw('absence_logs.id, register, absence_logs.expired_date, absence_logs.absence_id')
-                ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                ->where('absence_id', $request->absence_id)
-                ->where('type', $request->type)
-                ->where('absence_request_id', $request->absence_request_id)
-                // ->where('absence_logs.status', '1')
-                ->where('queue', '1')
+        if ($request->queue == base64_decode('Mg==')) {
+            $absenceBefore2 = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCByZWdpc3RlciwgYWJzZW5jZV9sb2dzLmV4cGlyZWRfZGF0ZSwgYWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                ->where(base64_decode('dHlwZQ=='), $request->type)
+                ->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)
+                ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
                 ->first();
-            // AbsenceLog::where('id', $end->id)->update(['register' => date('Y-m-d H:i:s')]);
             $day3 = $absenceBefore2->register;
             $day3 = strtotime($day3);
-            $day4 = date('Y-m-d H:i:s');
+            $day4 = date(base64_decode('WS1tLWQgSDppOnM='));
             $day4 = strtotime($day4);
 
             $duration = ($day4 - $day3) / 3600;
@@ -1886,315 +2073,268 @@ class AbsenceApiController extends Controller
 
         $day1 = $absenceBefore->register;
         $day1 = strtotime($day1);
-        $day2 = date('Y-m-d H:i:s');
+        $day2 = date(base64_decode('WS1tLWQgSDppOnM='));
         $day2 = strtotime($day2);
 
         $outDuration = ($day2 - $day1) / 3600;
 
         try {
-            $upload_image = AbsenceLog::where('id', $request->id)->where('absence_request_id', $request->absence_request_id)->first();
+            $upload_image = AbsenceLog::where(base64_decode('aWQ='), $request->id)->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)->first();
             $upload_image->image = $data_image;
-            // sementara start
             $upload_image->created_by_staff_id = $request->staff_id;
             $upload_image->updated_by_staff_id = $request->staff_id;
-            $upload_image->register = date('Y-m-d H:i:s');
-            // $upload_image->late = $late;
-            // $upload_image->early = $early;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->duration = $duration;
-            // sementara end
-            $upload_image->register = date('Y-m-d H:i:s');
-            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;
             $upload_image->status =  0;
             $upload_image->accuracy = $request->accuracy;
             $upload_image->distance = $request->distance;
-            // $upload_image->shift_id = $request->shift_id;
 
             $upload_image->save();
 
-            if ($request->queue == "1") {
-                $end = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')
-                    ->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', $request->type)
-                    ->where('absence_logs.status', '1')
-                    ->where('queue', '2')
+            AbsenceLog::where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)->where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => 0]);
+
+
+            if ($request->queue == base64_decode('MQ==')) {
+                $end = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))
+                    ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), $request->type)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLnN0YXR1cw=='), base64_decode('MQ=='))
+                    ->where(base64_decode('cXVldWU='), base64_decode('Mg=='))
                     ->first();
-                AbsenceLog::where('id', $end->id)->update(['register' => date('Y-m-d H:i:s')]);
+                AbsenceLog::where(base64_decode('aWQ='), $end->id)->update([base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM='))]);
             }
 
-            // start update request
-            if ($upload_image->absence_request_id != "" && $upload_image->absence_request_id != null) {
-                AbsenceRequest::where('id', $upload_image->absence_request_id)->update(['status' => 'close']);
+            if ($upload_image->absence_request_id != '' && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where(base64_decode('aWQ='), $upload_image->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U=')]);
             }
 
-            // end update request
-            if ($request->type != "extra") {
-                $out = AbsenceLog::selectRaw('absence_logs.id, absence_logs.expired_date, absence_logs.absence_id')->join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-                    ->where('absence_id', $request->absence_id)
-                    ->where('type', 'presence')
-                    ->orderBy('queue', 'DESC')
+            if ($request->type != base64_decode('ZXh0cmE=')) {
+                $out = AbsenceLog::selectRaw(base64_decode('YWJzZW5jZV9sb2dzLmlkLCBhYnNlbmNlX2xvZ3MuZXhwaXJlZF9kYXRlLCBhYnNlbmNlX2xvZ3MuYWJzZW5jZV9pZA=='))->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                    ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+                    ->where(base64_decode('dHlwZQ=='), base64_decode('cHJlc2VuY2U='))
+                    ->orderBy(base64_decode('cXVldWU='), base64_decode('REVTQw=='))
                     ->first();
-                AbsenceLog::where('id', $out->id)->update([
-                    'register' => date('Y-m-d H:i:s'),
-                    'duration' => $outDuration
+                AbsenceLog::where(base64_decode('aWQ='), $out->id)->update([
+                    base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQgSDppOnM=')),
+                    base64_decode('ZHVyYXRpb24=') => $outDuration
                 ]);
             }
 
-            // if ($request->queue == "1" && $request->type == "presence") {
 
-            //     // buat absen istirahat
-            //     AbsenceLog::create([
 
-            //         'absence_id' => $out->absence_id,
-            //         'absence_category_id' => 3,
-            //         'status' => '1',
-            //         'expired_date' => $out->expired_date,
-            //         'start_date' => date('Y-m-d H:i:10'),
 
-            //     ]);
-            //     AbsenceLog::create([
 
-            //         'absence_id' => $out->absence_id,
-            //         'absence_category_id' => 4,
-            //         'status' => '1',
-            //         'expired_date' => $out->expired_date,
-            //         'start_date' => date('Y-m-d H:i:11'),
 
-            //     ]);
-            //     // buat absen istirahat end
-            // }
 
 
             return response()->json([
-                'message' => 'Absen Terkirim',
-                'data' => $upload_image,
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
 
-    // create absen baru
     public function storeLocationDuty(Request $request)
     {
 
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/RequestFile";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9SZXF1ZXN0RmlsZQ==');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
-        if (date('w') == '0') {
-            $day = '7';
+        $data_image = '';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
 
-        $AbsenceRequestLogs = AbsenceRequestLogs::where('absence_request_id', $request->absence_request_id)
+        $AbsenceRequestLogs = AbsenceRequestLogs::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $request->absence_request_id)
             ->first();
 
-        if ($request->file('image')) {
-            $resource_image = $request->file('image');
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
             $name_image = $request->satff_id;
-            $file_ext_image = $request->file('image')->extension();
-            // $id_name_image = str_replace(' ', '-', $id_image);
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
 
-            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
-            // tambah watermark start
-            $image = $request->file('image');
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
+            $image = $request->file(base64_decode('aW1hZ2U='));
 
             $imgFile = Image::make($image->getRealPath());
 
-            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
 
-            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                 $font->size(14);
-                $font->color('#000000');
-                $font->valign('top');
-            })->save($basepath . '/' . $name_image);
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
 
-            // tambah watermark end
-            // $resource_image->move($basepath . $img_path, $name_image);
             $data_image = $name_image;
         }
 
 
         if ($responseImage != '') {
             return response()->json([
-                'message' => $responseImage,
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
             ]);
         }
         if ($AbsenceRequestLogs) {
-            $type = "request_log_out";
+            $type = base64_decode('cmVxdWVzdF9sb2dfb3V0');
         } else {
-            $type = "request_log_in";
+            $type = base64_decode('cmVxdWVzdF9sb2dfaW4=');
         }
 
         try {
 
             $upload_image = new AbsenceRequestLogs;
             $upload_image->image = $data_image;
-            // sementara start
-            // $upload_image->created_by_staff_id = $request->staff_id;
-            // $upload_image->updated_by_staff_id = $request->staff_id;
-            $upload_image->register = date('Y-m-d H:i:s');
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->absence_request_id = $request->absence_request_id;
             $upload_image->type = $type;
             $upload_image->memo = $request->memo;
-            $upload_image->created_at = date('Y-m-d H:i:s');
-            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->created_at = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;
-            // $upload_image->accuracy = $request->accuracy;
-            // $upload_image->distance = $request->distance;
-            // $upload_image->shift_id = $request->shift_id;
 
             $upload_image->save();
 
             if ($AbsenceRequestLogs) {
-                $absenceRequest = AbsenceRequest::select('category', DB::raw('DATE(start) as start'), DB::raw('DATE(end) as end'))
-                    ->where('id', $request->absence_request_id)->first();
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'close', 'attendance' => date("Y-m-d H:i:s", strtotime('- ' . 1 . ' days', strtotime(date('Y-m-d ' . '23:59:59'))))]);
-                $check = AbsenceLog::join('absences', 'absences.id', '=', 'absence_logs.absence_id')
-                    ->where('absence_category_id', $absenceRequest->category)
-                    ->where('absences.staff_id', $request->staff_id)
-                    ->where('absence_logs.absence_request_id', $request->absence_request_id)
-                    ->whereDate('absences.created_at', $absenceRequest->start)
+                $absenceRequest = AbsenceRequest::select(base64_decode('Y2F0ZWdvcnk='), DB::raw(base64_decode('REFURShzdGFydCkgYXMgc3RhcnQ=')), DB::raw(base64_decode('REFURShlbmQpIGFzIGVuZA==')))
+                    ->where(base64_decode('aWQ='), $request->absence_request_id)->first();
+                AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U='), base64_decode('YXR0ZW5kYW5jZQ==') => date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LSA=') . 1 . base64_decode('IGRheXM='), strtotime(date(base64_decode('WS1tLWQg') . base64_decode('MjM6NTk6NTk=')))))]);
+                $check = AbsenceLog::join(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+                    ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), $absenceRequest->category)
+                    ->where(base64_decode('YWJzZW5jZXMuc3RhZmZfaWQ='), $request->staff_id)
+                    ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfcmVxdWVzdF9pZA=='), $request->absence_request_id)
+                    ->whereDate(base64_decode('YWJzZW5jZXMuY3JlYXRlZF9hdA=='), $absenceRequest->start)
                     ->first();
                 if (!$check) {
-                    Absence::whereDate('created_at', '>', date('Y-m-d'))->delete();
-                    AbsenceLog::whereDate('register', '>', date('Y-m-d'))->delete();
+                    Absence::whereDate(base64_decode('Y3JlYXRlZF9hdA=='), base64_decode('Pg=='), date(base64_decode('WS1tLWQ=')))->delete();
+                    AbsenceLog::whereDate(base64_decode('cmVnaXN0ZXI='), base64_decode('Pg=='), date(base64_decode('WS1tLWQ=')))->delete();
                     $begin = strtotime($absenceRequest->start);
-                    $end   = strtotime(date('Y-m-d'));
+                    $end   = strtotime(date(base64_decode('WS1tLWQ=')));
 
                     for ($i = $begin; $i <= $end; $i = $i + 86400) {
-                        $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                        $holiday = Holiday::whereDate(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQ='), $i))->whereDate(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQ='), $i))->first();
                         if (!$holiday) {
-                            if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+                            if (date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 0 && date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 6) {
 
                                 Absence::create([
-                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                    'staff_id' => $request->staff_id,
-                                    'created_at' => date('Y-m-d H:i:s', $i),
-                                    'updated_at' => date('Y-m-d H:i:s')
+                                    base64_decode('ZGF5X2lk') => date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))),
+                                    base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                                    base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='), $i),
+                                    base64_decode('dXBkYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='))
                                 ]);
                                 AbsenceLog::create([
-                                    'absence_category_id' => $absenceRequest->category == "duty" ? 7 : 8,
-                                    'lat' => '',
-                                    'lng' => '',
-                                    'register' => date('Y-m-d', $i),
-                                    'absence_id' => '',
-                                    'duration' => '',
-                                    'status' => ''
+                                    base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $absenceRequest->category == base64_decode('ZHV0eQ==') ? 7 : 8,
+                                    base64_decode('bGF0') => '',
+                                    base64_decode('bG5n') => '',
+                                    base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQ='), $i),
+                                    base64_decode('YWJzZW5jZV9pZA==') => '',
+                                    base64_decode('ZHVyYXRpb24=') => '',
+                                    base64_decode('c3RhdHVz') => ''
                                 ]);
                             }
                         }
                     }
                 } else {
                     return response()->json([
-                        'message' => 'Tadi Sudah Absen',
+                        base64_decode('bWVzc2FnZQ==') => base64_decode('VGFkaSBTdWRhaCBBYnNlbg=='),
                     ]);
                 }
             } else {
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
-                // $absenceRequest = AbsenceRequest::select('category', DB::raw('DATE(start) as start'), DB::raw('DATE(end) as end'))
-                //     ->where('id', $request->absence_request_id)->first();
+                AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('YWN0aXZl')]);
             }
 
 
             return response()->json([
-                'message' => 'Absen Terkirim',
-                'data' => $upload_image,
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
 
-    // create absen baru
     public function storeLocationExtra(Request $request)
     {
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
-        if (date('w') == '0') {
-            $day = '7';
+        $data_image = '';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
 
-        $cekStatus = AbsenceRequest::where('id', $request->absence_request_id)->first();
+        $cekStatus = AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->first();
 
-        if ($cekStatus->status && $cekStatus->status == "pending") {
+        if ($cekStatus->status && $cekStatus->status == base64_decode('cGVuZGluZw==')) {
             $data = [
-                'day_id' => $day,
-                'staff_id' => $request->staff_id,
-                'created_at' => date('Y-m-d'),
-                'status_active' => '2'
+                base64_decode('ZGF5X2lk') => $day,
+                base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQ=')),
+                base64_decode('c3RhdHVzX2FjdGl2ZQ==') => base64_decode('Mg==')
             ];
         } else {
             $data = [
-                'day_id' => $day,
-                'staff_id' => $request->staff_id,
-                'created_at' => date('Y-m-d')
+                base64_decode('ZGF5X2lk') => $day,
+                base64_decode('c3RhZmZfaWQ=') => $request->staff_id,
+                base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQ='))
             ];
         }
-        $check = AbsenceLog::join('absences', 'absences.id', '=', 'absence_logs.absence_id')
-            ->where('absence_category_id', $request->absence_category_id)
-            ->where('absences.staff_id', $request->staff_id)
-            ->where('absence_logs.absence_request_id', $request->absence_request_id)
-            ->whereDate('absences.created_at', date('Y-m-d'))
+        $check = AbsenceLog::join(base64_decode('YWJzZW5jZXM='), base64_decode('YWJzZW5jZXMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='))
+            ->where(base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA=='), $request->absence_category_id)
+            ->where(base64_decode('YWJzZW5jZXMuc3RhZmZfaWQ='), $request->staff_id)
+            ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfcmVxdWVzdF9pZA=='), $request->absence_request_id)
+            ->whereDate(base64_decode('YWJzZW5jZXMuY3JlYXRlZF9hdA=='), date(base64_decode('WS1tLWQ=')))
             ->first();
 
         if (!$check) {
             $absence = Absence::create($data);
 
-            if ($request->file('image')) {
-                $resource_image = $request->file('image');
+            if ($request->file(base64_decode('aW1hZ2U='))) {
+                $resource_image = $request->file(base64_decode('aW1hZ2U='));
                 $name_image = $request->staff_id;
-                $file_ext_image = $request->file('image')->extension();
-                // $id_name_image = str_replace(' ', '-', $id_image);
-                // $nameIMG = 
-                $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+                $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
+                $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
 
-                // tambah watermark start
-                $image = $request->file('image');
+                $image = $request->file(base64_decode('aW1hZ2U='));
 
                 $imgFile = Image::make($image->getRealPath());
 
-                $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+                $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
 
-                $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                    $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                    $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                     $font->size(14);
-                    $font->color('#000000');
-                    $font->valign('top');
-                })->save($basepath . '/' . $name_image);
+                    $font->color(base64_decode('IzAwMDAwMA=='));
+                    $font->valign(base64_decode('dG9w'));
+                })->save($basepath . base64_decode('Lw==') . $name_image);
 
-                // tambah watermark end
 
-                // $resource_image->move($basepath . $img_path, $name_image);
                 $data_image = $name_image;
             }
 
 
             if ($responseImage != '') {
                 return response()->json([
-                    'message' => $responseImage,
+                    base64_decode('bWVzc2FnZQ==') => $responseImage,
                 ]);
             }
         }
@@ -2203,59 +2343,52 @@ class AbsenceApiController extends Controller
             if (!$check) {
                 $upload_image = new AbsenceLog;
                 $upload_image->image = $data_image;
-                // sementara start
                 $upload_image->created_by_staff_id = $request->staff_id;
                 $upload_image->updated_by_staff_id = $request->staff_id;
-                $upload_image->register = date('Y-m-d H:i:s');
+                $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
                 $upload_image->absence_id = $absence->id;
                 $upload_image->absence_request_id = $request->absence_request_id;
-                // $upload_image->late = $late;
-                // $upload_image->early = $early;
-                // $upload_image->duration = $duration;
-                // sementara end
-                $upload_image->register = date('Y-m-d H:i:s');
-                $upload_image->created_at = date('Y-m-d H:i:s');
-                $upload_image->updated_at = date('Y-m-d H:i:s');
+                $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+                $upload_image->created_at = date(base64_decode('WS1tLWQgSDppOnM='));
+                $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
                 $upload_image->absence_category_id = $request->absence_category_id;
-                $upload_image->lat = $request->lat;
-                $upload_image->lng = $request->lng;
+                $upload_image->lat = $request->lat ?  $request->lat : '';
+                $upload_image->lng = $request->lng ?  $request->lng : '';
                 $upload_image->status =  0;
-                $upload_image->expired_date = date("Y-m-d H:i:s", strtotime('+12 hours', strtotime(date('Y-m-d H:i:s'))));
-                $upload_image->start_date = date('Y-m-d H:i:10');
+                $upload_image->expired_date = date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KzEyIGhvdXJz'), strtotime(date(base64_decode('WS1tLWQgSDppOnM=')))));
+                $upload_image->start_date = date(base64_decode('WS1tLWQgSDppOjEw'));
                 $upload_image->accuracy = $request->accuracy;
                 $upload_image->distance = $request->distance;
-                // $upload_image->shift_id = $request->shift_id;
 
                 $upload_image->save();
 
 
 
 
-                // buat absen endnya
                 AbsenceLog::create([
-                    'absence_id' => $absence->id,
-                    'absence_category_id' => $request->absence_category_id_end,
-                    'status' => '1',
-                    'absence_request_id' => $request->absence_request_id,
-                    'expired_date' =>  date("Y-m-d H:i:s", strtotime('+12 hours', strtotime(date('Y-m-d H:i:s')))),
-                    'start_date' => date('Y-m-d H:i:10'),
+                    base64_decode('YWJzZW5jZV9pZA==') => $absence->id,
+                    base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $request->absence_category_id_end,
+                    base64_decode('c3RhdHVz') => base64_decode('MQ=='),
+                    base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk') => $request->absence_request_id,
+                    base64_decode('ZXhwaXJlZF9kYXRl') =>  date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('KzEyIGhvdXJz'), strtotime(date(base64_decode('WS1tLWQgSDppOnM='))))),
+                    base64_decode('c3RhcnRfZGF0ZQ==') => date(base64_decode('WS1tLWQgSDppOjEw')),
 
                 ]);
-                AbsenceRequest::where('id', $request->absence_request_id)->update(['status' => 'active']);
+                AbsenceRequest::where(base64_decode('aWQ='), $request->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('YWN0aXZl')]);
 
 
                 return response()->json([
-                    'message' => 'Absen Terkirim',
-                    'data' => $upload_image,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                    base64_decode('ZGF0YQ==') => $upload_image,
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Tadi Sudah Absen',
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('VGFkaSBTdWRhaCBBYnNlbg=='),
                 ]);
             }
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
@@ -2263,247 +2396,228 @@ class AbsenceApiController extends Controller
     public function leaveEnd(Request $request)
     {
         try {
-            $absenceRequest =  AbsenceRequest::where('id', $request->id)->first();
+            $absenceRequest =  AbsenceRequest::where(base64_decode('aWQ='), $request->id)->first();
 
-            if (date('Y-m-d') > $absenceRequest->start) {
-                AbsenceRequest::where('id', $request->id)->update(['status' => 'close', 'attendance' => date("Y-m-d H:i:s", strtotime('- ' . 1 . ' days', strtotime(date('Y-m-d ' . '23:59:59'))))]);
-                $absenceLog = AbsenceLog::where('absence_request_id', $absenceRequest->id)->get();
+            if (date(base64_decode('WS1tLWQ=')) > $absenceRequest->start) {
+                AbsenceRequest::where(base64_decode('aWQ='), $request->id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U='), base64_decode('YXR0ZW5kYW5jZQ==') => date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LSA=') . 1 . base64_decode('IGRheXM='), strtotime(date(base64_decode('WS1tLWQg') . base64_decode('MjM6NTk6NTk=')))))]);
+                $absenceLog = AbsenceLog::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absenceRequest->id)->get();
                 foreach ($absenceLog as $d) {
-                    $deleteAbsence = Absence::where('id', $absence_id)->first();
+                    $deleteAbsence = Absence::where(base64_decode('aWQ='), $absence_id)->first();
                     if ($deleteAbsence) {
-                        Absence::where('id', $d->id)->delete();
+                        Absence::where(base64_decode('aWQ='), $d->id)->delete();
                     }
                 }
 
-                AbsenceLog::where('absence_request_id', $absenceRequest->id)->delete();
+                AbsenceLog::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absenceRequest->id)->delete();
 
                 $begin = strtotime($absenceRequest->start);
-                $end   = strtotime(date('Y-m-d'));
+                $end   = strtotime(date(base64_decode('WS1tLWQ=')));
 
                 for ($i = $begin; $i < $end; $i = $i + 86400) {
-                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                    $holiday = Holiday::whereDate(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQ='), $i))->whereDate(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQ='), $i))->first();
                     if (!$holiday) {
-                        if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+                        if (date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 0 && date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 6) {
 
                             $ab_id = Absence::create([
-                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                'staff_id' => $absenceRequest->staff_id,
-                                'created_at' => date('Y-m-d H:i:s', $i),
-                                'updated_at' => date('Y-m-d H:i:s')
+                                base64_decode('ZGF5X2lk') => date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))),
+                                base64_decode('c3RhZmZfaWQ=') => $absenceRequest->staff_id,
+                                base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='), $i),
+                                base64_decode('dXBkYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='))
                             ]);
                             AbsenceLog::create([
-                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                                'lat' => '',
-                                'lng' => '',
-                                'absence_request_id' => $absenceRequest->id,
-                                'register' => date('Y-m-d', $i),
-                                'absence_id' => $ab_id->id,
-                                'duration' => '',
-                                'status' => ''
+                                base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $absenceRequest->category == base64_decode('bGVhdmU=') ? 8 : 13,
+                                base64_decode('bGF0') => '',
+                                base64_decode('bG5n') => '',
+                                base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk') => $absenceRequest->id,
+                                base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQ='), $i),
+                                base64_decode('YWJzZW5jZV9pZA==') => $ab_id->id,
+                                base64_decode('ZHVyYXRpb24=') => '',
+                                base64_decode('c3RhdHVz') => ''
                             ]);
                         }
                     }
                 }
                 return response()->json([
-                    'message' => 'Absen Terkirim',
-                    // 'data' => $upload_image,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'tidak bisa diakhiri hari ini karena tanggal mulai sama dengan tanggal sekarang',
-                    // 'data' => $upload_image,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('dGlkYWsgYmlzYSBkaWFraGlyaSBoYXJpIGluaSBrYXJlbmEgdGFuZ2dhbCBtdWxhaSBzYW1hIGRlbmdhbiB0YW5nZ2FsIHNla2FyYW5n'),
                 ]);
             }
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
 
     public function checkAbsenceLocation(Request $request)
     {
-        $absence = Absence::where('user_id', $request->user_id)->where('requests_id', $request->requests_id)->whereDate('register', '=', date('Y-m-d'))->first();
+        $absence = Absence::where(base64_decode('dXNlcl9pZA=='), $request->user_id)->where(base64_decode('cmVxdWVzdHNfaWQ='), $request->requests_id)->whereDate(base64_decode('cmVnaXN0ZXI='), base64_decode('PQ=='), date(base64_decode('WS1tLWQ=')))->first();
 
         if ($absence != null) {
-            $cek = "1";
+            $cek = base64_decode('MQ==');
         } else {
-            $cek = "0";
+            $cek = base64_decode('MA==');
         }
         return response()->json([
-            'message' => 'success',
-            'data' => $cek,
+            base64_decode('bWVzc2FnZQ==') => base64_decode('c3VjY2Vzcw=='),
+            base64_decode('ZGF0YQ==') => $cek,
         ]);
     }
 
     public function history(Request $request)
     {
         $data = [];
-        $absence = Absence::join('days', 'days.id', '=', 'absences.day_id')
-            ->selectRaw('absences.id,DATE(created_at) as created_at, days.name as day_name')
-            ->where('staff_id', $request->staff_id)
+
+        $absence = Absence::join(base64_decode('ZGF5cw=='), base64_decode('ZGF5cy5pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuZGF5X2lk'))
+            ->join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+            ->selectRaw(base64_decode('YWJzZW5jZXMuaWQsREFURShhYnNlbmNlcy5jcmVhdGVkX2F0KSBhcyBjcmVhdGVkX2F0LCBkYXlzLm5hbWUgYXMgZGF5X25hbWU='))
+            ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('Mg=='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
             ->FilterDate($request->from, $request->to)
-            ->groupByRaw('DATE(created_at)')
-            ->orderBy('created_at', 'DESC')
+            ->orderBy(base64_decode('YWJzZW5jZXMuY3JlYXRlZF9hdA=='), base64_decode('REVTQw=='))
             ->get();
 
         foreach ($absence as $d) {
-            // $absence_log = AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            //     ->select('absence_logs.*', 'absence_categories.title as category_title', 'IF("register != "", absence_logs.id, "")')
-            //     ->where('absence_logs.register', '!=', '')
-            //     ->where('absence_id', '=', $d->id)->get();
-            $absence_log = AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
+            $absence_log = AbsenceLog::join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
                 ->select(
-                    'absence_logs.*',
-                    'absence_categories.title as category_title',
-                    DB::raw("(CASE WHEN status = 0 THEN register ELSE '2020:01:01 00:00:00' END) as register")
+                    base64_decode('YWJzZW5jZV9sb2dzLio='),
+                    base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLnRpdGxlIGFzIGNhdGVnb3J5X3RpdGxl'),
+                    DB::raw(base64_decode('KENBU0UgV0hFTiBzdGF0dXMgPSAwIFRIRU4gcmVnaXN0ZXIgRUxTRSAnMjAyMDowMTowMSAwMDowMDowMCcgRU5EKSBhcyByZWdpc3Rlcg=='))
                 )
-                ->where('absence_logs.register', '!=', '')
-                ->where('absence_id', '=', $d->id)->get();
+                ->where(base64_decode('YWJzZW5jZV9sb2dzLnJlZ2lzdGVy'), base64_decode('IT0='), '')
+                ->where(base64_decode('YWJzZW5jZV9pZA=='), base64_decode('PQ=='), $d->id)->get();
             if (count($absence_log) > 0) {
                 if ($absence_log[0]->absence_category_id != 9 && $absence_log[0]->absence_category_id != 10) {
-                    $data[] = ['date' => $d->created_at, 'day_name' => $d->day_name, 'list' => $absence_log];
+                    $data[] = [base64_decode('ZGF0ZQ==') => $d->created_at, base64_decode('ZGF5X25hbWU=') => $d->day_name, base64_decode('bGlzdA==') => $absence_log];
                 }
             }
         }
         return response()->json([
-            'message' => 'success',
-            'data' => $data,
-            'tesss' => $absence,
+            base64_decode('bWVzc2FnZQ==') => base64_decode('c3VjY2Vzcw=='),
+            base64_decode('ZGF0YQ==') => $data,
+            base64_decode('dGVzc3M=') => $absence,
         ]);
     }
 
     public function schedule(Request $request)
     {
-        $type = "";
+        $type = '';
         $schedule = [];
-        $coordinat = WorkUnit::join('staffs', 'staffs.work_unit_id', '=', 'work_units.id')
-            ->join('work_types', 'staffs.work_type_id', '=', 'work_types.id')
-            ->where('staffs.id', $request->staff_id)->first();
+        $coordinat = WorkUnit::join(base64_decode('c3RhZmZz'), base64_decode('c3RhZmZzLndvcmtfdW5pdF9pZA=='), base64_decode('PQ=='), base64_decode('d29ya191bml0cy5pZA=='))
+            ->join(base64_decode('d29ya190eXBlcw=='), base64_decode('c3RhZmZzLndvcmtfdHlwZV9pZA=='), base64_decode('PQ=='), base64_decode('d29ya190eXBlcy5pZA=='))
+            ->where(base64_decode('c3RhZmZzLmlk'), $request->staff_id)->first();
         $type = $coordinat->type;
-        if ($coordinat->type == "shift") {
+        if ($coordinat->type == base64_decode('c2hpZnQ=')) {
 
-            $list_absence = ShiftPlannerStaffs::select(DB::raw('DATE(shift_planner_staffs.start) AS date'), 'shift_planner_staffs.id as shift_planner_id', 'shift_planner_staffs.shift_group_id')
-                ->join('shift_groups', 'shift_planner_staffs.shift_group_id', '=', 'shift_groups.id')
-                ->leftJoin('absence_logs', 'shift_planner_staffs.id', '=', 'absence_logs.shift_planner_id')
-                ->where('shift_planner_staffs.staff_id', '=', $request->staff_id)
-                ->groupBy('shift_planner_staffs.id')
-                // ->whereDate('shift_planner_staffs.start', '>=', date('Y-m-d'))
-                ->orderBy('shift_groups.queue', 'ASC')
+            $list_absence = ShiftPlannerStaffs::select(DB::raw(base64_decode('REFURShzaGlmdF9wbGFubmVyX3N0YWZmcy5zdGFydCkgQVMgZGF0ZQ==')), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuaWQgYXMgc2hpZnRfcGxhbm5lcl9pZA=='), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc2hpZnRfZ3JvdXBfaWQ='))
+                ->join(base64_decode('c2hpZnRfZ3JvdXBz'), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc2hpZnRfZ3JvdXBfaWQ='), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBzLmlk'))
+                ->leftJoin(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9sb2dzLnNoaWZ0X3BsYW5uZXJfaWQ='))
+                ->where(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc3RhZmZfaWQ='), base64_decode('PQ=='), $request->staff_id)
+                ->groupBy(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuaWQ='))
+                ->whereDate(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc3RhcnQ='), base64_decode('Pj0='), date(base64_decode('WS1tLWQ=')))
+                ->orderBy(base64_decode('c2hpZnRfcGxhbm5lcl9zdGFmZnMuc3RhcnQ='), base64_decode('QVND'))
                 ->get();
 
             foreach ($list_absence as $data) {
                 $schedule[] = [
-                    'id' => $data->shift_planner_id,
-                    'date' => $data->date,
-                    'list' => ShiftGroups::selectRaw('duration, duration_exp, type, time, start, absence_category_id,shift_group_timesheets.id as shift_group_timesheet_id ')
-                        ->join('shift_group_timesheets', 'shift_group_timesheets.shift_group_id', '=', 'shift_groups.id')
-                        ->join('absence_categories', 'shift_group_timesheets.absence_category_id', '=', 'absence_categories.id')
-                        ->where('shift_groups.id', $data->shift_group_id)
-                        ->orderBy('absence_categories.id', 'ASC')
+                    base64_decode('aWQ=') => $data->shift_planner_id,
+                    base64_decode('ZGF0ZQ==') => $data->date,
+                    base64_decode('bGlzdA==') => ShiftGroups::selectRaw(base64_decode('ZHVyYXRpb24sIGR1cmF0aW9uX2V4cCwgdHlwZSwgdGltZSwgc3RhcnQsIGFic2VuY2VfY2F0ZWdvcnlfaWQsc2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5pZCBhcyBzaGlmdF9ncm91cF90aW1lc2hlZXRfaWQg'))
+                        ->join(base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cw=='), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5zaGlmdF9ncm91cF9pZA=='), base64_decode('PQ=='), base64_decode('c2hpZnRfZ3JvdXBzLmlk'))
+                        ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('c2hpZnRfZ3JvdXBfdGltZXNoZWV0cy5hYnNlbmNlX2NhdGVnb3J5X2lk'), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->where(base64_decode('c2hpZnRfZ3JvdXBzLmlk'), $data->shift_group_id)
+                        ->orderBy(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'), base64_decode('QVND'))
                         ->get()
 
                 ];
             }
-            $schedule = $list_absence;
+            $schedule = $schedule;
         } else {
             $day = Day::get();
-            // $list_absence = WorkTypeDays::selectRaw('duration, duration_exp, type, time, start, absence_category_id,work_type_days.id as work_type_day_id ')
-            //     ->join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-            //     ->where('work_type_id', $coordinat->work_type_id)
-            //     ->where('day_id', $day)
-            //     ->orderBy('day_id', 'ASC')
-            //     ->get();
             foreach ($day as $data) {
                 $schedule[] = [
-                    'day' => $data->name,
-                    'list' => WorkTypeDays::selectRaw('duration, duration_exp, type, time, start, absence_category_id,work_type_days.id as work_type_day_id ')
-                        ->join('absence_categories', 'work_type_days.absence_category_id', '=', 'absence_categories.id')
-                        ->where('work_type_id', $coordinat->work_type_id)
-                        ->where('day_id', $data->id)
-                        ->orderBy('day_id', 'ASC')
+                    base64_decode('ZGF5') => $data->name,
+                    base64_decode('bGlzdA==') => WorkTypeDays::selectRaw(base64_decode('ZHVyYXRpb24sIGR1cmF0aW9uX2V4cCwgdHlwZSwgdGltZSwgc3RhcnQsIGFic2VuY2VfY2F0ZWdvcnlfaWQsd29ya190eXBlX2RheXMuaWQgYXMgd29ya190eXBlX2RheV9pZCA='))
+                        ->join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('d29ya190eXBlX2RheXMuYWJzZW5jZV9jYXRlZ29yeV9pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+                        ->where(base64_decode('d29ya190eXBlX2lk'), $coordinat->work_type_id)
+                        ->where(base64_decode('ZGF5X2lk'), $data->id)
+                        ->orderBy(base64_decode('ZGF5X2lk'), base64_decode('QVND'))
                         ->get()
 
                 ];
             }
         }
         return response()->json([
-            'message' => 'success',
-            'type' => $type,
-            'data' => $schedule,
+            base64_decode('bWVzc2FnZQ==') => base64_decode('c3VjY2Vzcw=='),
+            base64_decode('dHlwZQ==') => $type,
+            base64_decode('ZGF0YQ==') => $schedule,
         ]);
     }
 
     public function holiday(Request $request)
     {
-        $holiday = Holiday::paginate(3, ['*'], 'page', $request->page);
+        $holiday = Holiday::whereDate(base64_decode('c3RhcnQ='), base64_decode('Pj0='), date(base64_decode('WS1tLWQ=')))->paginate(3, [base64_decode('Kg==')], base64_decode('cGFnZQ=='), $request->page);
         return response()->json([
-            'message' => 'success',
-            'data' => $holiday,
+            base64_decode('bWVzc2FnZQ==') => base64_decode('c3VjY2Vzcw=='),
+            base64_decode('ZGF0YQ==') => $holiday,
         ]);
     }
 
-    // untuk lembur
     public function storeExtra(Request $request)
     {
 
-        // $last_code = $this->get_last_code('lock_action');
 
-        // $code = acc_code_generate($last_code, 8, 3);
-        $img_path = "/images/absence";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $dataForm = json_decode($request->form);
+        $img_path = base64_decode('L2ltYWdlcy9hYnNlbmNl');
+        $basepath = str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path());
         $responseImage = '';
-        $data_image = "";
-        if (date('w') == '0') {
-            $day = '7';
+        $data_image = '';
+        if (date(base64_decode('dw==')) == base64_decode('MA==')) {
+            $day = base64_decode('Nw==');
         } else {
-            $day = date('w');
+            $day = date(base64_decode('dw=='));
         }
 
-        if ($request->file('image')) {
-            $resource_image = $request->file('image');
+        if ($request->file(base64_decode('aW1hZ2U='))) {
+            $resource_image = $request->file(base64_decode('aW1hZ2U='));
             $name_image = $request->staff_id;
-            $file_ext_image = $request->file('image')->extension();
-            // $id_name_image = str_replace(' ', '-', $id_image);
+            $file_ext_image = $request->file(base64_decode('aW1hZ2U='))->extension();
 
-            $name_image = $img_path . '/' . $name_image . '-' . date('Y-m-d h:i:s') . '-absence.' . $file_ext_image;
+            $name_image = $img_path . base64_decode('Lw==') . $name_image . base64_decode('LQ==') . date(base64_decode('WS1tLWQgaDppOnM=')) . base64_decode('LWFic2VuY2Uu') . $file_ext_image;
 
-            // tambah watermark start
-            $image = $request->file('image');
+            $image = $request->file(base64_decode('aW1hZ2U='));
 
             $imgFile = Image::make($image->getRealPath());
 
-            $imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10);
+            $imgFile->insert($basepath . base64_decode('L2ltYWdlcy9Mb2dvLnBuZw=='), base64_decode('Ym90dG9tLXJpZ2h0'), 10, 10);
 
-            $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $request->lat . ' lng : ' . $request->lng, 10, 10, function ($font) {
-                $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+            $imgFile->text('' . Date(base64_decode('WS1tLWQgSDppOnM=')) . base64_decode('IGxhdCA6IA==') . $request->lat . base64_decode('IGxuZyA6IA==') . $request->lng, 10, 10, function ($font) {
+                $font->file(str_replace(base64_decode('bGFyYXZlbC1zaW1wbGV0YWI='), base64_decode('cHVibGljX2h0bWwvc2ltcGxldGFiYWRtaW4v'), \base_path()) . base64_decode('L2ZvbnQvVGl0YW5pYS1SZWd1bGFyLnR0Zg=='));
                 $font->size(14);
-                $font->color('#000000');
-                $font->valign('top');
-            })->save($basepath . '/' . $name_image);
+                $font->color(base64_decode('IzAwMDAwMA=='));
+                $font->valign(base64_decode('dG9w'));
+            })->save($basepath . base64_decode('Lw==') . $name_image);
 
-            // tambah watermark end
 
-            // $resource_image->move($basepath . $img_path, $name_image);
             $data_image = $name_image;
         }
 
 
         if ($responseImage != '') {
             return response()->json([
-                'message' => $responseImage,
+                base64_decode('bWVzc2FnZQ==') => $responseImage,
             ]);
         }
 
-        $absenceBefore = AbsenceLog::select('register')
-            ->leftJoin('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')
-            ->where('absence_id', $request->absence_id)
-            ->where('queue', '1')
-            ->where('type', 'extra')
+        $absenceBefore = AbsenceLog::select(base64_decode('cmVnaXN0ZXI='))
+            ->leftJoin(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))
+            ->where(base64_decode('YWJzZW5jZV9pZA=='), $request->absence_id)
+            ->where(base64_decode('cXVldWU='), base64_decode('MQ=='))
+            ->where(base64_decode('dHlwZQ=='), base64_decode('ZXh0cmE='))
             ->first();
 
-        // mencari durasi
         $duration = 0;
 
 
@@ -2515,7 +2629,7 @@ class AbsenceApiController extends Controller
 
 
         $day1 = strtotime($day1);
-        $day2 = date('Y-m-d H:i:s');
+        $day2 = date(base64_decode('WS1tLWQgSDppOnM='));
         $day2 = strtotime($day2);
 
         $duration = ($day2 - $day1) / 3600;
@@ -2524,11 +2638,10 @@ class AbsenceApiController extends Controller
             $duration = 8;
         }
 
-        // variable early dan late
         $late = 0;
         $early = 0;
         try {
-            $upload_image = AbsenceLog::where('id', $request->id)->first();
+            $upload_image = AbsenceLog::where(base64_decode('aWQ='), $request->id)->first();
 
 
 
@@ -2537,65 +2650,56 @@ class AbsenceApiController extends Controller
 
 
             $upload_image->image = $data_image;
-            // sementara start
             $upload_image->created_by_staff_id = $request->staff_id;
             $upload_image->updated_by_staff_id = $request->staff_id;
-            $upload_image->register = date('Y-m-d H:i:s');
-            // $upload_image->late = $late;
-            // $upload_image->early = $early;
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->duration = $duration;
-            // sementara end
-            $upload_image->register = date('Y-m-d H:i:s');
-            $upload_image->updated_at = date('Y-m-d H:i:s');
+            $upload_image->register = date(base64_decode('WS1tLWQgSDppOnM='));
+            $upload_image->updated_at = date(base64_decode('WS1tLWQgSDppOnM='));
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;
             $upload_image->status =  0;
             $upload_image->accuracy = $request->accuracy;
             $upload_image->distance = $request->distance;
-            // $upload_image->shift_id = $request->shift_id;
 
             $upload_image->save();
 
-            // start update request
-            if ($upload_image->absence_request_id != "" && $upload_image->absence_request_id != null) {
-                AbsenceRequest::where('id', $upload_image->absence_request_id)->update(['status' => 'close']);
+            if ($upload_image->absence_request_id != '' && $upload_image->absence_request_id != null) {
+                AbsenceRequest::where(base64_decode('aWQ='), $upload_image->absence_request_id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U=')]);
             }
 
             return response()->json([
-                'message' => 'Absen Terkirim',
-                'data' => $upload_image,
+                base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
+                base64_decode('ZGF0YQ==') => $upload_image,
             ]);
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }
 
-    // extra
     public function historyExtra(Request $request)
     {
         $data = [];
-        $absence = Absence::join('days', 'days.id', '=', 'absences.day_id')
-            ->join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
-            ->selectRaw('absences.id,DATE(absences.created_at) as created_at, days.name as day_name')
-            ->where('staff_id', $request->staff_id)
-            ->where('absence_logs.absence_category_id', '9')
+        $absence = Absence::join(base64_decode('ZGF5cw=='), base64_decode('ZGF5cy5pZA=='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuZGF5X2lk'))
+            ->join(base64_decode('YWJzZW5jZV9sb2dz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZXMuaWQ='))
+            ->selectRaw(base64_decode('YWJzZW5jZXMuaWQsREFURShhYnNlbmNlcy5jcmVhdGVkX2F0KSBhcyBjcmVhdGVkX2F0LCBkYXlzLm5hbWUgYXMgZGF5X25hbWU='))
+            ->where(base64_decode('c3RhZmZfaWQ='), $request->staff_id)
+            ->where(base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('OQ=='))
             ->FilterDate($request->from, $request->to)
-            ->groupBy('absences.id')->get();
+            ->groupBy(base64_decode('YWJzZW5jZXMuaWQ='))->get();
 
         foreach ($absence as $d) {
-            $absence_log = AbsenceLog::join('absence_categories', 'absence_logs.absence_category_id', '=', 'absence_categories.id')->selectRaw('absence_logs.*, absence_categories.title as category_title')->where('absence_id', '=', $d->id)->get();
+            $absence_log = AbsenceLog::join(base64_decode('YWJzZW5jZV9jYXRlZ29yaWVz'), base64_decode('YWJzZW5jZV9sb2dzLmFic2VuY2VfY2F0ZWdvcnlfaWQ='), base64_decode('PQ=='), base64_decode('YWJzZW5jZV9jYXRlZ29yaWVzLmlk'))->selectRaw(base64_decode('YWJzZW5jZV9sb2dzLiosIGFic2VuY2VfY2F0ZWdvcmllcy50aXRsZSBhcyBjYXRlZ29yeV90aXRsZQ=='))->where(base64_decode('YWJzZW5jZV9pZA=='), base64_decode('PQ=='), $d->id)->get();
             if (count($absence_log) > 0) {
-                // if ($absence_log[0]->absence_category_id == "9") {
-                $data[] = ['date' => $d->created_at, 'day_name' => $d->day_name, 'list' => $absence_log];
-                // }
+                $data[] = [base64_decode('ZGF0ZQ==') => $d->created_at, base64_decode('ZGF5X25hbWU=') => $d->day_name, base64_decode('bGlzdA==') => $absence_log];
             }
         }
         return response()->json([
-            'message' => 'success',
-            'data' => $data,
-            'tesss' => $absence,
+            base64_decode('bWVzc2FnZQ==') => base64_decode('c3VjY2Vzcw=='),
+            base64_decode('ZGF0YQ==') => $data,
+            base64_decode('dGVzc3M=') => $absence,
         ]);
     }
 
@@ -2603,63 +2707,57 @@ class AbsenceApiController extends Controller
     {
         $dataForm = json_decode($request->form);
         try {
-            $absenceRequest =  AbsenceRequest::where('id', $dataForm->id)->first();
-            // return response()->json([
-            //     'message' => $dataForm->end,
-            //     // 'data' => $upload_image,
-            // ]);
+            $absenceRequest =  AbsenceRequest::where(base64_decode('aWQ='), $dataForm->id)->first();
             if ($dataForm->end > $absenceRequest->end) {
-                AbsenceRequest::where('id', $dataForm->id)->update(['status' => 'close', 'end' => $dataForm->end, 'attendance' => date("Y-m-d H:i:s", strtotime('- ' . 1 . ' days', strtotime(date('Y-m-d ' . '23:59:59'))))]);
-                $absenceLog = AbsenceLog::where('absence_request_id', $absenceRequest->id)->get();
+                AbsenceRequest::where(base64_decode('aWQ='), $dataForm->id)->update([base64_decode('c3RhdHVz') => base64_decode('Y2xvc2U='), base64_decode('ZW5k') => $dataForm->end, base64_decode('YXR0ZW5kYW5jZQ==') => date(base64_decode('WS1tLWQgSDppOnM='), strtotime(base64_decode('LSA=') . 1 . base64_decode('IGRheXM='), strtotime(date(base64_decode('WS1tLWQg') . base64_decode('MjM6NTk6NTk=')))))]);
+                $absenceLog = AbsenceLog::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absenceRequest->id)->get();
                 foreach ($absenceLog as $d) {
-                    $deleteAbsence = Absence::where('id', $d->absence_id)->first();
+                    $deleteAbsence = Absence::where(base64_decode('aWQ='), $d->absence_id)->first();
                     if ($deleteAbsence) {
-                        Absence::where('id', $d->id)->delete();
+                        Absence::where(base64_decode('aWQ='), $d->id)->delete();
                     }
                 }
 
-                AbsenceLog::where('absence_request_id', $absenceRequest->id)->delete();
+                AbsenceLog::where(base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk'), $absenceRequest->id)->delete();
 
                 $begin = strtotime($absenceRequest->start);
                 $end   = strtotime($dataForm->end);
 
                 for ($i = $begin; $i < $end; $i = $i + 86400) {
-                    $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
+                    $holiday = Holiday::whereDate(base64_decode('c3RhcnQ='), base64_decode('PD0='), date(base64_decode('WS1tLWQ='), $i))->whereDate(base64_decode('ZW5k'), base64_decode('Pj0='), date(base64_decode('WS1tLWQ='), $i))->first();
                     if (!$holiday) {
-                        if (date("w", strtotime(date('Y-m-d', $i))) != 0 && date("w", strtotime(date('Y-m-d', $i))) != 6) {
+                        if (date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 0 && date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))) != 6) {
 
                             $ab_id = Absence::create([
-                                'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                'staff_id' => $absenceRequest->staff_id,
-                                'created_at' => date('Y-m-d H:i:s', $i),
-                                'updated_at' => date('Y-m-d H:i:s')
+                                base64_decode('ZGF5X2lk') => date(base64_decode('dw=='), strtotime(date(base64_decode('WS1tLWQ='), $i))),
+                                base64_decode('c3RhZmZfaWQ=') => $absenceRequest->staff_id,
+                                base64_decode('Y3JlYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='), $i),
+                                base64_decode('dXBkYXRlZF9hdA==') => date(base64_decode('WS1tLWQgSDppOnM='))
                             ]);
                             AbsenceLog::create([
-                                'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                                'lat' => '',
-                                'lng' => '',
-                                'absence_request_id' => $absenceRequest->id,
-                                'register' => date('Y-m-d', $i),
-                                'absence_id' => $ab_id->id,
-                                'duration' => '',
-                                'status' => ''
+                                base64_decode('YWJzZW5jZV9jYXRlZ29yeV9pZA==') => $absenceRequest->category == base64_decode('bGVhdmU=') ? 8 : 13,
+                                base64_decode('bGF0') => '',
+                                base64_decode('bG5n') => '',
+                                base64_decode('YWJzZW5jZV9yZXF1ZXN0X2lk') => $absenceRequest->id,
+                                base64_decode('cmVnaXN0ZXI=') => date(base64_decode('WS1tLWQ='), $i),
+                                base64_decode('YWJzZW5jZV9pZA==') => $ab_id->id,
+                                base64_decode('ZHVyYXRpb24=') => '',
+                                base64_decode('c3RhdHVz') => ''
                             ]);
                         }
                     }
                 }
                 return response()->json([
-                    'message' => 'Absen Terkirim',
-                    // 'data' => $upload_image,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('QWJzZW4gVGVya2lyaW0='),
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'tidak bisa kurang dari tanggal pengajuan sebelumnya',
-                    // 'data' => $upload_image,
+                    base64_decode('bWVzc2FnZQ==') => base64_decode('dGlkYWsgYmlzYSBrdXJhbmcgZGFyaSB0YW5nZ2FsIHBlbmdhanVhbiBzZWJlbHVtbnlh'),
                 ]);
             }
         } catch (QueryException $ex) {
             return response()->json([
-                'message' => 'gagal',
+                base64_decode('bWVzc2FnZQ==') => base64_decode('Z2FnYWw='),
             ]);
         }
     }

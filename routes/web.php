@@ -476,6 +476,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('location/{id}/reject', 'LocationController@reject')->name('location.reject');
     Route::resource('location', 'LocationController');
 
+
+    // visit
+    Route::post('visit/report', 'VisitController@report')->name('visit.report');
+    Route::get('visit/reportForm', 'VisitController@reportForm')->name('visit.reportForm');
+    Route::resource('visit', 'VisitController');
+
     // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
     // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
     Route::resource('absencegroup', 'AbsenceGroupController');

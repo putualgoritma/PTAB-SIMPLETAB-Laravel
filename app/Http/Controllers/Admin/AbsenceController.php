@@ -2435,6 +2435,7 @@ class AbsenceController extends Controller
 
     public function reportAbsenceExcel(Request $request)
     {
+        abort_unless(\Gate::allows('absence_access'), 403);
         ini_set("memory_limit", -1);
         set_time_limit(0);
         if ($request->absence_log != "yes") {
@@ -2471,6 +2472,16 @@ class AbsenceController extends Controller
                 if ($staff->work_type_id != 2) {
                     $holidays = Holiday::get();
                     foreach ($holidays as $data) {
+                        $dayname = '';
+                        if (date('w', strtotime($data->start)) == '0') {
+                            $dayname = "Minggu";
+                        } else if (date('w', strtotime($data->start)) == '6') {
+                            $dayname = "Sabtu";
+                        } else if (date('w', strtotime($data->start)) == '5') {
+                            $dayname = "Jumat";
+                        } else {
+                            $dayname = "Senin-Kamis";
+                        }
                         $list_absen[] = [
                             'Emp No' => '',
                             'AC-No' => '',
@@ -2478,13 +2489,32 @@ class AbsenceController extends Controller
                             'Name' => $staff->name,
                             'Auto-Asign' => '',
                             'Date' => date('d/m/Y', strtotime($data->start)),
-                            'TimeTable' => '',
+                            'TimeTable' => $dayname,
                             'On_Duty' => '',
                             'Off_Duty' => '',
                             'Clock_in' => '',
                             'Clock_out' => '',
-                            'keterangan' => $data->title,
-                            'deskripsi' => $data->description,
+                            // 'keterangan' => $data->title,
+                            // 'deskripsi' => $data->description,
+                            'Normal' => '1',
+                            'Real time' => '1',
+                            'Late' => '',
+                            'Early' => '',
+                            'Absent' => '',
+                            'OT Time' => '',
+                            'Work Time' => '08:00',
+                            'Exception' => '',
+                            'Must C/In' => 'TRUE',
+                            'Must C/Out' => 'TRUE',
+                            'Department' => 'OUR COMPANY',
+                            'NDays' => '1',
+                            'WeekEnd' => '',
+                            'Holiday' => '',
+                            'ATT_Time' => '08:05',
+                            'NDays_OT' => '',
+                            'WeekEnd_OT' => '',
+                            'Holiday_OT' => '',
+
                         ];
                     }
                 }
@@ -2611,7 +2641,16 @@ class AbsenceController extends Controller
                         // dd('tesss');
                     }
 
-
+                    $dayname = '';
+                    if (date('w', strtotime($data->created_at)) == '0') {
+                        $dayname = "Minggu";
+                    } else if (date('w', strtotime($data->created_at)) == '6') {
+                        $dayname = "Sabtu";
+                    } else if (date('w', strtotime($data->created_at)) == '5') {
+                        $dayname = "Jumat";
+                    } else {
+                        $dayname = "Senin-Kamis";
+                    }
 
                     $list_absen[] = [
                         'Emp No' => '',
@@ -2620,14 +2659,33 @@ class AbsenceController extends Controller
                         'Name' => $staff->name,
                         'Auto-Asign' => '',
                         'Date' => date('d/m/Y', strtotime($data->created_at)),
-                        'TimeTable' => '',
+                        'TimeTable' => $dayname,
                         'On_Duty' => $duty_in ? date('H:i', strtotime($duty_in)) : '',
                         'Off_Duty' => $duty_out ? date('H:i', strtotime($duty_out)) : '',
                         'Clock_in' => $clock_in ? date('H:i', strtotime($clock_in)) : '',
                         'Clock_out' => $clock_out ? date('H:i', strtotime($clock_out)) : '',
-                        'keterangan' => $keterangan,
-                        'deskripsi' => $deskripsi,
-                        'shift' => $shift,
+                        // 'keterangan' => $keterangan,
+                        // 'deskripsi' => $deskripsi,
+                        // 'shift' => $shift,
+                        'Normal' => '1',
+                        'Real time' => '1',
+                        'Late' => '',
+                        'Early' => '',
+                        'Absent' => '',
+                        'OT Time' => '',
+                        'Work Time' => '08:00',
+                        'Exception' => '',
+                        'Must C/In' => 'TRUE',
+                        'Must C/Out' => 'TRUE',
+                        'Department' => 'OUR COMPANY',
+                        'NDays' => '1',
+                        'WeekEnd' => '',
+                        'Holiday' => '',
+                        'ATT_Time' => '08:05',
+                        'NDays_OT' => '',
+                        'WeekEnd_OT' => '',
+                        'Holiday_OT' => '',
+
                     ];
                 }
 
@@ -2645,6 +2703,16 @@ class AbsenceController extends Controller
                     }
                     // $o = 0;
                     foreach ($shifts as $data) {
+                        $dayname = '';
+                        if (date('w', strtotime($data->start)) == '0') {
+                            $dayname = "Minggu";
+                        } else if (date('w', strtotime($data->start)) == '6') {
+                            $dayname = "Sabtu";
+                        } else if (date('w', strtotime($data->start)) == '5') {
+                            $dayname = "Jumat";
+                        } else {
+                            $dayname = "Senin-Kamis";
+                        }
                         // $o++;
                         $cek = $list_absen->where('shift', $data->id)->first();
                         if (!$cek) {
@@ -2657,14 +2725,33 @@ class AbsenceController extends Controller
                                     'Name' => $staff->name,
                                     'Auto-Asign' => '',
                                     'Date' => date('d/m/Y', strtotime($data->start)),
-                                    'TimeTable' => '',
+                                    'TimeTable' => $dayname,
                                     'On_Duty' => '',
                                     'Off_Duty' => '',
                                     'Clock_in' => '',
                                     'Clock_out' => '',
-                                    'keterangan' => $cek_keterangan['deskripsi'],
-                                    'deskripsi' => $data->id,
-                                    'shift' => '',
+                                    // 'keterangan' => $cek_keterangan['deskripsi'],
+                                    // 'deskripsi' => $data->id,
+                                    // 'shift' => '',
+                                    'Normal' => '1',
+                                    'Real time' => '1',
+                                    'Late' => '',
+                                    'Early' => '',
+                                    'Absent' => '',
+                                    'OT Time' => '',
+                                    'Work Time' => '08:00',
+                                    'Exception' => '',
+                                    'Must C/In' => 'TRUE',
+                                    'Must C/Out' => 'TRUE',
+                                    'Department' => 'OUR COMPANY',
+                                    'NDays' => '1',
+                                    'WeekEnd' => '',
+                                    'Holiday' => '',
+                                    'ATT_Time' => '08:05',
+                                    'NDays_OT' => '',
+                                    'WeekEnd_OT' => '',
+                                    'Holiday_OT' => '',
+
                                 ];
                             } else {
                                 $list_absen_excel[] = [
@@ -2674,14 +2761,32 @@ class AbsenceController extends Controller
                                     'Name' => $staff->name,
                                     'Auto-Asign' => '',
                                     'Date' => date('d/m/Y', strtotime($data->start)),
-                                    'TimeTable' => '',
+                                    'TimeTable' => $dayname,
                                     'On_Duty' => '',
                                     'Off_Duty' => '',
                                     'Clock_in' => '',
                                     'Clock_out' => '',
-                                    'keterangan' => 'Alpha',
-                                    'deskripsi' => $data->id,
-                                    'shift' => '',
+                                    // 'keterangan' => 'Alpha',
+                                    // 'deskripsi' => $data->id,
+                                    // 'shift' => '',
+                                    'Normal' => '1',
+                                    'Real time' => '1',
+                                    'Late' => '',
+                                    'Early' => '',
+                                    'Absent' => '',
+                                    'OT Time' => '',
+                                    'Work Time' => '08:00',
+                                    'Exception' => '',
+                                    'Must C/In' => 'TRUE',
+                                    'Must C/Out' => 'TRUE',
+                                    'Department' => 'OUR COMPANY',
+                                    'NDays' => '1',
+                                    'WeekEnd' => '',
+                                    'Holiday' => '',
+                                    'ATT_Time' => '08:05',
+                                    'NDays_OT' => '',
+                                    'WeekEnd_OT' => '',
+                                    'Holiday_OT' => '',
                                 ];
                             }
                         }
@@ -2699,6 +2804,17 @@ class AbsenceController extends Controller
 
                     foreach ($dates as $dt) {
                         $day_id = date('w', strtotime($dt->format('Y-m-d'))) == "0" ? '7' : date('w', strtotime($dt->format('Y-m-d')));
+
+                        $dayname = '';
+                        if (date('w', strtotime($dt->format('Y-m-d'))) == '0') {
+                            $dayname = "Minggu";
+                        } else if (date('w', strtotime($dt->format('Y-m-d'))) == '6') {
+                            $dayname = "Sabtu";
+                        } else if (date('w', strtotime($dt->format('Y-m-d'))) == '5') {
+                            $dayname = "Jumat";
+                        } else {
+                            $dayname = "Senin-Kamis";
+                        }
 
                         $list = $list_absen->where('Date', $dt->format('d/m/Y'))->first();
 
@@ -2720,13 +2836,31 @@ class AbsenceController extends Controller
                                     'Name' => $cek_masuk['Name'],
                                     'Auto-Asign' => '',
                                     'Date' => $cek_masuk['Date'],
-                                    'TimeTable' => '',
+                                    'TimeTable' => $dayname,
                                     'On_Duty' => $cek_masuk['On_Duty'],
                                     'Off_Duty' => $cek_masuk['Off_Duty'],
                                     'Clock_in' => $cek_masuk['Clock_in'],
                                     'Clock_out' => $cek_lembur['Clock_out'],
-                                    'keterangan' => 'Masuk dan Lembur',
-                                    'deskripsi' => $deskripsi,
+                                    // 'keterangan' => 'Masuk dan Lembur',
+                                    // 'deskripsi' => $deskripsi,
+                                    'Normal' => '1',
+                                    'Real time' => '1',
+                                    'Late' => '',
+                                    'Early' => '',
+                                    'Absent' => '',
+                                    'OT Time' => '',
+                                    'Work Time' => '08:00',
+                                    'Exception' => '',
+                                    'Must C/In' => 'TRUE',
+                                    'Must C/Out' => 'TRUE',
+                                    'Department' => 'OUR COMPANY',
+                                    'NDays' => '1',
+                                    'WeekEnd' => '',
+                                    'Holiday' => '',
+                                    'ATT_Time' => '08:05',
+                                    'NDays_OT' => '',
+                                    'WeekEnd_OT' => '',
+                                    'Holiday_OT' => '',
                                 ];
                             } else if ($cek_lembur) {
                                 // untuk absen lembur
@@ -2745,15 +2879,44 @@ class AbsenceController extends Controller
                                 'Name' => $staff->name,
                                 'Auto-Asign' => '',
                                 'Date' => $dt->format('d/m/Y'),
-                                'TimeTable' => '',
+                                'TimeTable' => $dayname,
                                 'On_Duty' => '',
                                 'Off_Duty' => '',
                                 'Clock_in' => '',
                                 'Clock_out' => '',
-                                'keterangan' => 'Libur',
-                                'deskripsi' => '',
+                                // 'keterangan' => 'Libur',
+                                // 'deskripsi' => '',
+                                'Normal' => '1',
+                                'Real time' => '1',
+                                'Late' => '',
+                                'Early' => '',
+                                'Absent' => '',
+                                'OT Time' => '',
+                                'Work Time' => '08:00',
+                                'Exception' => '',
+                                'Must C/In' => 'TRUE',
+                                'Must C/Out' => 'TRUE',
+                                'Department' => 'OUR COMPANY',
+                                'NDays' => '1',
+                                'WeekEnd' => '',
+                                'Holiday' => '',
+                                'ATT_Time' => '08:05',
+                                'NDays_OT' => '',
+                                'WeekEnd_OT' => '',
+                                'Holiday_OT' => '',
+
                             ];
                         } else {
+                            $dayname = '';
+                            if (date('w', strtotime($dt->format('Y-m-d'))) == '0') {
+                                $dayname = "Minggu";
+                            } else if (date('w', strtotime($dt->format('Y-m-d'))) == '6') {
+                                $dayname = "Sabtu";
+                            } else if (date('w', strtotime($dt->format('Y-m-d'))) == '5') {
+                                $dayname = "Jumat";
+                            } else {
+                                $dayname = "Senin-Kamis";
+                            }
                             $list_absen_excel[] = [
                                 'Emp No' => '',
                                 'AC-No' => '',
@@ -2761,13 +2924,32 @@ class AbsenceController extends Controller
                                 'Name' => $staff->name,
                                 'Auto-Asign' => '',
                                 'Date' => $dt->format('d/m/Y'),
-                                'TimeTable' => '',
+                                'TimeTable' => $dayname,
                                 'On_Duty' => '',
                                 'Off_Duty' => '',
                                 'Clock_in' => '',
                                 'Clock_out' => '',
-                                'keterangan' => 'Alpa',
-                                'deskripsi' => '',
+                                // 'keterangan' => 'Alpa',
+                                // 'deskripsi' => '',
+                                'Normal' => '1',
+                                'Real time' => '1',
+                                'Late' => '',
+                                'Early' => '',
+                                'Absent' => '',
+                                'OT Time' => '',
+                                'Work Time' => '08:00',
+                                'Exception' => '',
+                                'Must C/In' => 'TRUE',
+                                'Must C/Out' => 'TRUE',
+                                'Department' => 'OUR COMPANY',
+                                'NDays' => '1',
+                                'WeekEnd' => '',
+                                'Holiday' => '',
+                                'ATT_Time' => '08:05',
+                                'NDays_OT' => '',
+                                'WeekEnd_OT' => '',
+                                'Holiday_OT' => '',
+
                             ];
                         }
                     }
@@ -2776,7 +2958,7 @@ class AbsenceController extends Controller
 
             // $absence[0]->absence_logs->where('absence_category_id', 2);
 
-            return Excel::download(new AbsenceExport($list_absen_excel), 'report_excel.xlsx');
+            return Excel::download(new AbsenceExport($list_absen_excel), 'report_excel.xls');
             // dd($i, $list_absen_excel);
         } else {
             $staffs = Staff::FilterWorkUnit($request->work_unit_id)
@@ -2833,7 +3015,7 @@ class AbsenceController extends Controller
             }
             // $absence[0]->absence_logs->where('absence_category_id', 2);
 
-            return Excel::download(new AbsenceLogExport($list_absen), 'report_log_excel.xlsx');
+            return Excel::download(new AbsenceLogExport($list_absen), 'report_log_excel.xls');
         }
 
 
@@ -2916,6 +3098,7 @@ class AbsenceController extends Controller
 
     public function reportAbsence(Request $request)
     {
+        abort_unless(\Gate::allows('absence_access'), 403);
 
         try {
 

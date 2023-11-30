@@ -142,10 +142,11 @@ class VisitApiController extends Controller
 
         $history = Visit::FilterDate($request->from, $request->to)
             ->FilterCustomer($request->nomorrekening)
+            ->where('staff_id', $request->staff_id)
             ->with('visitCategory')
             ->with('visitImages')
             ->with('customer')
-
+            ->orderBy('created_at', 'DESC')
             ->paginate(10, ['*'], 'page', $request->page);
 
 
