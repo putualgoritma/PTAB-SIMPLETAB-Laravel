@@ -220,7 +220,40 @@
 
             {{-- end pergantian WM --}}
 
-               {{-- start pergantian WM --}}
+
+                   {{-- start Kunjungan --}}
+            @can('duty_access')
+            <li class="nav-item nav-dropdown">
+             <a class="nav-link  nav-dropdown-toggle">
+                 <i class="nav-icon fas fa-car">
+     
+                 </i>
+                 {{-- {{ trans('global.segelmeter.index') }} --}}
+                 Kunjungan
+             </a>
+             <ul class="nav-dropdown-items">
+          
+            <li class="nav-item">
+                <a href="{{ route('admin.visit.index') }}" class="nav-link">
+                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                <i class="nav-icon fas fa-user"></i>
+               Data Kunjungan
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('admin.visit.reportForm') }}" class="nav-link">
+                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                <i class="nav-icon fas fa-file"></i>
+               Rekap Kunjungan
+                </a>
+            </li>
+          
+         </ul>
+     </li>
+     @endcan
+             
+        
                 
             {{-- @endif --}}
             
@@ -230,7 +263,7 @@
         
                     </i>
                     {{-- {{ trans('global.segelmeter.index') }} --}}
-                    Absen (Uji)
+                    Absen
                 </a>
                 <ul class="nav-dropdown-items">
               

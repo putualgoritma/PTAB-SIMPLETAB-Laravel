@@ -1184,6 +1184,9 @@ class RequestApiController extends Controller
                 ->join('staffs as st2', 'st2.id', '=', 'shift_changes.staff_change_id')
                 ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
                 ->whereDate('shift_changes.created_at', '>=', date('Y-m-d'))
+                ->whereDate('s1.start', '>=', date('Y-m-d'))
+                ->whereDate('s2.start', '>=', date('Y-m-d'))
+                ->where('shift_changes.status', 'pending')
                 ->orderBy('shift_changes.created_at', 'ASC')
                 ->first();
         } else {
@@ -1209,7 +1212,10 @@ class RequestApiController extends Controller
                 ->join('staffs as st2', 'st2.id', '=', 'shift_changes.staff_change_id')
                 ->join('shift_groups as sh2', 'sh2.id', '=', 's2.shift_group_id')
                 ->FilterDapertement($user->dapertement_id)
-                ->whereDate('shift_changes.created_at', '>=', date('Y-m-d'))
+                // ->whereDate('shift_changes.created_at', '>=', date('Y-m-d'))
+                ->whereDate('s1.start', '>=', date('Y-m-d'))
+                ->whereDate('s2.start', '>=', date('Y-m-d'))
+                ->where('shift_changes.status', 'pending')
                 ->orderBy('shift_changes.created_at', 'ASC')
                 ->first();
         }
@@ -1218,8 +1224,8 @@ class RequestApiController extends Controller
 
         return response()->json([
             'message' => 'Pengajuan Terkirim',
-            'data' => $absence_request_count,
-            'change_shift' => $shift_change->total
+            'data' => $absence_request_count->setAttribute('change_shift', $shift_change->total)
+            // 'change_shift' => 
         ]);
     }
 
@@ -1401,108 +1407,123 @@ class RequestApiController extends Controller
                 // ]);
                 // dd();
 
+                if ($requests->category != "duty") {
+                    if ($requests->type != "shift") {
 
+                        // libur nasional
+                        // $holidays = Holiday::select(DB::raw('DATE(holidays.start) AS start'), DB::raw('DATE(holidays.end) AS end'))
+                        //     //  ->whereBetween(DB::raw('DATE(holidays.start)'), [$from, $to])
+                        //     //  ->orWhereBetween(DB::raw('DATE(holidays.end)'), [$from, $to])
+                        //     ->get();
+                        // // dd($holidays);
+                        // foreach ($holidays as $holiday) {
+                        //     $awal_libur = date_create_from_format('Y-m-d', $holiday->start);
+                        //     $awal_libur = date_format($awal_libur, 'Y-m-d');
+                        //     $awal_libur = strtotime($awal_libur);
 
-                if ($requests->type != "shift") {
+                        //     $akhir_libur = date_create_from_format('Y-m-d', $holiday->end);
+                        //     $akhir_libur = date_format($akhir_libur, 'Y-m-d');
+                        //     $akhir_libur = strtotime($akhir_libur);
 
-                    // libur nasional
-                    // $holidays = Holiday::select(DB::raw('DATE(holidays.start) AS start'), DB::raw('DATE(holidays.end) AS end'))
-                    //     //  ->whereBetween(DB::raw('DATE(holidays.start)'), [$from, $to])
-                    //     //  ->orWhereBetween(DB::raw('DATE(holidays.end)'), [$from, $to])
-                    //     ->get();
-                    // // dd($holidays);
-                    // foreach ($holidays as $holiday) {
-                    //     $awal_libur = date_create_from_format('Y-m-d', $holiday->start);
-                    //     $awal_libur = date_format($awal_libur, 'Y-m-d');
-                    //     $awal_libur = strtotime($awal_libur);
-
-                    //     $akhir_libur = date_create_from_format('Y-m-d', $holiday->end);
-                    //     $akhir_libur = date_format($akhir_libur, 'Y-m-d');
-                    //     $akhir_libur = strtotime($akhir_libur);
-
-                    //     $work_type_days = Day::select('days.*')->leftJoin(
-                    //         'work_type_days',
-                    //         function ($join) use ($requests) {
-                    //             $join->on('days.id', '=', 'work_type_days.day_id')
-                    //                 ->where('work_type_id', $requests->work_type_id);
-                    //         }
-                    //     )
-                    //         ->where('work_type_days.day_id', '=', null)->get();
-                    // }
-
-
-                    $work_type_days = Day::select('days.*')->leftJoin(
-                        'work_type_days',
-                        function ($join) use ($requests) {
-                            $join->on('days.id', '=', 'work_type_days.day_id')
-                                ->where('work_type_id', $requests->work_type_id);
+                        //     $work_type_days = Day::select('days.*')->leftJoin(
+                        //         'work_type_days',
+                        //         function ($join) use ($requests) {
+                        //             $join->on('days.id', '=', 'work_type_days.day_id')
+                        //                 ->where('work_type_id', $requests->work_type_id);
+                        //         }
+                        //     )
+                        //         ->where('work_type_days.day_id', '=', null)->get();
+                        // }
+                        $category_absence = "";
+                        if ($requests->category == "permission") {
+                            $category_absence = 13;
+                        } else if ($requests->category == "leave") {
+                            $category_absence = 8;
+                        } else {
+                            // $category_absence = 7;
                         }
-                    )
-                        ->where('work_type_days.day_id', '=', null)->get();
-                    // dd($work_type_days);
-                    // dd($work_type_days);
-                    $jadwallibur = [];
-                    foreach ($work_type_days as $work_type_day) {
-                        $jadwallibur = array_merge($jadwallibur, [$work_type_day->id != "7" ? '' . $work_type_day->id : '0']);
-                    }
-                    $ab_id = [];
-                    for ($i = $begin; $i <= $end; $i = $i + 86400) {
-                        $holiday = Holiday::whereDate(DB::raw('DATE(start)'), '<=', date('Y-m-d', $i))->whereDate(DB::raw('DATE(end)'), '>=', date('Y-m-d', $i))->first();
 
-                        if (!$holiday) {
-                            if ((!in_array(date('w', $i), $jadwallibur))) {
-                                $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
-                                if (!$check_empty) {
-                                    // dd('test');
-                                    // $ab_id[] = [
-                                    //     'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                    //     'staff_id' => $absenceRequest->staff_id,
-                                    //     'created_at' => date('Y-m-d H:i:s', $i),
-                                    //     'updated_at' => date('Y-m-d H:i:s')
-                                    // ];
-                                    $ab_id = Absence::create([
-                                        'day_id' => date("w", strtotime(date('Y-m-d', $i))),
-                                        'staff_id' => $absenceRequest->staff_id,
-                                        'created_at' => date('Y-m-d H:i:s', $i),
-                                        'updated_at' => date('Y-m-d H:i:s')
-                                    ]);
-                                    AbsenceLog::create([
-                                        'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
-                                        'lat' => '',
-                                        'lng' => '',
-                                        'absence_request_id' => $absenceRequest->id,
-                                        'register' => date('Y-m-d', $i),
-                                        'absence_id' => $ab_id->id,
-                                        'duration' => '',
-                                        'status' => ''
-                                    ]);
-                                }
+                        $work_type_days = Day::select('days.*')->leftJoin(
+                            'work_type_days',
+                            function ($join) use ($requests) {
+                                $join->on('days.id', '=', 'work_type_days.day_id')
+                                    ->where('work_type_id', $requests->work_type_id);
                             }
+                        )
+                            ->where('work_type_days.day_id', '=', null)->get();
+                        // dd($work_type_days);
+                        // dd($work_type_days);
+                        $jadwallibur = [];
+                        foreach ($work_type_days as $work_type_day) {
+                            $jadwallibur = array_merge($jadwallibur, [$work_type_day->id != "7" ? '' . $work_type_day->id : '0']);
+                        }
+                        $ab_id = [];
+                        for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                            $holiday = Holiday::whereDate(DB::raw('DATE(start)'), '<=', date('Y-m-d', $i))->whereDate(DB::raw('DATE(end)'), '>=', date('Y-m-d', $i))->first();
+
+                            // if (!$holiday) {
+                            // if ((!in_array(date('w', $i), $jadwallibur))) {
+                            $check_empty = Absence::where('staff_id', $absenceRequest->staff_id)->whereDate('created_at', '=', date('Y-m-d', $i))->first();
+                            if (!$check_empty) {
+                                // dd('test');
+                                // $ab_id[] = [
+                                //     'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                //     'staff_id' => $absenceRequest->staff_id,
+                                //     'created_at' => date('Y-m-d H:i:s', $i),
+                                //     'updated_at' => date('Y-m-d H:i:s')
+                                // ];
+                                $ab_id = Absence::create([
+                                    'day_id' => date("w", strtotime(date('Y-m-d', $i))),
+                                    'staff_id' => $absenceRequest->staff_id,
+                                    'created_at' => date('Y-m-d H:i:s', $i),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                                AbsenceLog::create([
+                                    'absence_category_id' => $category_absence,
+                                    'lat' => '',
+                                    'lng' => '',
+                                    'absence_request_id' => $absenceRequest->id,
+                                    'register' => date('Y-m-d', $i),
+                                    'absence_id' => $ab_id->id,
+                                    'duration' => '',
+                                    'status' => ''
+                                ]);
+                            }
+                            // }
                             // dd($holiday);
 
+                            // }
+                            // if ($holiday) {
+                            //     $hd[] = ['test1' => $holiday->start, 'test1' => $holiday->end];
+                            // }
+                            // $id[] = [date('Y-m-d', $i)];
                         }
-                        // if ($holiday) {
-                        //     $hd[] = ['test1' => $holiday->start, 'test1' => $holiday->end];
-                        // }
-                        // $id[] = [date('Y-m-d', $i)];
-                    }
-                    // return response()->json([
-                    //     'message' => 'Pengajuan Terkirim',
-                    //     'begin' => $ab_id,
-                    //     'holiday' => $hd,
-                    //     'i' => $id
-                    // ]);
-                } else {
-                    $shift_planners = ShiftPlannerStaffs::select('shift_planner_staffs.*', DB::raw('DATE(shift_planner_staffs.start) as start'))->where('staff_id',  $requests->staff_id)
-                        // ->whereBetween(DB::raw('DATE(shift_planner_staffs.start)'), [$from, $to])
-                        ->get();
+                        // return response()->json([
+                        //     'message' => 'Pengajuan Terkirim',
+                        //     'begin' => $ab_id,
+                        //     'holiday' => $hd,
+                        //     'i' => $id
+                        // ]);
+                    } else {
+                        $shift_planners = ShiftPlannerStaffs::select('shift_planner_staffs.*', DB::raw('DATE(shift_planner_staffs.start) as start'))->where('staff_id',  $requests->staff_id)
+                            // ->whereBetween(DB::raw('DATE(shift_planner_staffs.start)'), [$from, $to])
+                            ->get();
 
-                    $jadwalmasuk = [];
-                    foreach ($shift_planners as $shift_planner) {
-                        $jadwalmasuk = array_merge($jadwalmasuk, [$shift_planner->start]);
-                    }
+                        $category_absence = "";
+                        if ($requests->category == "permission") {
+                            $category_absence = 13;
+                        } else if ($requests->category == "leave") {
+                            $category_absence = 8;
+                        } else {
+                            // $category_absence = 7;
+                        }
 
-                    for ($i = $begin; $i <= $end; $i = $i + 86400) {
+                        $jadwalmasuk = [];
+                        foreach ($shift_planners as $shift_planner) {
+                            $jadwalmasuk = array_merge($jadwalmasuk, [$shift_planner->start]);
+                        }
+
+                        // for ($i = $begin; $i <= $end; $i = $i + 86400) {
                         $holiday = Holiday::whereDate('start', '<=', date('Y-m-d', $i))->whereDate('end', '>=', date('Y-m-d', $i))->first();
                         // if (!$holiday) {
                         if ((in_array(date("Y-m-d", strtotime(date('Y-m-d', $i))), $jadwalmasuk))) {
@@ -1516,7 +1537,7 @@ class RequestApiController extends Controller
                                     'updated_at' => date('Y-m-d H:i:s')
                                 ]);
                                 AbsenceLog::create([
-                                    'absence_category_id' => $absenceRequest->category == "leave" ? 8 : 13,
+                                    'absence_category_id' => $category_absence,
                                     'lat' => '',
                                     'lng' => '',
                                     'absence_request_id' => $absenceRequest->id,
@@ -1531,67 +1552,68 @@ class RequestApiController extends Controller
                         }
                         // dd($holiday);
                         // }
+                        // }
                     }
-                }
-                // return $jadwallibur;
+                    // return $jadwallibur;
 
-                // dd('hhh');
-                // buat absence log end
-                $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
-                MessageLog::create([
-                    'staff_id' => $d->staff_id,
-                    'memo' => $message,
-                    'type' => 'message',
-                    'status' => 'pending',
-                ]);
+                    // dd('hhh');
+                    // buat absence log end
+                    $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+                    MessageLog::create([
+                        'staff_id' => $d->staff_id,
+                        'memo' => $message,
+                        'type' => 'message',
+                        'status' => 'pending',
+                    ]);
 
-                // untuk Notif start
-                $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
-                $id_onesignal = $admin->_id_onesignal;
-                // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
-                //wa notif                
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($d->staff_id > 0) {
-                    $staff = Staff::where('id', $d->staff_id)->first();
-                    $phone_no = $staff->phone;
-                } else {
-                    $phone_no = $admin->phone;
-                }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa')
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    // untuk Notif start
+                    $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+                    $id_onesignal = $admin->_id_onesignal;
+                    // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+                    //wa notif                
+                    $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                    $wa_data_group = [];
+                    //get phone user
+                    if ($d->staff_id > 0) {
+                        $staff = Staff::where('id', $d->staff_id)->first();
+                        $phone_no = $staff->phone;
+                    } else {
+                        $phone_no = $admin->phone;
                     }
-                }
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($phone_no),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa')
+                    ];
+                    $wa_data_group[] = $wa_data;
+                    DB::table('wa_histories')->insert($wa_data);
+                    $wa_sent = WablasTrait::sendText($wa_data_group);
+                    $array_merg = [];
+                    if (!empty(json_decode($wa_sent)->data->messages)) {
+                        $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                    }
+                    foreach ($array_merg as $key => $value) {
+                        if (!empty($value->ref_id)) {
+                            wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                        }
+                    }
 
-                //onesignal notif                                
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
+                    //onesignal notif                                
+                    if (!empty($id_onesignal)) {
+                        OneSignal::sendNotificationToUser(
+                            $message,
+                            $id_onesignal,
+                            $url = null,
+                            $data = null,
+                            $buttons = null,
+                            $schedule = null
+                        );
+                    }
                 }
                 // untuk notif end
             } else {
@@ -1675,6 +1697,7 @@ class RequestApiController extends Controller
                 // untuk notif end
             }
         }
+
 
         // jika dinas luar/izin/lembur end
 

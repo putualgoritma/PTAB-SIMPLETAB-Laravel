@@ -9,11 +9,18 @@ use App\Shift;
 use App\ShiftChange;
 use App\ShiftPlannerStaff;
 use App\ShiftPlannerStaffs;
+use App\Staff;
+use App\StaffApi;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Traits\WablasTrait;
+use App\wa_history;
+use OneSignal;
 
 class ShiftChangeApiController extends Controller
 {
+    use WablasTrait;
     public function index(Request $request)
     {
         $shiftChange = ShiftChange::selectRaw('shiftsA.date, shifts.title, shifts.time_in, shifts.time_out, usersA.name, shift_changes.status, shiftsC.date as c_date, shiftsCC.title as c_title, shiftsCC.time_in as C_time_in, shiftsCC.time_out as C_time_out')
@@ -38,9 +45,9 @@ class ShiftChangeApiController extends Controller
             ->join('shift_planner_staffs as B', 'shift_changes.shift_id', '=', 'B.id')
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
-            ->where('A.staff_id', $request->staff_id)
-            ->where('shift_changes.status', '!=', 'approve')
-            ->where('shift_changes.status', '!=', 'reject')
+            ->where('shift_changes.staff_change_id', $request->staff_id)
+            // ->where('shift_changes.status', '!=', 'approve')
+            // ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -58,9 +65,9 @@ class ShiftChangeApiController extends Controller
             ->join('shift_planner_staffs as B', 'shift_changes.shift_id', '=', 'B.id')
             ->join('shift_groups as D', 'B.shift_group_id', '=', 'D.id')
             ->FilterDate($request->from, $request->to)
-            ->where('B.staff_id', $request->staff_id)
-            ->where('shift_changes.status', '!=', 'approve')
-            ->where('shift_changes.status', '!=', 'reject')
+            ->where('shift_changes.staff_id', $request->staff_id)
+            // ->where('shift_changes.status', '!=', 'approve')
+            // ->where('shift_changes.status', '!=', 'reject')
             ->paginate(3, ['*'], 'page', $request->page);
 
         return response()->json([
@@ -130,6 +137,114 @@ class ShiftChangeApiController extends Controller
             'status' => 'pending',
         ];
         $shiftChange = ShiftChange::create($data);
+
+
+        // untuk Notif start
+        $admin = Staff::selectRaw('users.*')->where('staffs.id',  $dataForm->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $id_onesignal = $admin->_id_onesignal;
+        // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+
+        $categoryName = "Tukar Shift";
+
+        $phone_no = $admin->phone;
+        $message = "Pengajuan " . $categoryName . " oleh " . $admin->name;
+        $wa_data = [
+            'phone' => $this->gantiFormat($phone_no),
+            'customer_id' => null,
+            'message' => $message,
+            'template_id' => '',
+            'status' => 'gagal',
+            'ref_id' => $wa_code,
+            'created_at' => date('Y-m-d h:i:sa'),
+            'updated_at' => date('Y-m-d h:i:sa')
+        ];
+        $wa_data_group[] = $wa_data;
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        // //onesignal notif                                
+        if (!empty($id_onesignal)) {
+            OneSignal::sendNotificationToUser(
+                $message,
+                $id_onesignal,
+                $url = null,
+                $data = null,
+                $buttons = null,
+                $schedule = null
+            );
+        }
+        // // untuk notif end
+
+        //send notif to admin
+        $bagian = Staff::selectRaw('users.*')->where('staffs.id',  $dataForm->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();
+        $admin_arr = User::where('dapertement_id', $bagian->dapertement_id)
+            ->where('subdapertement_id', 0)
+            ->where('staff_id', 0)->get();
+        foreach ($admin_arr as $key => $admin) {
+            $id_onesignal = $admin->_id_onesignal;
+            // $message = 'Admin: Keluhan Baru Diterima : ' . $dataForm->description;
+            //wa notif                
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            if ($admin->staff_id > 0) {
+                $staff = StaffApi::where('id', $admin->staff_id)->first();
+                $phone_no = $staff->phone;
+            } else {
+                $phone_no = $admin->phone;
+            }
+            $wa_data = [
+                'phone' => $this->gantiFormat($phone_no),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa')
+            ];
+            $wa_data_group[] = $wa_data;
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+            //onesignal notif                                
+            if (!empty($id_onesignal)) {
+                OneSignal::sendNotificationToUser(
+                    $message,
+                    $id_onesignal,
+                    $url = null,
+                    $data = null,
+                    $buttons = null,
+                    $schedule = null
+                );
+            }
+        }
+
+
+
+
+
         return response()->json([
             'message' => 'pengajuan berhasil',
             'data' =>  $shiftChange,
@@ -165,6 +280,8 @@ class ShiftChangeApiController extends Controller
                 ->orderBy('shift_changes.created_at', 'DESC')
                 ->paginate(3, ['*'], 'page', $request->page);
         }
+
+
         return response()->json([
             'message' => 'berhasil',
             'data' =>  $shiftChange,

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\AbsenceRequest;
 use App\AbsenceRequestLogs;
 use App\Http\Controllers\Controller;
@@ -268,6 +270,55 @@ class DutyController extends Controller
             'type' => 'message',
             'status' => 'pending',
         ]);
+
+        // if ($d->category == "duty") {
+        //     $begin = strtotime($d->start);
+        //     // $end   = strtotime(date('Y-m-d'));
+        //     $end   = strtotime($d->end);
+
+        //     $list_abs = Absence::select('absences.*')->join('absence_logs', 'absences.id', '=', 'absence_logs.absence_id')
+        //         ->where('absences.staff_id', $d->staff_id)
+        //         ->whereDate('absences.created_at', '>=', $d->start)
+        //         ->where('absence_logs.absence_request_id', $d->id)
+        //         // ->where('absence_category_id', $absenceRequest->category == "duty" ? 7 : 8)
+        //         ->get();
+        //     foreach ($list_abs as $data) {
+
+        //         AbsenceLog::where('absence_id', $data->id)->delete();
+        //         // dd('error');
+        //         $data->delete();
+        //         # code...
+        //     }
+
+
+        //     for ($i = $begin; $i <= $end; $i = $i + 86400) {
+        //         // $holiday = Holiday::whereDate('start', '=', date('Y-m-d', $i))->first();
+        //         // if (!$holiday) {
+        //         if (date("w", strtotime(date('Y-m-d', $i))) != 0) {
+        //             $day =  date("w", strtotime(date('Y-m-d', $i)));
+        //         } else {
+        //             $day = 7;
+        //         }
+
+        //         $ab1 =  Absence::create([
+        //             'day_id' => $day,
+        //             'staff_id' => $d->staff_id,
+        //             'created_at' => date('Y-m-d H:i:s', $i),
+        //             'updated_at' => date('Y-m-d H:i:s')
+        //         ]);
+        //         AbsenceLog::create([
+        //             'absence_category_id' => 7,
+        //             'absence_request_id' => $d->id,
+        //             'lat' => '',
+        //             'lng' => '',
+        //             'register' => date('Y-m-d', $i),
+        //             'absence_id' => $ab1->id,
+        //             'duration' => '',
+        //             'status' => ''
+        //         ]);
+        //     }
+        // }
+
 
         // untuk Notif start
         $admin = Staff::selectRaw('users.*')->where('staffs.id', $d->staff_id)->join('users', 'users.staff_id', '=', 'staffs.id')->first();

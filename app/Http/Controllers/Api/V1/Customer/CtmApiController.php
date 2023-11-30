@@ -328,15 +328,17 @@ class CtmApiController extends Controller
         $img_path = "/gambar-test";
         // $img_path = "/gambar";
         $basepath = str_replace("laravel-simpletab", "public_html/pdam/", \base_path());
-        $path = "/pdam-test/gambar-test/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
-        // if (!is_dir($path)) {
-        //     mkdir($path, 0777, true);
-        // }
+        $path = $basepath . $img_path . "/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
+        // new server $path = "/pdam/gambar-test/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
         $new_image_name = $var['norek'] . "_" . $year_catat . "_" . $month_catat . ".jpg"; //nama image dibuat sendiri
         //move_uploaded_file($_FILES['file']['tmp_name'], $path . $new_image_name);
         $img_name = $img_path . "/" . $new_image_name;
         $resourceImage = $request->file('image');
 
+        /*
         //upload di server baru
         $cfile = curl_file_create($_FILES['image']['tmp_name'], $_FILES['image']['type'], $_FILES['image']['name']);
 
@@ -365,9 +367,10 @@ class CtmApiController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
+        */
 
         //upload di server lama
-        //$resourceImage->move($path, $img_name);
+        $resourceImage->move($path, $img_name);
 
         $path_img = "/" . "gambar/" . $year_catat . $month_catat . "/";
         $path_img1 = "D:/MyAMP/www/" . "gambar/" . $year_catat . $month_catat . "/";
@@ -505,15 +508,17 @@ class CtmApiController extends Controller
         //img path
         $img_path = "/gambar-test";
         $basepath = str_replace("laravel-simpletab", "public_html/pdam/", \base_path());
-        $path = "/pdam-test/gambar-test/" . $year_catat . $month_catat . "/";  //path nanti bisa dirubah disini mode 755
-        // if (!is_dir($path)) {
-        //     mkdir($path, 0777, true);
-        // }
+        $path = $basepath . $img_path . "/" . $year_catat . $month_catat . "/"; //path nanti bisa dirubah disini mode 755
+        // new server $path = "/pdam/gambar-test/" . $year_catat . $month_catat . "/";  //path nanti bisa dirubah disini mode 755
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
         $new_image_name = $var['norek'] . "_" . $var['tahunrekening'] . "_" . $month_catat . ".jpg"; //nama image dibuat sendiri
         //move_uploaded_file($_FILES['file']['tmp_name'], $path . $new_image_name);
         $img_name = $img_path . "/" . $new_image_name;
         $resourceImage = $request->file('image');
 
+        /*
         //upload di server baru
         $cfile = curl_file_create($_FILES['image']['tmp_name'], $_FILES['image']['type'], $_FILES['image']['name']);
 
@@ -542,9 +547,10 @@ class CtmApiController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
+        */
 
         //upload di server lama
-        //$resourceImage->move($path, $img_name);
+        $resourceImage->move($path, $img_name);
 
         $path_img = "/" . "gambar/" . $year_catat . $month_catat . "/";
         $path_img1 = "D:/MyAMP/www/" . "gambar/" . $year_catat . $month_catat . "/";

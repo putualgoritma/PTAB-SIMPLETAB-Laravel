@@ -30,6 +30,7 @@ use DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use OneSignal;
+use Image;
 
 class ActionsApiController extends Controller
 {
@@ -366,7 +367,8 @@ class ActionsApiController extends Controller
             // image yang lama disimpan
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
-            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            // $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            $basepath = base_path();
             $dataImageName = [];
             $dataImageNameTool = [];
 
@@ -374,14 +376,35 @@ class ActionsApiController extends Controller
             if ($action->status == 'pending' && $dataForm->status == 'active') {
                 for ($i = 1; $i <= $request->countImagePengerjaan; $i++) {
                     if ($request->file('image' . $i)) {
-                        $resourceImage = $request->file('image' . $i);
+                        // $resourceImage = $request->file('image' . $i);
+                        // $nameImage = strtolower($action->id);
+                        // $file_extImage = $request->file('image' . $i)->extension();
+                        // $nameImage = str_replace(" ", "-", $nameImage);
+
+                        // $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+
+                        // $resourceImage->move($basepath . $img_path, $img_name);
+
+                        // $dataImageName[] = $img_name;
+
+
                         $nameImage = strtolower($action->id);
-                        $file_extImage = $request->file('image' . $i)->extension();
+                        $file_extImage = $image->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
-
                         $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+                        $image = $image;
 
-                        $resourceImage->move($basepath . $img_path, $img_name);
+                        $imgFile = Image::make($image->getRealPath())->orientate();;
+
+                        // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                        // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                        $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                            // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                            $font->size(14);
+                            $font->color('#000000');
+                            $font->valign('top');
+                        })->save($basepath . '/' . $img_name);
 
                         $dataImageName[] = $img_name;
                     } else {
@@ -395,14 +418,34 @@ class ActionsApiController extends Controller
 
                 for ($i = 1; $i <= $request->countImagePengerjaan; $i++) {
                     if ($request->file('image' . $i)) {
-                        $resourceImage = $request->file('image' . $i);
+                        // $resourceImage = $request->file('image' . $i);
+                        // $nameImage = strtolower($action->id);
+                        // $file_extImage = $request->file('image' . $i)->extension();
+                        // $nameImage = str_replace(" ", "-", $nameImage);
+
+                        // $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+
+                        // $resourceImage->move($basepath . $img_path, $img_name);
+
+                        // $dataImageName[] = $img_name;
+                        $image = $request->file('image' . $i);
                         $nameImage = strtolower($action->id);
-                        $file_extImage = $request->file('image' . $i)->extension();
+                        $file_extImage = $image->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
-
                         $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+                        $image = $image;
 
-                        $resourceImage->move($basepath . $img_path, $img_name);
+                        $imgFile = Image::make($image->getRealPath())->orientate();
+
+                        // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                        // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                        $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                            // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                            $font->size(20);
+                            $font->color('#000000');
+                            $font->valign('top');
+                        })->save($basepath . '/' . $img_name);
 
                         $dataImageName[] = $img_name;
                     } else {
@@ -415,14 +458,40 @@ class ActionsApiController extends Controller
 
             // foto sebelum pengerjaan
             if ($request->file('image_prework')) {
-                $resource_image_prework = $request->file('image_prework');
-                $id_name_image_prework = strtolower($action->id);
+                // $resource_image_prework = $request->file('image_prework');
+                // $id_name_image_prework = strtolower($action->id);
+                // $file_ext_image_prework = $request->file('image_prework')->extension();
+                // $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
+
+                // $name_image_prework = $img_path . '/' . $id_name_image_prework . '-' . $dataForm->action_id . '-pre.' . $file_ext_image_prework;
+
+                // $resource_image_prework->move($basepath . $img_path, $name_image_prework);
+                // $data_image_prework = $name_image_prework;
+
+
+
+
+                $nameImage = strtolower($action->id);
                 $file_ext_image_prework = $request->file('image_prework')->extension();
+                $id_name_image_prework = strtolower($action->id);
+                $nameImage = str_replace(" ", "-", $nameImage);
                 $id_name_image_prework = str_replace(' ', '-', $id_name_image_prework);
 
-                $name_image_prework = $img_path . '/' . $id_name_image_prework . '-' . $dataForm->action_id . '-pre.' . $file_ext_image_prework;
+                $name_image_prework = $img_path . '/' . $id_name_image_prework . '123-' . $dataForm->action_id . '-pre.' . $file_ext_image_prework;
+                $resource_image_prework = $request->file('image_prework');
 
-                $resource_image_prework->move($basepath . $img_path, $name_image_prework);
+                $imgFile = Image::make($resource_image_prework->getRealPath())->orientate();;
+
+
+                // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+                // . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng
+                $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                    // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                    $font->size(14);
+                    $font->color('#000000');
+                    $font->valign('top');
+                })->save($basepath . '/' . $name_image_prework);
+
                 $data_image_prework = $name_image_prework;
             }
 
@@ -430,14 +499,35 @@ class ActionsApiController extends Controller
             if ($action->status == 'pending' && $dataForm->status == 'active') {
                 for ($i = 1; $i <= $request->countImageTool; $i++) {
                     if ($request->file('image_tools' . $i)) {
-                        $resourceImage = $request->file('image_tools' . $i);
+                        // $resourceImage = $request->file('image_tools' . $i);
+                        // $nameImage = strtolower($action->id);
+                        // $file_extImage = $request->file('image_tools' . $i)->extension();
+                        // $nameImage = str_replace(" ", "-", $nameImage);
+
+                        // $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+
+                        // $resourceImage->move($basepath . $img_path, $img_name);
+
+                        // $dataImageNameTool[] = $img_name;
+                        $image = $request->file('image_tools' . $i);
                         $nameImage = strtolower($action->id);
-                        $file_extImage = $request->file('image_tools' . $i)->extension();
+                        $file_extImage = $image->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . ".-tools." . $file_extImage;
+                        $image = $image;
 
-                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "." . $file_extImage;
+                        $imgFile = Image::make($image->getRealPath())->orientate();
 
-                        $resourceImage->move($basepath . $img_path, $img_name);
+
+                        // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                        // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                        $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                            // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                            $font->size(14);
+                            $font->color('#000000');
+                            $font->valign('top');
+                        })->save($basepath . '/' . $img_name);
 
                         $dataImageNameTool[] = $img_name;
                     } else {
@@ -451,14 +541,34 @@ class ActionsApiController extends Controller
 
                 for ($i = 1; $i <= $request->countImageTool; $i++) {
                     if ($request->file('image_tools' . $i)) {
-                        $resourceImage = $request->file('image_tools' . $i);
+                        // $resourceImage = $request->file('image_tools' . $i);
+                        // $nameImage = strtolower($action->id);
+                        // $file_extImage = $request->file('image_tools' . $i)->extension();
+                        // $nameImage = str_replace(" ", "-", $nameImage);
+
+                        // $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "-tools." . $file_extImage;
+
+                        // $resourceImage->move($basepath . $img_path, $img_name);
+
+                        // $dataImageNameTool[] = $img_name;
+                        $image = $request->file('image_tools' . $i);
                         $nameImage = strtolower($action->id);
-                        $file_extImage = $request->file('image_tools' . $i)->extension();
+                        $file_extImage = $image->extension();
                         $nameImage = str_replace(" ", "-", $nameImage);
+                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id  . $i . ".-tools." . $file_extImage;
+                        $image = $image;
 
-                        $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "-tools." . $file_extImage;
+                        $imgFile = Image::make($image->getRealPath())->orientate();
 
-                        $resourceImage->move($basepath . $img_path, $img_name);
+                        // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                        // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                        $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                            // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                            $font->size(14);
+                            $font->color('#000000');
+                            $font->valign('top');
+                        })->save($basepath . '/' . $img_name);
 
                         $dataImageNameTool[] = $img_name;
                     } else {
@@ -484,16 +594,36 @@ class ActionsApiController extends Controller
             for ($i = 1; $i <= $request->countImageDone; $i++) {
 
                 if ($request->file('image_done' . $i)) {
-                    $resourceImageDone = $request->file('image_done' . $i);
-                    $nameImageDone = strtolower($action->id);
-                    $file_extImageDone = $request->file('image_done' . $i)->extension();
-                    $nameImageDone = str_replace(" ", "-", $nameImageDone);
+                    // $resourceImageDone = $request->file('image_done' . $i);
+                    // $nameImageDone = strtolower($action->id);
+                    // $file_extImageDone = $request->file('image_done' . $i)->extension();
+                    // $nameImageDone = str_replace(" ", "-", $nameImageDone);
 
-                    $img_name_done = $img_path . "/" . $nameImageDone . "-" . $dataForm->action_id . $i . "-done." . $file_extImageDone;
+                    // $img_name_done = $img_path . "/" . $nameImageDone . "-" . $dataForm->action_id . $i . "-done." . $file_extImageDone;
 
-                    $resourceImageDone->move($basepath . $img_path, $img_name_done);
+                    // $resourceImageDone->move($basepath . $img_path, $img_name_done);
 
-                    $dataImageNameDone[] = $img_name_done;
+                    // $dataImageNameDone[] = $img_name_done;
+                    $image = $request->file('image_done' . $i);
+                    $nameImage = strtolower($action->id);
+                    $file_extImage = $image->extension();
+                    $nameImage = str_replace(" ", "-", $nameImage);
+                    $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->action_id . $i . "-done." . $file_extImage;
+                    $image = $image;
+
+                    $imgFile = Image::make($image->getRealPath())->orientate();
+
+                    // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+
+                    // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                    $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                        // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                        $font->size(14);
+                        $font->color('#000000');
+                        $font->valign('top');
+                    })->save($basepath . '/' . $img_name);
+
+                    $dataImageNameDone[] = $img_name;
                 } else {
                     $responseImage = 'Image tidak di dukung';
                     break;
@@ -1589,20 +1719,46 @@ class ActionsApiController extends Controller
 
             $action_staffs = ActionApi::where('id', $action_id)->with('staff')->first();
 
-            $staffs = StaffApi::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
-                ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
-                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
-                ->where('subdapertement_id', $action->subdapertement_id)
-                ->orderBy('work_units.serial_number', 'ASC')
-                ->get();
+            // $staffs = StaffApi::selectRaw('staffs.id,staffs.code,staffs.name,staffs.phone, work_units.name as work_unit_name')
+            //     ->join('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
+            //     ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+            //     ->where('subdapertement_id', $action->subdapertement_id)
+            //     ->orderBy('work_units.serial_number', 'ASC')
+            //     ->get();
 
-            // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+            // // $staffs = StaffApi::where('dapertement_id', $action->dapertement_id)->with('action')->get();
+
+            // $action_staff_lists = DB::table('staffs')
+            //     ->join('action_staff', function ($join) {
+            //         $join->on('action_staff.staff_id', '=', 'staffs.id')
+            //             ->where('action_staff.status', '!=', 'close');
+            //     })
+            //     ->get();
 
             $action_staff_lists = DB::table('staffs')
                 ->join('action_staff', function ($join) {
                     $join->on('action_staff.staff_id', '=', 'staffs.id')
                         ->where('action_staff.status', '!=', 'close');
                 })
+                ->join('actions', 'actions.id', '=', 'action_staff.action_id')
+                ->where('actions.id', $action_id)
+                ->get();
+
+            $staffs = StaffApi::selectRaw('
+        staffs.id,staffs.code,
+        staffs.name,
+        staffs.phone,
+        work_units.name as work_unit_name,
+        SUM(CASE WHEN status != "close" THEN 1 ELSE 0 END) AS jumlahtindakan
+        ')
+                ->leftJoin('action_staff', 'staffs.id', '=', 'action_staff.staff_id')
+                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+                ->where('action_staff.status', '!=', null)
+                ->where('subdapertement_id', $action->subdapertement_id)
+                ->orWhere('action_staff.status', '=', null)
+                ->where('subdapertement_id', $action->subdapertement_id)
+                ->groupBy('staffs.id')
+                ->orderBy('work_units.serial_number', 'ASC')
                 ->get();
 
             $data = [
@@ -2733,16 +2889,36 @@ class ActionsApiController extends Controller
         $dataQtyImage = json_decode($request->qtyImage);
         for ($i = 1; $i <= $dataQtyImage; $i++) {
             if ($request->file('image' . $i)) {
-                $resourceImage = $request->file('image' . $i);
-                $nameImage = time() + $i;
-                $file_extImage = $request->file('image' . $i)->extension();
+                // $resourceImage = $request->file('image' . $i);
+                // $nameImage = time() + $i;
+                // $file_extImage = $request->file('image' . $i)->extension();
+                // $nameImage = str_replace(" ", "-", $nameImage);
+
+                // $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+
+                // $resourceImage->move($basepath . $img_path, $img_name);
+
+                // $dataImageName[] = $nameImage . "." . $file_extImage;
+                $image = $request->file('image' . $i);
+                $nameImage = strtolower($action->id);
+                $file_extImage = $image->extension();
                 $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+                $image = $image;
 
-                $img_name = $img_path . "/" . $nameImage . "." . $file_extImage;
+                $imgFile = Image::make($image->getRealPath());
 
-                $resourceImage->move($basepath . $img_path, $img_name);
+                // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
 
-                $dataImageName[] = $nameImage . "." . $file_extImage;
+                // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                    // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                    $font->size(14);
+                    $font->color('#000000');
+                    $font->valign('top');
+                })->save($basepath . '/' . $img_name);
+
+                $dataImageName[] = $img_name;
             } else {
                 $responseImage = 'Image tidak di dukung';
                 break;

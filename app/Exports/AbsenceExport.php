@@ -2,11 +2,19 @@
 
 namespace App\Exports;
 
+
+use Maatwebsite\Excel\Concerns\WithDefaultStyles;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class AbsenceExport implements FromCollection, WithHeadings
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Events\BeforeExport;
+
+class AbsenceExport implements WithStyles, WithEvents, FromCollection, WithHeadings
 {
     use Exportable;
 
@@ -24,20 +32,69 @@ class AbsenceExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
+        // return [
+        //     'Emp No',
+        //     'AC-No',
+        //     'No',
+        //     'Name',
+        //     'Auto-Asign',
+        //     'Date',
+        //     'TimeTable',
+        //     'On_Duty',
+        //     'Off_Duty',
+        //     'Clock_in',
+        //     'Clock_out',
+        //     'Keterangan',
+        //     'Memo'
+        // ];
+
         return [
-            'Emp No',
-            'AC-No',
-            'No',
+            'Emp No.',
+            'AC-No.',
+            'No.',
             'Name',
-            'Auto-Asign',
+            'Auto-Assign',
             'Date',
-            'TimeTable',
-            'On_Duty',
-            'Off_Duty',
-            'Clock_in',
-            'Clock_out',
-            'Keterangan',
-            'Memo'
+            'Timetable',
+            'On Duty',
+            'Off Duty',
+            'Clock In',
+            'Clock Out',
+            'Normal',
+            'Real time',
+            'Late',
+            'Early',
+            'Absent',
+            'OT Time',
+            'Work Time',
+            'Exception',
+            'Must C/In',
+            'Must C/Out',
+            'Department',
+            'NDays',
+            'WeekEnd',
+            'Holiday',
+            'ATT_Time',
+            'NDays_OT',
+            'WeekEnd_OT',
+            'Holiday_OT',
         ];
+    }
+
+
+
+
+    public function styles(Worksheet $sheet)
+    {
+        $sheet->getStyle('A1:AC1')->getFont()->setBold(true);
+    }
+
+    public function registerEvents(): array
+    {
+        return array(
+            AfterSheet::class => function (AfterSheet $event) {
+                $event->sheet->getDelegate()->setAutoFilter('A1:' . $event->sheet->getDelegate()->getHighestColumn() . '1');
+            }
+        );
     }
 }

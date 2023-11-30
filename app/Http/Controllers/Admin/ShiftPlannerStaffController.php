@@ -95,6 +95,7 @@ class ShiftPlannerStaffController extends Controller
                 ->join('staffs', 'shift_planner_staffs.staff_id', '=', 'staffs.id')
                 ->orderBy('shift_groups.queue', 'ASC')
                 ->where('shift_parents.id', $request->id)
+
                 ->FilterJob($shift_parent->job_id)
                 ->FilterWorkUnit($shift_parent->work_unit_id)
                 ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
@@ -129,6 +130,7 @@ class ShiftPlannerStaffController extends Controller
             return response()->json($data);
         }
         $pgw = Staff::FilterJob($shift_parent->job_id)
+            ->where('_status', '!=', 'non_active')
             ->FilterWorkUnit($shift_parent->work_unit_id)
             ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
             ->where('staffs.work_type_id', '2')
@@ -175,6 +177,7 @@ class ShiftPlannerStaffController extends Controller
                 ->where('shift_planner_staffs.id', $request->id)->first();
             $shift_parent = ShiftParent::where('id', $requests->shift_parent_id)->first();
             $pgw = Staff::select('staffs.*')->FilterJob($shift_parent->job_id)
+                ->where('_status', '!=', 'non_active')
                 ->FilterWorkUnit($shift_parent->work_unit_id)
                 ->FilterSubdapertement($shift_parent->subdapertement_id, $shift_parent->job_id)
                 ->where('staffs.work_type_id', '2')
@@ -271,11 +274,9 @@ class ShiftPlannerStaffController extends Controller
                     ->first();
                 if ($cek) {
                     $event = "fail";
-                }
-                // else if (date("Y-m-d",  strtotime($request->start)) <= date('Y-m-d')) {
-                //     $event = "fail";
-                // } 
-                else {
+                    // } else if (date("Y-m-d",  strtotime($request->start)) <= date('Y-m-d')) {
+                    //     $event = "fail";
+                } else {
                     $ShiftGroup = ShiftGroups::where('id', $request->shift_group_id)->first();
                     $time = date("Y-m-d 0" . $ShiftGroup->queue . ":i:s",  strtotime($request->start));
                     $event = ShiftPlannerStaffs::create([

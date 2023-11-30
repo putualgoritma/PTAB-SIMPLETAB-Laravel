@@ -24,7 +24,7 @@ class GeolocationOffController extends Controller
     public function index(Request $request)
     {
 
-        // abort_unless(\Gate::allows('geolocation_off_access'), 403);
+        abort_unless(\Gate::allows('duty_access'), 403);
         $checker = [];
         $users = user::with(['roles'])
             ->where('id', Auth::user()->id)
@@ -70,7 +70,7 @@ class GeolocationOffController extends Controller
             $table->editColumn('actions', function ($row) {
                 $viewGate = 'duty_access';
                 $editGate = '';
-                $deleteGate = 'geolocation_off_delete';
+                $deleteGate = 'duty_delete';
                 $crudRoutePart = 'geolocation_off';
 
                 return view('partials.datatablesDuties', compact(
@@ -130,7 +130,7 @@ class GeolocationOffController extends Controller
     }
     public function create(Request $request)
     {
-        // abort_unless(\Gate::allows('geolocation_off_create'), 403);
+        // abort_unless(\Gate::allows('duty_create'), 403);
         $type = $request->type;
         $staffs = Staff::orderBy('name')->get();
         return view('admin.geolocation_off.create', compact('staffs', 'type'));
@@ -138,7 +138,7 @@ class GeolocationOffController extends Controller
 
     public function show($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_access'), 403);
+        // abort_unless(\Gate::allows('duty_access'), 403);
         $geolocation_off = AbsenceRequest::selectRaw('absence_requests.*, staffs.name as staff_name')
             ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
             ->where('absence_requests.id', $id)->first();
@@ -151,7 +151,7 @@ class GeolocationOffController extends Controller
 
     public function store(Request $request)
     {
-        // abort_unless(\Gate::allows('geolocation_off_create'), 403);
+        // abort_unless(\Gate::allows('duty_create'), 403);
         $data = [
             'category' => 'geolocation_off',
             'type' => 'other',
@@ -166,7 +166,7 @@ class GeolocationOffController extends Controller
 
     public function edit($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
+        // abort_unless(\Gate::allows('duty_edit'), 403);
         $requests = Requests::where('id', $id)->first();
         $type = $requests->type;
         $users = User::where('staff_id', '!=', '0')->orderBy('name')->get();
@@ -174,7 +174,7 @@ class GeolocationOffController extends Controller
     }
     public function update(Request $request, $id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
+        // abort_unless(\Gate::allows('duty_edit'), 403);
         $geolocation_off = Requests::where('id', $id)
             ->update($request->except(['_token', '_method']));
         return redirect()->route('admin.geolocation_off.index');
@@ -183,7 +183,8 @@ class GeolocationOffController extends Controller
 
     public function reject($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_edit'), 403);
+        // abort_unless(\Gate::allows('duty_edit'), 403);
+        abort_unless(\Gate::allows('duty_access'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'reject']);
 
@@ -252,7 +253,8 @@ class GeolocationOffController extends Controller
     }
     public function approve($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_delete'), 403);
+        // abort_unless(\Gate::allows('duty_delete'), 403);
+        abort_unless(\Gate::allows('duty_access'), 403);
         $d = AbsenceRequest::where('id', $id)
             ->update(['status' => 'approve']);
 
@@ -368,7 +370,7 @@ class GeolocationOffController extends Controller
     }
     public function destroy($id)
     {
-        // abort_unless(\Gate::allows('geolocation_off_delete'), 403);
+        // abort_unless(\Gate::allows('duty_delete'), 403);
         AbsenceRequest::where('id', $id)
             ->delete();
         return redirect()->back();
