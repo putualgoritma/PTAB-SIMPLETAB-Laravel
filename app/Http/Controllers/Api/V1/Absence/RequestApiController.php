@@ -1373,7 +1373,7 @@ class RequestApiController extends Controller
 
 
             // jika dinas luar/izin/lembur start
-            if ($requests->category == "permission" || $requests->category == "duty" || $requests->category == "leave") {
+            if ($requests->category == "permission" || $requests->category == "dispense" || $requests->category == "duty" || $requests->category == "leave") {
 
                 $d = AbsenceRequest::where('id', $request->id)
                     ->update(['status' => 'approve']);
@@ -1390,6 +1390,8 @@ class RequestApiController extends Controller
                 // dd($absenceRequest);
                 if ($requests->category == "permission") {
                     $message = "Izin anda tanggal " . $d->start . " disetujui";
+                } else if ($requests->category == "dispense") {
+                    $message = "Dispen anda tanggal " . $d->start . " disetujui";
                 } else if ($requests->category == "duty") {
                     $message = "Dinas anda tanggal " . $d->start . " sampai dengan " . $d->end . " disetujui";
                 } else if ($requests->category == "leave") {
@@ -1439,6 +1441,8 @@ class RequestApiController extends Controller
                             $category_absence = 13;
                         } else if ($requests->category == "leave") {
                             $category_absence = 8;
+                        } else if ($requests->category == "dispense") {
+                            $category_absence = 14;
                         } else {
                             // $category_absence = 7;
                         }
