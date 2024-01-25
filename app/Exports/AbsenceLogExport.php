@@ -5,12 +5,18 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class AbsenceLogExport implements FromCollection, WithHeadings
+class AbsenceLogExport implements FromCollection, WithTitle, WithHeadings
 {
     use Exportable;
 
     private $data;
+
+    public function title(): string
+    {
+        return 'ABSENSI';
+    }
 
     public function __construct($data)
     {
@@ -32,6 +38,8 @@ class AbsenceLogExport implements FromCollection, WithHeadings
             'Location',
             'ID Number',
             'VerifyCode',
+            'shift',
+            'status',
             'CardNo'
         ];
     }

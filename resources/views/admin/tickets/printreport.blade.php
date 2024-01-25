@@ -16,7 +16,7 @@
                 {{-- <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction) <textarea name="" id="" cols="30" rows="10">{{$index+1}}.{{$ticketaction->memo}}</textarea> <br>@endforeach</span> --}}
             <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction) <pre> {{$ticketaction->memo}} </pre><br>@endforeach</span>
               
-               <span class="v103_245"> @if ($ticket->delegated_at != null){{ date('H:i:s', strtotime($ticket->action[0]->start)) }}@endif </span>
+               <span class="v103_245"> @if ($ticket->delegated_at != null) {{ date('H:i:s', strtotime($ticket->delegated_at)) }} @else {{ date('H:i:s', strtotime($ticket->action[0]->start)) }} @endif </span>
                 <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
@@ -39,11 +39,11 @@ $detik = $diff % 60;
                 <span class="v103_251"></span>
                 <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
                 <span class="v103_253">{{$ticket->spk}}</span>
-                <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
+                <span class="v103_254">@if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif</span>
                 <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
-                <span class="v103_257"> @if ($ticket->delegated_at != null){{ date('d/m/Y', strtotime($ticket->action[0]->start)) }}@endif </span>
-                <span class="v103_258"> @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif </span>
+                <span class="v103_257">@if ($ticket->delegated_at != null) {{ date('d/m/Y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
+                <span class="v103_258"> @if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
                 <span class="v103_260"> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
@@ -67,7 +67,7 @@ $detik = $diff % 60;
             <div class="A2Text">
                  <span class="v103_243"> {{ date('d/m/Y', strtotime($ticket->action[0]->end)) }} </span>
                 <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
-                <span class="v103_245"> @if ($ticket->delegated_at != null){{ date('H:i:s', strtotime($ticket->action[0]->start)) }}@endif </span>
+                <span class="v103_245"> @if ($ticket->delegated_at != null) {{ date('H:i:s', strtotime($ticket->delegated_at)) }} @else {{ date('H:i:s', strtotime($ticket->action[0]->start)) }} @endif </span>
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
@@ -76,11 +76,11 @@ $detik = $diff % 60;
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
                 <span class="v103_253">{{$ticket->spk}}</span>
-                <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
+                <span class="v103_254">@if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif</span>
                 <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
-               <span class="v103_257"> @if ($ticket->delegated_at != null){{ date('d/m/Y', strtotime($ticket->action[0]->start)) }}@endif </span>
-                <span class="v103_258"> @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif </span>
+               <span class="v103_257">@if ($ticket->delegated_at != null) {{ date('d/m/Y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
+                <span class="v103_258"> @if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
                 <span class="v103_260"> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
@@ -104,7 +104,7 @@ $detik = $diff % 60;
             <div class="A3Text">
                  <span class="v103_243"> {{ date('d/m/Y', strtotime($ticket->action[0]->end)) }} </span>
                 <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
-               <span class="v103_245"> @if ($ticket->delegated_at != null){{ date('H:i:s', strtotime($ticket->action[0]->start)) }}@endif </span>
+               <span class="v103_245">@if ($ticket->delegated_at != null) {{ date('H:i:s', strtotime($ticket->delegated_at)) }} @else {{ date('H:i:s', strtotime($ticket->action[0]->start)) }} @endif </span>
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
@@ -113,11 +113,11 @@ $detik = $diff % 60;
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
                 <span class="v103_253">{{$ticket->spk}}</span>
-                <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
+                <span class="v103_254">@if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif</span>
                 <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
-               <span class="v103_257"> @if ($ticket->delegated_at != null){{ date('d/m/Y', strtotime($ticket->action[0]->start)) }}@endif </span>
-                <span class="v103_258"> @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif </span>
+               <span class="v103_257"> @if ($ticket->delegated_at != null) {{ date('d/m/Y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
+                <span class="v103_258"> @if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
                 <span class="v103_260"> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>
@@ -141,7 +141,7 @@ $detik = $diff % 60;
             <div class="A4Text">
                  <span class="v103_243"> {{ date('d/m/Y', strtotime($ticket->action[0]->end)) }} </span>
                 <span class="v103_244">@foreach ($ticket->action as $index => $ticketaction)<pre>{{$index+1}}.{{$ticketaction->memo}}</pre><br>@endforeach</span>
-               <span class="v103_245"> @if ($ticket->delegated_at != null){{ date('H:i:s', strtotime($ticket->action[0]->start)) }}@endif </span>
+               <span class="v103_245">@if ($ticket->delegated_at != null) {{ date('H:i:s', strtotime($ticket->delegated_at)) }} @else {{ date('H:i:s', strtotime($ticket->action[0]->start)) }} @endif  </span>
                  <span class="v103_246"> {{ date('H:i:s', strtotime($ticket->action[0]->end)) }}  </span>
                 <span class="v103_247"></span>
                 <span class="v103_248"></span>
@@ -150,11 +150,11 @@ $detik = $diff % 60;
                 <span class="v103_251"></span>
               <span class="v103_252">  {{-- @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('H:i:s')}}@endif --}}  </span>
                 <span class="v103_253">{{$ticket->spk}}</span>
-                <span class="v103_254">@if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif</span>
+                <span class="v103_254">@if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif</span>
                 <span class="v103_255">{{ $ticket->action[0]->todo }}</span>
                 <span class="v103_256">{{$ticket->dapertement->name}}</span>
-               <span class="v103_257"> @if ($ticket->delegated_at != null){{ date('d/m/Y', strtotime($ticket->action[0]->start)) }}@endif </span>
-                <span class="v103_258"> @if ($ticket->delegated_at != null){{$ticket->delegated_at->format('d/m/Y')}}@endif </span>
+               <span class="v103_257">@if ($ticket->delegated_at != null) {{ date('d/m/Y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
+                <span class="v103_258"> @if ($ticket->delegated_at != null) {{ date('d/m/y', strtotime($ticket->delegated_at)) }} @else {{ date('d/m/Y', strtotime($ticket->action[0]->start)) }} @endif </span>
                 <span class="v103_259">{{$ticket->customer->name}}</span>
                 <span class="v103_260"> @if ($ticket->address != null){{$ticket->address}}@endif  @if ($ticket->address == null){{$ticket->customer->address}}@endif</span>
                 <span class="v103_261">{{$ticket->customer->code}}</span>

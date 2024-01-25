@@ -367,8 +367,8 @@ class ActionsApiController extends Controller
             // image yang lama disimpan
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
-            // $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-            $basepath = base_path();
+            $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
+            // $basepath = base_path();
             $dataImageName = [];
             $dataImageNameTool = [];
 
@@ -3640,4 +3640,97 @@ class ActionsApiController extends Controller
             ]);
         }
     }
+
+
+    // upload image start
+
+    public function uploadImage(Request $request)
+    {
+        // $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+
+        $img_path = "/images/action";
+        // $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
+        $basepath = base_path();
+
+
+        if ($request->image_done) {
+            $image = $request->image_done;
+            $nameImage = strtolower($request->action_id);
+            $file_extImage = $image->extension();
+            $nameImage = str_replace(" ", "-", $nameImage);
+            $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $request->i . "-done." . $file_extImage;
+            $image = $image;
+
+            $imgFile = Image::make($image->getRealPath())->orientate();
+
+            $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                $font->size(14);
+                $font->color('#000000');
+                $font->valign('top');
+            })->save($basepath . '/' . $img_name);
+
+            $dataImageNameDone[] = $img_name;
+        } else {
+            $data = [
+                'status' => 403,
+                'message' => "Image tidak di dukung"
+            ];
+            return response()->json($data);
+        }
+        $data = [
+            'status' => 200,
+            'image' => $img_name,
+            'url' => $basepath . $img_name
+        ];
+
+        return response()->json($data);
+    }
+
+
+    public function uploadImages(Request $request)
+    {
+        // $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+
+        $img_path = "/images/action";
+        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
+        $data = [];
+        $list_images = [];
+
+        $i = 1;
+        foreach ($request->image_done as $data) {
+            if ($data) {
+                $image = $data;
+                $nameImage = strtolower($request->action_id);
+                $file_extImage = $image->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $i . "-done." . $file_extImage;
+                $image = $image;
+
+                $imgFile = Image::make($image->getRealPath())->orientate();
+
+                $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                    $font->size(14);
+                    $font->color('#000000');
+                    $font->valign('top');
+                })->save($basepath . '/' . $img_name);
+
+                $dataImageNameDone[] = $img_name;
+            } else {
+                $data = [
+                    'status' => 403,
+                    'message' => "Image tidak di dukung"
+                ];
+                return response()->json($data);
+            }
+            $i++;
+            $list_images[] = $img_name;
+        }
+
+        $data = [
+            'data' => $list_images
+        ];
+        return response()->json($data);
+    }
+
+    // upload image end
 }

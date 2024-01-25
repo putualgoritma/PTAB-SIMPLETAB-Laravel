@@ -3640,4 +3640,430 @@ class ActionsApiController extends Controller
             ]);
         }
     }
+
+    public function uploadImage(Request $request)
+    {
+        // $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+
+        // $img_path = "/images/action";
+        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
+        $basepath = base_path();
+
+
+        if ($request->image_done) {
+            $image = $request->image_done;
+            $nameImage = strtolower($request->action_id);
+            $file_extImage = $image->extension();
+            $nameImage = str_replace(" ", "-", $nameImage);
+            $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $request->i . "-done." . $file_extImage;
+            $image = $image;
+
+            $imgFile = Image::make($image->getRealPath())->orientate();
+
+            $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                $font->size(14);
+                $font->color('#000000');
+                $font->valign('top');
+            })->save($basepath . '/' . $img_name);
+
+            $dataImageNameDone[] = $img_name;
+        } else {
+            $data = [
+                'status' => 403,
+                'message' => "Image tidak di dukung"
+            ];
+            return response()->json($data);
+        }
+        $data = [
+            'status' => 200,
+            'image' => $img_name,
+            'url' => $basepath . $img_name
+        ];
+
+        return response()->json($data);
+    }
+
+    public function uploadImages(Request $request)
+    {
+        // $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
+
+        $img_path = "/images/action";
+        // $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
+        $basepath = base_path();
+        $data = [];
+        $list_images = [];
+
+        $i = 1;
+        foreach ($request->image_done as $data) {
+            if ($data) {
+                $image = $data;
+                $nameImage = strtolower($request->action_id);
+                $file_extImage = $image->extension();
+                $nameImage = str_replace(" ", "-", $nameImage);
+                $img_name = $img_path . "/" . $nameImage . "-" . $request->action_id . $i . "-done." . $file_extImage;
+                $image = $image;
+
+                $imgFile = Image::make($image->getRealPath())->orientate();
+
+                $imgFile->text('' . Date('Y-m-d H:i:s'), 10, 10, function ($font) {
+                    $font->size(14);
+                    $font->color('#000000');
+                    $font->valign('top');
+                })->save($basepath . '/' . $img_name);
+
+                $dataImageNameDone[] = $img_name;
+            } else {
+                $data = [
+                    'status' => 403,
+                    'message' => "Image tidak di dukung"
+                ];
+                return response()->json($data);
+            }
+            $i++;
+            $list_images[] = $img_name;
+        }
+
+        $data = [
+            'data' => $list_images
+        ];
+        return response()->json($data);
+    }
+
+    public function actionStatusUpdateDone(Request $request)
+    {
+        try {
+            // ambil data dari request simpan di dataForm
+
+            // data action
+            $action = ActionApi::where('id', $request->action_id)->with('ticket')->with('staff')->first();
+
+            $action = ActionApi::where('id', $request->action_id)->with('ticket')->with('staff')->first();
+
+            $statusAction = $request->status;
+
+            $dateNow = date('Y-m-d H:i:s');
+
+            // update database
+            $dataNewAction = array(
+                'status' => $statusAction,
+                // 'image_prework' => $data_image_prework,
+                // 'image_tools' => $dataImageNameTool,
+                'end' => $statusAction == 'pending' || $statusAction == 'active' ? '' : $dateNow,
+                'memo' => $request->memo,
+            );
+
+            $dataNewAction['image_done'] = $request->imgDone;
+
+
+            $action->update($dataNewAction);
+            //update staff
+            $ids = $action->staff()->allRelatedIds();
+            foreach ($ids as $sid) {
+                $action->staff()->updateExistingPivot($sid, ['status' => $request->status]);
+            }
+            //update ticket status
+            $ticket = TicketApi::find($action->ticket_id);
+            $ticket->status = $statusAction;
+            $ticket->save();
+
+            //def subdap
+            $dateNow = date('Y-m-d H:i:s');
+            $subdapertement_def = Subdapertement::where('def', '1')->first();
+            $dapertement_def_id = $subdapertement_def->dapertement_id;
+            $subdapertement_def_id = $subdapertement_def->id;
+
+            // if ($statusAction == 'close') {
+            //     $customer = CustomerApi::find($ticket->customer_id);
+            //     $id_onesignal = $customer->_id_onesignal;
+            //     $message = 'Customer: Keluahan Sudah Diselesaikan  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     $phone_no = $customer->phone;
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
+
+            //send notif to admin
+            // $admin_arr = User::where('dapertement_id', 0)->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Admin: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
+
+            //send notif to humas
+            // $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->where('staff_id', 0)->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
+
+            //send notif to departement terkait
+            // $admin_arr = User::where('dapertement_id', $ticket->dapertement_id)
+            //     ->where('subdapertement_id', 0)
+            //     ->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
+
+            //send notif to sub departement terkait
+            // $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
+            //     ->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Sub Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
+
+            //send notif to staff terkait
+            // $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
+            // foreach ($actionstaffs as $key => $actionstaff) {
+            //     $message = 'Staff: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
+            //     $phone_no = $staff_phone->phone;
+
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            // }
+
+            return response()->json([
+                'message' => 'Status di ubah ',
+                'data' => $action,
+                'datanew' => $dataNewAction,
+            ]);
+        } catch (QueryException $ex) {
+            return response()->json([
+                'message' => 'gagal update status ',
+                'data' => $ex,
+            ]);
+        }
+    }
 }

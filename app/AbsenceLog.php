@@ -53,6 +53,8 @@ class AbsenceLog extends Model
     {
         return $this->belongsTo(AbsenceRequest::class, 'absence_request_id', 'id');
     }
+
+
     // public function scopeFilterDate($query, $monthyear)
     // {
     //     if (!empty(request()->input('monthyear'))) {
@@ -135,6 +137,14 @@ class AbsenceLog extends Model
         return $query;
     }
 
+    public function scopeFilterJob($query, $job)
+    {
+        if ($job != '') {
+            $query->where('staffs.job_id', $job);
+        }
+        return $query;
+    }
+
     public function scopeFilterAbsenceCategory($query, $absence_category)
     {
         if ($absence_category != '') {
@@ -143,6 +153,14 @@ class AbsenceLog extends Model
         return $query;
     }
 
+
+    public function scopeFilterWorkUnit($query, $work_unit_id)
+    {
+        if ($work_unit_id != '') {
+            $query->where('staffs.work_unit_id', $work_unit_id);
+        }
+        return $query;
+    }
 
 
     public function scopeFilterdapertement($query, $dapertement)

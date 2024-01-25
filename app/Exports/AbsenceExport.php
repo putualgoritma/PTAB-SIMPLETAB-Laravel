@@ -13,12 +13,18 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Events\BeforeExport;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class AbsenceExport implements WithStyles, WithEvents, FromCollection, WithHeadings
+class AbsenceExport implements WithStyles, WithEvents, FromCollection, WithTitle, WithHeadings
 {
     use Exportable;
 
     private $data;
+
+    public function title(): string
+    {
+        return 'ABSENSI';
+    }
 
     public function __construct($data)
     {

@@ -533,6 +533,16 @@
                     </li>
                     {{-- @endcan --}}
 
+                    @can('absence_all_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.absence.reportAbsenceAllView') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-book"></i>
+                      Laporan Rekap Excel (uji)
+                        </a>
+                    </li>
+                    @endcan
+
                                {{-- @can('absence_report') --}}
                                <li class="nav-item">
                                 <a href="{{ route('admin.absence.reportAbsenceView') }}" class="nav-link">
@@ -551,6 +561,17 @@
                                Staff Spesial
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('admin.receives.index') }}" class="nav-link">
+                                <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                                <i class="nav-icon fas fa-phone"></i>
+                               Penerima WA (uji)
+                                </a>
+                            </li>
+
+
+                            
                             @endcan
 
                     @can('absence_report')

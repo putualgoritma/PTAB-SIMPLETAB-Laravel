@@ -35,6 +35,16 @@ class Staff extends Model
         return $this->belongsTo(Subdapertement::class, 'subdapertement_id', 'id');
     }
 
+    public function shiftPlannerStaffs()
+    {
+        return $this->hasMany(ShiftPlannerStaffs::class, 'staff_id', 'id');
+    }
+
+    public function workUnit()
+    {
+        return $this->belongsTo(WorkUnit::class, 'work_unit_id', 'id');
+    }
+
     public function action()
     {
         return $this->belongsToMany(Action::class, 'action_staff', 'action_id', 'staff_id')
@@ -93,6 +103,7 @@ class Staff extends Model
             return $query;
         }
     }
+
 
     public function scopeFilterDateWeb($query, $from, $to)
     {

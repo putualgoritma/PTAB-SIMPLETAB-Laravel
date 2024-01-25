@@ -106,7 +106,20 @@
                 @endif
             </div> --}}
 
-
+            <div class="form-group {{ $errors->has('type') ? 'has-error' : '' }}">
+                <label for="type">{{ trans('global.staff.fields.dapertement') }}*</label>
+                <select id="type" name="type_s" class="form-control" value="{{ old('type', isset($shift_group) ? $shift_group->type_s : '') }}">
+                    <option value="">--Pilih type--</option>
+                    <option value="P">P</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                </select>
+                @if($errors->has('type'))
+                    <em class="invalid-feedback">
+                        {{ $errors->first('type') }}
+                    </em>
+                @endif
+            </div>
 
 
             <div>

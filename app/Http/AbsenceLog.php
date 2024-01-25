@@ -48,6 +48,11 @@ class AbsenceLog extends Model
     {
         return $this->belongsTo(ShiftGroupTimesheets::class, 'shift_group_timesheet_id', 'id');
     }
+
+    public function absenceRequests()
+    {
+        return $this->belongsTo(AbsenceRequest::class, 'absence_request_id', 'id');
+    }
     // public function scopeFilterDate($query, $monthyear)
     // {
     //     if (!empty(request()->input('monthyear'))) {

@@ -19,6 +19,11 @@ class ShiftPlannerStaffs extends Model
         'updated_at',
     ];
 
+    public function absenceLogs()
+    {
+        return $this->hasMany(AbsenceLog::class, 'shift_planner_id', 'id');
+    }
+
     public function scopeFilterJob($query, $job)
     {
         if ($job != '' && $job != '0' && $job != null) {

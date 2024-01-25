@@ -38,6 +38,7 @@ class TicketsController extends Controller
         // }
         // dd($checker, in_array('all_absence_access', $checker));
 
+        ini_set('memory_limit', '-1');
         $departementlist = Dapertement::all();
         $subdepartementlist = array();
 
@@ -70,7 +71,7 @@ class TicketsController extends Controller
 
                 $staff = $admin->staff_id;
 
-                $departementlist = Dapertement::where('id', $department)->get();
+                $departementlist = Dapertement::where('id', $department);
 
                 // ->get();
 
@@ -197,17 +198,18 @@ class TicketsController extends Controller
 
             $table->editColumn('nomorrekening', function ($row) {
 
-                return $row->customer->nomorrekening ? $row->customer->nomorrekening : "";
+                return $row->customer ? $row->customer->nomorrekening : "";
             });
 
             $table->editColumn('created_at', function ($row) {
 
+                // return $row->created_at ? strval($row->created_at) : "";
                 return $row->created_at ? strval($row->created_at) : "";
             });
 
             $table->editColumn('dapertement', function ($row) {
 
-                return $row->dapertement->name ? $row->dapertement->name : "";
+                return $row->dapertement ? $row->dapertement->name : "";
             });
 
             $table->editColumn('title', function ($row) {
@@ -227,7 +229,7 @@ class TicketsController extends Controller
                     return $row->address != "" ? $row->address : "";
                 } else {
 
-                    return $row->customer->alamat;
+                    return $row->customer ? $row->customer->alamat : "";
                 }
             });
 
@@ -271,7 +273,7 @@ class TicketsController extends Controller
         }
 
         //default view
-        echo $test_val;
+        // echo $test_val;
         if ($department > 0) {
             $subdepartementlist = Subdapertement::where('dapertement_id', $department)->get();
         }
@@ -286,10 +288,12 @@ class TicketsController extends Controller
 
         $code = acc_code_generate($last_code, 8, 3);
 
+        // dd($code);
+
         abort_unless(\Gate::allows('ticket_create'), 403);
 
         $categories = Category::all();
-
+        // dd($code);
         //$customers = Customer::all();
 
         return view('admin.tickets.create', compact('categories', 'code'));
@@ -297,10 +301,15 @@ class TicketsController extends Controller
 
     public function store(StoreTicketRequest $request)
     {
+        $last_code = $this->get_last_code('ticket');
+
+        $code = acc_code_generate($last_code, 8, 3);
 
         abort_unless(\Gate::allows('ticket_create'), 403);
 
         $customer_id = Customer::where('nomorrekening', $request->customer_id)->get();
+
+
 
         // dd($customer_id);
 
@@ -322,7 +331,7 @@ class TicketsController extends Controller
 
                 foreach ($request->file('image') as $key => $image) {
 
-                    $nameImage = strtolower($request->code);
+                    $nameImage = strtolower($code);
                     $file_extImage = $image->extension();
                     $nameImage = str_replace(" ", "-", $nameImage);
                     $img_name = $img_path . "/" . $nameImage . "-" . $request->customer_id . $key . "." . $file_extImage;
@@ -351,7 +360,7 @@ class TicketsController extends Controller
 
                 $resource = $request->file('video');
 
-                $video_name = $video_path . "/" . strtolower($request->code) . '-' . $request->customer_id . '.mp4';
+                $video_name = $video_path . "/" . strtolower($code) . '-' . $request->customer_id . '.mp4';
 
                 $resource->move($basepath . $video_path, $video_name);
             } else {
@@ -379,7 +388,7 @@ class TicketsController extends Controller
 
             $data = array(
 
-                'code' => $request->code,
+                'code' => $code,
 
                 'title' => $request->title,
 
