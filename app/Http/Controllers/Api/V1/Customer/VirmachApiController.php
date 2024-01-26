@@ -95,7 +95,8 @@ class VirmachApiController extends Controller
         //return $dirList;
 
         //get active ctm
-        $ctmPeriodActive = (int) date("Y") . date("m");
+        //$ctmPeriodActive = (int) date("Y") . date("m");
+        $ctmPeriodActive = (int) date('Ym', strtotime(date('Y-m')." -1 month"));
         if ($files_total > 0 && $dirStart < $ctmPeriodActive) {
             $nameDirectory = $dirStart;
             $pathDirectory = env('SFTP_ROOT') . $selectedFolder . $nameDirectory;

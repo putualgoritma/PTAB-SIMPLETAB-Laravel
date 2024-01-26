@@ -367,8 +367,8 @@ class ActionsApiController extends Controller
             // image yang lama disimpan
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
-            // $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-            $basepath = base_path();
+            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            // $basepath = base_path();
             $dataImageName = [];
             $dataImageNameTool = [];
 
