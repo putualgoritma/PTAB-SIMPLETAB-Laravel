@@ -106,7 +106,7 @@ class ShiftGroupController extends Controller
     {
         $shift_group = ShiftGroups::where('id', $id)->first();
         $shift_group->update($request->all());
-        return redirect()->route('admin.shift_group.index');
+        return redirect()->route('admin.shift_group.index', ["id" => $shift_group->shift_parent_id]);
     }
     public function destroy($id)
     {

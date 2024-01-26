@@ -18,6 +18,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use OneSignal;
+use Image;
 
 class TicketsApiController extends Controller
 {
@@ -63,14 +64,28 @@ class TicketsApiController extends Controller
         $dataQtyImage = json_decode($request->qtyImage);
         for ($i = 1; $i <= $dataQtyImage; $i++) {
             if ($request->file('image' . $i)) {
-                $resourceImage = $request->file('image' . $i);
+                $image = $request->file('image' . $i);
                 $nameImage = strtolower($code);
                 $file_extImage = $request->file('image' . $i)->extension();
                 $nameImage = str_replace(" ", "-", $nameImage);
 
                 $img_name = $img_path . "/" . $nameImage . "-" . $dataForm->customer_id . $i . "." . $file_extImage;
 
-                $resourceImage->move($basepath . $img_path, $img_name);
+
+                $imgFile = Image::make($image->getRealPath())->orientate();;
+
+                // dd($imgFile->insert($basepath . "/images/Logo.png", 'bottom-right', 10, 10));
+                $lt = $dataForm->lat ? $dataForm->lat : '';
+                $lng = $dataForm->lng ? $dataForm->lng : '';
+                // $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $dataForm->lat . ' lng : ' . $dataForm->lng, 10, 10, function ($font) {
+                $imgFile->text('' . Date('Y-m-d H:i:s') . ' lat : ' . $lt . ' lng :' . $lng, 10, 10, function ($font) {
+                    // $font->file(str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path()) . '/font/Titania-Regular.ttf');
+                    $font->size(14);
+                    $font->color('#000000');
+                    $font->valign('top');
+                })->save($basepath . '/' . $img_name);
+
+                // $resourceImage->move($basepath . $img_path, $img_name);
 
                 $dataImageName[] = $img_name;
             } else {

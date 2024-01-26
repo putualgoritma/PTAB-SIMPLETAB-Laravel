@@ -339,6 +339,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::delete('staffSpecials/destroy', 'StaffSpecialController@massDestroy')->name('staffSpecials.massDestroy');
     Route::resource('staffSpecials', 'StaffSpecialController');
 
+    // 22-01-2024 start
+    Route::post('absence/reportAllExcel', 'AbsenceController@reportAllExcel')->name('absence.reportAllExcel');
+    Route::get('absence/reportAbsenceAllView', 'AbsenceController@reportAbsenceAllView')->name('absence.reportAbsenceAllView');
+    // 22-01-2024 end
+
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
 
@@ -481,6 +486,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('visit/report', 'VisitController@report')->name('visit.report');
     Route::get('visit/reportForm', 'VisitController@reportForm')->name('visit.reportForm');
     Route::resource('visit', 'VisitController');
+
+
+
+    // 22-01-2024 start
+    Route::get('waReceive', 'WaReceivesController@index')->name('receives.index');
+    Route::post('waReceive/store', 'WaReceivesController@store')->name('waReceives.store');
+    Route::delete('waReceive/{id}/destroy', 'WaReceivesController@destroy')->name('waReceives.destroy');
+    // 22-01-2024 end
 
     // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
     // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');

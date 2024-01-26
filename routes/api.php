@@ -152,6 +152,10 @@ Route::group(['prefix' => 'close/admin', 'namespace' => 'Api\V1\Admin', 'middlew
     // payment
     // Route::resource('payments', 'PaymentApiController');
     Route::put('payments/edit', 'PaymentApiController@updatePay');
+
+    // 25-01-2024 upload image
+    Route::post('uploadImage', 'ActionsApiController@uploadImage');
+    Route::post('actionStatusUpdateDone', 'ActionsApiController@actionStatusUpdateDone');
 });
 
 
@@ -268,6 +272,10 @@ Route::group(['prefix' => 'close/absence', 'namespace' => 'Api\V1\Absence'], fun
     Route::get('history', 'AbsenceApiController@history');
     Route::get('requests/listFile', 'RequestApiController@listFile');
     Route::get('requests/history', 'RequestApiController@history');
+
+    Route::get('absence/report', 'AbsenceApiController@report');
+    Route::get('nextAbsence', 'AbsenceApiController@nextAbsence');
+
 
     // admin start
     Route::get('menuadmin', 'RequestApiController@menuAdmin');

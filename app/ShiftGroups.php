@@ -21,6 +21,7 @@ class ShiftGroups extends Model
         'work_type_id',
         'work_unit_id',
         'queue',
+        'type_s'
     ];
 
 

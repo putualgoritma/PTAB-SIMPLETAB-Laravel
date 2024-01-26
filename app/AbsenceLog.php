@@ -137,6 +137,14 @@ class AbsenceLog extends Model
         return $query;
     }
 
+    public function scopeFilterJob($query, $job)
+    {
+        if ($job != '') {
+            $query->where('staffs.job_id', $job);
+        }
+        return $query;
+    }
+
     public function scopeFilterAbsenceCategory($query, $absence_category)
     {
         if ($absence_category != '') {

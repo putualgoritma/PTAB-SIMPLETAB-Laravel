@@ -105,6 +105,33 @@
                             </div>
                     </div>   --}}
                 </div>     
+
+
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Dari Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="from" placeholder="masukkan tanggal Awal" type="date" class="form-control datepicker" name="from" value = "{{request()->input('from')}}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sampai Tanggal</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                            <input id="to" placeholder="masukkan tanggal Akhir" type="date" class="form-control datepicker" name="to" value = "{{request()->input('to')}}">
+                        </div>
+                    </div>
+                 
+            </div> 
+
+
+
                         <span class="input-group-btn">
                             &nbsp;&nbsp;<input type="submit" class="btn btn-primary" value="Filter">
                         </span>           
@@ -134,6 +161,9 @@
                 <thead>
                     <tr>
                      
+                        {{-- <th>
+                            id
+                        </th> --}}
                         <th>
                             Code
                         </th>
@@ -224,6 +254,8 @@
         }else{
             $("#priority").val('');
         }
+
+
         // console.log('custom : ', custom);
 
   let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
@@ -277,6 +309,7 @@
       }
     },
     columns: [
+        // { data: 'id', name: 'proposal_wms.id' },
         { data: 'code', name: 'proposal_wms.close_queue', searchable : false, sortable : false   },
         { data: 'idareal', name: 'tblpelanggan.idareal' },
         { data: 'customer_id', name: 'proposal_wms.customer_id' },

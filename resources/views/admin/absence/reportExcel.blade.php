@@ -68,6 +68,24 @@
         </em>
     @endif
 </div>
+
+
+<div class="form-group {{ $errors->has('job_id') ? 'has-error' : '' }}">
+    <label for="job_id">Job*</label>
+    <select id="job_id" name="job_id" class="form-control" value="{{ old('job_id', isset($absence) ? $absence->job_id : '') }}">
+        <option value="">--job--</option>
+        @foreach ($jobs as $key=>$job )
+            <option value="{{$job->id}}">{{$job->name}}</option>
+        @endforeach
+    </select>
+    @if($errors->has('job_id'))
+        <em class="invalid-feedback">
+            {{ $errors->first('job_id') }}
+        </em>
+    @endif
+</div>
+
+
 </div>  
 
 {{-- <label for="type">Wilayah</label>

@@ -23,6 +23,7 @@ use OneSignal;
 use App\Traits\WablasTrait;
 use App\User;
 use App\wa_history;
+use App\WaReceives;
 use App\WorkTypeDays;
 use App\WorkUnit;
 
@@ -928,6 +929,8 @@ class RequestApiController extends Controller
                 $categoryName = "Lupa Absen";
             } else if ($dataForm->category == "AdditionalTime") {
                 $categoryName = "Penambahan Waktu Kerja";
+            } else if ($dataForm->category == "dispense") {
+                $categoryName = "Dispen";
             } else {
                 $categoryName = "";
             }
@@ -1022,6 +1025,41 @@ class RequestApiController extends Controller
                     );
                 }
             }
+
+
+
+            // untuk Notif start manual
+            $waReceives = WaReceives::pluck('no_telp');
+            //wa notif                
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            for ($i = 0; $i < count($waReceives); $i++) {
+                $wa_data = [
+                    'phone' => $this->gantiFormat($waReceives[$i]),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa')
+                ];
+                $wa_data_group[] = $wa_data;
+            }
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+
+            // untuk notif end manual
 
             return response()->json([
                 'message' => 'Pengajuan Terkirim',
@@ -1174,6 +1212,7 @@ class RequestApiController extends Controller
                 ->selectRaw('COUNT(CASE WHEN category = "location" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS location_count')
                 ->selectRaw('COUNT(CASE WHEN category = "forget" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS forget_count')
                 ->selectRaw('COUNT(CASE WHEN category = "AdditionalTime" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS AdditionalTime_count')
+                ->selectRaw('COUNT(CASE WHEN category = "dispense" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS dispense_count')
                 ->first();
 
             $shift_change = ShiftChange::selectRaw('count(shift_changes.id) as total')
@@ -1200,6 +1239,7 @@ class RequestApiController extends Controller
                 ->selectRaw('COUNT(CASE WHEN category = "location" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS location_count')
                 ->selectRaw('COUNT(CASE WHEN category = "forget" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS forget_count')
                 ->selectRaw('COUNT(CASE WHEN category = "AdditionalTime" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS AdditionalTime_count')
+                ->selectRaw('COUNT(CASE WHEN category = "dispense" and status = "pending" and absence_requests.created_at >= "' . date('Y-m-d') . '" THEN 1 END) AS dispense_count')
                 ->join('staffs', 'staffs.id', '=', 'absence_requests.staff_id')
                 ->where('dapertement_id', $user->dapertement_id)
                 ->first();
@@ -1562,7 +1602,16 @@ class RequestApiController extends Controller
 
                     // dd('hhh');
                     // buat absence log end
-                    $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+                    // $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+
+                    if ($requests->category == "permission") {
+                        $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+                    } else if ($requests->category == "dispense") {
+                        $message = "Dispen anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+                    } else {
+                        $message = "Izin anda tanggal " . $d->start . " sampai dengan " . $d->end . " diterima";
+                    }
+
                     MessageLog::create([
                         'staff_id' => $d->staff_id,
                         'memo' => $message,
@@ -1699,6 +1748,40 @@ class RequestApiController extends Controller
                     );
                 }
                 // untuk notif end
+
+
+                // untuk Notif start manual
+                $waReceives = WaReceives::pluck('no_telp');
+                //wa notif                
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                for ($i = 0; $i < count($waReceives); $i++) {
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($waReceives[$i]),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa')
+                    ];
+                    $wa_data_group[] = $wa_data;
+                }
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+
+                // untuk notif end manual
             }
         }
 
@@ -1797,6 +1880,39 @@ class RequestApiController extends Controller
             );
         }
         // untuk notif end
+
+        // untuk Notif start manual
+        $waReceives = WaReceives::pluck('no_telp');
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        for ($i = 0; $i < count($waReceives); $i++) {
+            $wa_data = [
+                'phone' => $this->gantiFormat($waReceives[$i]),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa')
+            ];
+            $wa_data_group[] = $wa_data;
+        }
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        // untuk notif end manual
 
         return response()->json([
             'message' => 'Berhasil Ditolak',

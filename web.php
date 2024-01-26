@@ -341,9 +341,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
+    Route::post('absence/reportAllExcel', 'AbsenceController@reportAllExcel')->name('absence.reportAllExcel');
+    Route::get('absence/reportAbsenceAllView', 'AbsenceController@reportAbsenceAllView')->name('absence.reportAbsenceAllView');
 
     Route::get('absence/getShiftPlanner', 'AbsenceController@getShiftPlanner')->name('absence.getShiftPlanner');
     Route::get('absence/reportAbsenceExcelView', 'AbsenceController@reportAbsenceExcelView')->name('absence.reportAbsenceExcelView');
+
     Route::get('absence/reportAbsenceView', 'AbsenceController@reportAbsenceView')->name('absence.reportAbsenceView');
 
     Route::get('absence/createImport', 'AbsenceController@createImport')->name('absence.createImport');

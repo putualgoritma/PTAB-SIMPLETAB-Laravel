@@ -104,6 +104,7 @@ class Staff extends Model
         }
     }
 
+
     public function scopeFilterDateWeb($query, $from, $to)
     {
         if (!empty(request()->input('from')) && !empty(request()->input('to'))) {

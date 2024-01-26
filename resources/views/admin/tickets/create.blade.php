@@ -21,7 +21,7 @@
     <div class="card-body">
         <form action="{{ route('admin.tickets.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
+            {{-- <div class="form-group {{ $errors->has('code') ? 'has-error' : '' }}">
                 <label for="code">{{ trans('global.ticket.fields.code') }}*</label>
                 <input type="text" id="code" name="code" class="form-control" value="{{ old('code', isset($ticket) ? $ticket->code : $code) }}" required>
                 @if($errors->has('code'))
@@ -29,7 +29,7 @@
                         {{ $errors->first('code') }}
                     </em>
                 @endif
-            </div>
+            </div> --}}
             <div class="form-group {{ $errors->has('title') ? 'has-error' : '' }}">
                 <label for="title">{{ trans('global.ticket.fields.title') }}*</label>
                 <input type="text" id="title" name="title" class="form-control" value="{{ old('title', isset($ticket) ? $ticket->title : '') }}" required>
