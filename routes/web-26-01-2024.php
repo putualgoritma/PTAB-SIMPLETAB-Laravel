@@ -102,14 +102,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::put('actions/staff/update', 'ActionsController@actionStaffUpdate')->name('actions.actionStaffUpdate');
 
-    //   30-01-2024 start
-    Route::get('actions/addiyionaldone/{action}/edit', 'ActionsController@additionalDone')->name('actions.additionalDone');
-
-    Route::put('actions/addiyionaldone/update', 'ActionsController@storeAdditionalDone')->name('actions.storeAdditionalDone');
-
-    // 30-01-2024 end
-
-
     Route::put('actions/staff/update', 'ActionsController@actionStaffUpdate')->name('actions.actionStaffUpdate');
 
     Route::delete('users/staff/delete/{action}/{staff}', 'ActionsController@actionStaffDestroy')->name('actions.actionStaffDestroy');
@@ -489,6 +481,20 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('location/{id}/reject', 'LocationController@reject')->name('location.reject');
     Route::resource('location', 'LocationController');
 
+
+    // visit
+    Route::post('visit/report', 'VisitController@report')->name('visit.report');
+    Route::get('visit/reportForm', 'VisitController@reportForm')->name('visit.reportForm');
+    Route::resource('visit', 'VisitController');
+
+
+
+    // 22-01-2024 start
+    Route::get('waReceive', 'WaReceivesController@index')->name('receives.index');
+    Route::post('waReceive/store', 'WaReceivesController@store')->name('waReceives.store');
+    Route::delete('waReceive/{id}/destroy', 'WaReceivesController@destroy')->name('waReceives.destroy');
+    // 22-01-2024 end
+
     // Route::post('absencegroup/approve', 'AbsenceGroupController@approve')->name('absencegroup.approve');
     // Route::get('absencegroup', 'AbsenceGroupController@index')->name('absencegroup.index');
     Route::resource('absencegroup', 'AbsenceGroupController');
@@ -497,18 +503,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('cronjob/problem', 'CronJobController@problemRemainer');
     Route::post('gawatdarurat/import', 'GawatDaruratController@import')->name('gawatdarurat.import');
     Route::get('gawatdarurat', 'GawatDaruratController@index');
-
-    // visit
-    Route::post('visit/report', 'VisitController@report')->name('visit.report');
-    Route::get('visit/reportForm', 'VisitController@reportForm')->name('visit.reportForm');
-    Route::resource('visit', 'VisitController');
-
-
-    // 22-01-2024 start
-    Route::get('waReceive', 'WaReceivesController@index')->name('receives.index');
-    Route::post('waReceive/store', 'WaReceivesController@store')->name('waReceives.store');
-    Route::delete('waReceive/{id}/destroy', 'WaReceivesController@destroy')->name('waReceives.destroy');
-    // 22-01-2024 end
 
     //virmach
     Route::get('virmach-image', 'VirmachController@index')->name('virmach.index');

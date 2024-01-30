@@ -266,18 +266,18 @@ class RequestApiController extends Controller
                             }
                         }
                         // dd($absen_now);
-                        if ($schedule) {
-                            $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                            $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                            // dd($schedule);
-                            if ($time_start <  $startS &&  $startS < $time_end) {
-                                // return json_encode('pengajuan berhasil');
-                            } else {
-                                $error = 'anda hanya bisa mengajukan di jam kerja';
-                            }
-                        } else {
-                            $error = 'anda hanya bisa mengajukan di jam kerja';
-                        }
+                        // if ($schedule) {
+                        //     $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                        //     $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                        //     // dd($schedule);
+                        //     if ($time_start <  $startS &&  $startS < $time_end) {
+                        //         // return json_encode('pengajuan berhasil');
+                        //     } else {
+                        //         $error = 'anda hanya bisa mengajukan di jam kerja';
+                        //     }
+                        // } else {
+                        //     $error = 'anda hanya bisa mengajukan di jam kerja';
+                        // }
                     }
                 } else {
 

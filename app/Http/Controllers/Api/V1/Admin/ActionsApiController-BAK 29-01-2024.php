@@ -367,8 +367,8 @@ class ActionsApiController extends Controller
             // image yang lama disimpan
             $actionImage = json_decode($action->image);
             $img_path = "/images/action";
-            $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-            // $basepath = base_path();
+            // $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+            $basepath = base_path();
             $dataImageName = [];
             $dataImageNameTool = [];
 
@@ -3641,13 +3641,12 @@ class ActionsApiController extends Controller
         }
     }
 
-    // 29-01-2024
     public function uploadImage(Request $request)
     {
         // $action = ActionApi::where('id', $dataForm->action_id)->with('ticket')->with('staff')->first();
 
         $img_path = "/images/action";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
+        $basepath = str_replace("laravel-simpletab-test", "public_html/simpletabadmin-test/", \base_path());
         // $basepath = base_path();
 
 
@@ -3727,287 +3726,287 @@ class ActionsApiController extends Controller
             $dapertement_def_id = $subdapertement_def->dapertement_id;
             $subdapertement_def_id = $subdapertement_def->id;
 
-            if ($statusAction == 'close') {
-                $customer = CustomerApi::find($ticket->customer_id);
-                $id_onesignal = $customer->_id_onesignal;
-                $message = 'Customer: Keluahan Sudah Diselesaikan  : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                $phone_no = $customer->phone;
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-                //onesignal notif
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
+            // if ($statusAction == 'close') {
+            //     $customer = CustomerApi::find($ticket->customer_id);
+            //     $id_onesignal = $customer->_id_onesignal;
+            //     $message = 'Customer: Keluahan Sudah Diselesaikan  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     $phone_no = $customer->phone;
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
 
-            // send notif to admin
-            $admin_arr = User::where('dapertement_id', 0)->get();
-            foreach ($admin_arr as $key => $admin) {
-                $id_onesignal = $admin->_id_onesignal;
-                $message = 'Admin: Status Pengerjaan Diupdate  : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($admin->staff_id > 0) {
-                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff_phone->phone;
-                } else {
-                    $phone_no = $admin->phone;
-                }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-                //onesignal notif
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
+            //send notif to admin
+            // $admin_arr = User::where('dapertement_id', 0)->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Admin: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
 
-            // send notif to humas
-            $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->where('staff_id', 0)->get();
-            foreach ($admin_arr as $key => $admin) {
-                $id_onesignal = $admin->_id_onesignal;
-                $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($admin->staff_id > 0) {
-                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff_phone->phone;
-                } else {
-                    $phone_no = $admin->phone;
-                }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-                //onesignal notif
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
+            //send notif to humas
+            // $admin_arr = User::where('subdapertement_id', $subdapertement_def_id)->where('staff_id', 0)->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Humas: Status Pengerjaan Diupdate  : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
 
-            // send notif to departement terkait
-            $admin_arr = User::where('dapertement_id', $ticket->dapertement_id)
-                ->where('subdapertement_id', 0)
-                ->get();
-            foreach ($admin_arr as $key => $admin) {
-                $id_onesignal = $admin->_id_onesignal;
-                $message = 'Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($admin->staff_id > 0) {
-                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff_phone->phone;
-                } else {
-                    $phone_no = $admin->phone;
-                }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-                //onesignal notif
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
+            //send notif to departement terkait
+            // $admin_arr = User::where('dapertement_id', $ticket->dapertement_id)
+            //     ->where('subdapertement_id', 0)
+            //     ->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
 
-            // send notif to sub departement terkait
-            $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
-                ->get();
-            foreach ($admin_arr as $key => $admin) {
-                $id_onesignal = $admin->_id_onesignal;
-                $message = 'Sub Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                if ($admin->staff_id > 0) {
-                    $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
-                    $phone_no = $staff_phone->phone;
-                } else {
-                    $phone_no = $admin->phone;
-                }
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-                //onesignal notif
-                if (!empty($id_onesignal)) {
-                    OneSignal::sendNotificationToUser(
-                        $message,
-                        $id_onesignal,
-                        $url = null,
-                        $data = null,
-                        $buttons = null,
-                        $schedule = null
-                    );
-                }
-            }
+            //send notif to sub departement terkait
+            // $admin_arr = User::where('subdapertement_id', $action->subdapertement_id)->where('staff_id', 0)
+            //     ->get();
+            // foreach ($admin_arr as $key => $admin) {
+            //     $id_onesignal = $admin->_id_onesignal;
+            //     $message = 'Sub Bagian: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     if ($admin->staff_id > 0) {
+            //         $staff_phone = StaffApi::where('id', $admin->staff_id)->first();
+            //         $phone_no = $staff_phone->phone;
+            //     } else {
+            //         $phone_no = $admin->phone;
+            //     }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            //     //onesignal notif
+            //     if (!empty($id_onesignal)) {
+            //         OneSignal::sendNotificationToUser(
+            //             $message,
+            //             $id_onesignal,
+            //             $url = null,
+            //             $data = null,
+            //             $buttons = null,
+            //             $schedule = null
+            //         );
+            //     }
+            // }
 
-            // send notif to staff terkait
-            $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
-            foreach ($actionstaffs as $key => $actionstaff) {
-                $message = 'Staff: Status Pengerjaan Diupdate : ' . $ticket->code . $request->memo;
-                //wa notif
-                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
-                $wa_data_group = [];
-                //get phone user
-                $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
-                $phone_no = $staff_phone->phone;
+            //send notif to staff terkait
+            // $actionstaffs = ActionStaff::where('action_id', '=', $action->id)->get();
+            // foreach ($actionstaffs as $key => $actionstaff) {
+            //     $message = 'Staff: Status Pengerjaan Diupdate : ' . $ticket->code . $dataForm->memo;
+            //     //wa notif
+            //     $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            //     $wa_data_group = [];
+            //     //get phone user
+            //     $staff_phone = StaffApi::where('id', $actionstaff->staff_id)->first();
+            //     $phone_no = $staff_phone->phone;
 
-                $wa_data = [
-                    'phone' => $this->gantiFormat($phone_no),
-                    'customer_id' => null,
-                    'message' => $message,
-                    'template_id' => '',
-                    'status' => 'gagal',
-                    'ref_id' => $wa_code,
-                    'created_at' => date('Y-m-d h:i:sa'),
-                    'updated_at' => date('Y-m-d h:i:sa'),
-                ];
-                $wa_data_group[] = $wa_data;
-                DB::table('wa_histories')->insert($wa_data);
-                $wa_sent = WablasTrait::sendText($wa_data_group);
-                $array_merg = [];
-                if (!empty(json_decode($wa_sent)->data->messages)) {
-                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
-                }
-                foreach ($array_merg as $key => $value) {
-                    if (!empty($value->ref_id)) {
-                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
-                    }
-                }
-            }
+            //     $wa_data = [
+            //         'phone' => $this->gantiFormat($phone_no),
+            //         'customer_id' => null,
+            //         'message' => $message,
+            //         'template_id' => '',
+            //         'status' => 'gagal',
+            //         'ref_id' => $wa_code,
+            //         'created_at' => date('Y-m-d h:i:sa'),
+            //         'updated_at' => date('Y-m-d h:i:sa'),
+            //     ];
+            //     $wa_data_group[] = $wa_data;
+            //     DB::table('wa_histories')->insert($wa_data);
+            //     $wa_sent = WablasTrait::sendText($wa_data_group);
+            //     $array_merg = [];
+            //     if (!empty(json_decode($wa_sent)->data->messages)) {
+            //         $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            //     }
+            //     foreach ($array_merg as $key => $value) {
+            //         if (!empty($value->ref_id)) {
+            //             wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            //         }
+            //     }
+            // }
 
             return response()->json([
                 'message' => 'Status di ubah ',

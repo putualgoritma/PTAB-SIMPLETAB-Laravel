@@ -2241,7 +2241,7 @@ class AbsenceApiController extends Controller
                                 'absence_category_id' => 3,
                                 'status' => '1',
                                 'expired_date' => date('Y-m-d 09:30:59'),
-                                'start_date' => date('Y-m-d 09:30:00'),
+                                'start_date' => date('Y-m-d 09:00:00'),
 
                             ]);
                             AbsenceLog::create([
