@@ -102,14 +102,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     Route::put('actions/staff/update', 'ActionsController@actionStaffUpdate')->name('actions.actionStaffUpdate');
 
-    //   30-01-2024 start
-    Route::get('actions/addiyionaldone/{action}/edit', 'ActionsController@additionalDone')->name('actions.additionalDone');
-
-    Route::put('actions/addiyionaldone/update', 'ActionsController@storeAdditionalDone')->name('actions.storeAdditionalDone');
-
-    // 30-01-2024 end
-
-
     Route::put('actions/staff/update', 'ActionsController@actionStaffUpdate')->name('actions.actionStaffUpdate');
 
     Route::delete('users/staff/delete/{action}/{staff}', 'ActionsController@actionStaffDestroy')->name('actions.actionStaffDestroy');
@@ -347,11 +339,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::delete('staffSpecials/destroy', 'StaffSpecialController@massDestroy')->name('staffSpecials.massDestroy');
     Route::resource('staffSpecials', 'StaffSpecialController');
 
-    // 22-01-2024 start
-    Route::post('absence/reportAllExcel', 'AbsenceController@reportAllExcel')->name('absence.reportAllExcel');
-    Route::get('absence/reportAbsenceAllView', 'AbsenceController@reportAbsenceAllView')->name('absence.reportAbsenceAllView');
-    // 22-01-2024 end
-
     Route::get('absence/reportAbsence', 'AbsenceController@reportAbsence')->name('absence.reportAbsence');
     Route::post('absence/reportAbsenceExcel', 'AbsenceController@reportAbsenceExcel')->name('absence.reportAbsenceExcel');
 
@@ -498,17 +485,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('gawatdarurat/import', 'GawatDaruratController@import')->name('gawatdarurat.import');
     Route::get('gawatdarurat', 'GawatDaruratController@index');
 
-    // visit
+// visit
     Route::post('visit/report', 'VisitController@report')->name('visit.report');
     Route::get('visit/reportForm', 'VisitController@reportForm')->name('visit.reportForm');
     Route::resource('visit', 'VisitController');
-
-
-    // 22-01-2024 start
-    Route::get('waReceive', 'WaReceivesController@index')->name('receives.index');
-    Route::post('waReceive/store', 'WaReceivesController@store')->name('waReceives.store');
-    Route::delete('waReceive/{id}/destroy', 'WaReceivesController@destroy')->name('waReceives.destroy');
-    // 22-01-2024 end
 
     //virmach
     Route::get('virmach-image', 'VirmachController@index')->name('virmach.index');

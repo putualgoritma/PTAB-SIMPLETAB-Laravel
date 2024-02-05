@@ -521,15 +521,7 @@
                      
                         {{-- @endcan --}}
     
-                        @can('absence_all_access')
-                    <li class="nav-item">
-                        <a href="{{ route('admin.absence.reportAbsenceAllView') }}" class="nav-link">
-                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
-                        <i class="nav-icon fas fa-book"></i>
-                      Laporan Rekap Excel (uji)
-                        </a>
-                    </li>
-                    @endcan
+                    
 
                     {{-- @can('absence_report') --}}
                     <li class="nav-item">
@@ -540,6 +532,16 @@
                         </a>
                     </li>
                     {{-- @endcan --}}
+
+                    @can('absence_all_access')
+                    <li class="nav-item">
+                        <a href="{{ route('admin.absence.reportAbsenceAllView') }}" class="nav-link">
+                        <!-- <i class="nav-icon fas fa-landmark"></i> -->
+                        <i class="nav-icon fas fa-book"></i>
+                      Laporan Rekap Excel (uji)
+                        </a>
+                    </li>
+                    @endcan
 
                                {{-- @can('absence_report') --}}
                                <li class="nav-item">
@@ -568,6 +570,8 @@
                                 </a>
                             </li>
 
+
+                            
                             @endcan
 
                     @can('absence_report')

@@ -123,7 +123,14 @@
                                         Tambah {{ trans('global.staff.title') }}
                                     </a>
                                 @endcan
-                                
+
+                                @if ($action->status == "close")
+                                @can('action_staff_create')
+                                <a class="btn btn-xs btn-warning"  href="{{ route('admin.actions.additionalDone', $action->id) }}">
+                                    Tambah Foto Selesai
+                                </a>
+                            @endcan
+                            @endif
                               
                                 <!-- start surya buat -->
                                 

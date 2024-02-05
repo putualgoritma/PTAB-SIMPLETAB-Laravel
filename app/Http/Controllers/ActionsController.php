@@ -335,12 +335,10 @@ class ActionsController extends Controller
     public function actionStaffUpdate(Request $request)
     {
         abort_unless(\Gate::allows('action_staff_edit'), 403);
-        // ini_set('max_file_uploads', 50);
+
         $img_path = "/images/action";
         $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $basepath = base_path();
 
-        // dd($request->image_done);
         // upload image
         if ($request->file('image')) {
             foreach ($request->file('image') as $key => $image) {
@@ -506,73 +504,6 @@ class ActionsController extends Controller
 
         return redirect()->route('admin.actions.actionStaff', $action_id);
     }
-
-
-    // tambahan foto selesai start
-
-
-    public function additionalDone($action_id)
-    {
-        abort_unless(\Gate::allows('action_staff_edit'), 403);
-
-        $action = Action::with('ticket')->findOrFail($action_id);
-        $ticket = Ticket::find($action->ticket_id);
-        // dd($action);
-        return view('admin.actions.additionalDone', compact('action', 'ticket'));
-    }
-
-
-    public function storeAdditionalDone(Request $request)
-    {
-        abort_unless(\Gate::allows('action_staff_edit'), 403);
-        // ini_set('max_file_uploads', 50);
-        $img_path = "/images/action";
-        $basepath = str_replace("laravel-simpletab", "public_html/simpletabadmin/", \base_path());
-        // $basepath = base_path();
-
-        // dd($request->image_done);
-        // upload image
-
-        $action = Action::where('id', $request->action_id)->with('ticket')->with('staff')->first();
-
-        $actionImgNow = json_decode($action->image_done);
-        // dd(count(($actionImgNow)));
-
-        if ($request->file('image_done')) {
-            foreach ($request->file('image_done') as $key => $image) {
-                $resourceImageDone = $image;
-                $nameImageDone = strtolower($request->action_id);
-                $file_extImageDone = $image->extension();
-                $nameImageDone = str_replace(" ", "-", $nameImageDone);
-
-                $img_name_done = $img_path . "/" . $nameImageDone . "-" . $request->action_id . (count($actionImgNow) + $key + 1) . "-done." . $file_extImageDone;
-
-                $resourceImageDone->move($basepath . $img_path, $img_name_done);
-
-                $dataImageNameDone[] = $img_name_done;
-            }
-            $newImg = array_merge($dataImageNameDone, $actionImgNow);
-        }
-
-
-
-        // upload image end
-
-
-        if ($request->file('image_done')) {
-            $action->update(['image_done' => str_replace("\/", "/", json_encode($newImg))]);
-        }
-
-
-        // return redirect()->route('admin.actions.list', $request->ticket_id);
-        return redirect()->back();
-    }
-
-
-    // tambahan foto selesai end
-
-
-
     //start surya buat
     public function printservice()
     {
