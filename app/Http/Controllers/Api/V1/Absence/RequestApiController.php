@@ -72,41 +72,44 @@ class RequestApiController extends Controller
                 ->where('staffs.id', $dataForm->staff_id)->first();
             // dd($staff);
             if ($staff->work_type == "shift") {
-                $jumShift = ShiftPlannerStaffs::whereDate('shift_planner_staffs.start', '=', $dataForm->start)
-                    ->where('staff_id', $staff->id)
-                    ->get();
-                foreach ($jumShift as $data) {
-                    $absence = ShiftPlannerStaffs::join('shift_groups', 'shift_groups.id', '=', 'shift_planner_staffs.shift_group_id')
-                        ->join('shift_group_timesheets', 'shift_groups.id', '=', 'shift_group_timesheets.shift_group_id')
-                        ->where('shift_group_timesheets.absence_category_id', '1')
-                        ->where('shift_groups.id', $data->shift_group_id)
+                $holiday = Holiday::whereDate('start', '=', date("Y-m-d", strtotime($dataForm->start)))->first();
+                if (!$holiday) {
+                    $jumShift = ShiftPlannerStaffs::whereDate('shift_planner_staffs.start', '=', $dataForm->start)
                         ->where('staff_id', $staff->id)
-                        ->whereDate('shift_planner_staffs.start', '=', $dataForm->start)
-                        ->orWhere('shift_group_timesheets.absence_category_id', '2')
-                        ->where('shift_groups.id', $data->shift_group_id)
-                        ->where('staff_id', $staff->id)
-                        ->whereDate('shift_planner_staffs.start', '=', $dataForm->start)
-                        ->orderBy('shift_group_timesheets.absence_category_id', 'ASC')
                         ->get();
+                    foreach ($jumShift as $data) {
+                        $absence = ShiftPlannerStaffs::join('shift_groups', 'shift_groups.id', '=', 'shift_planner_staffs.shift_group_id')
+                            ->join('shift_group_timesheets', 'shift_groups.id', '=', 'shift_group_timesheets.shift_group_id')
+                            ->where('shift_group_timesheets.absence_category_id', '1')
+                            ->where('shift_groups.id', $data->shift_group_id)
+                            ->where('staff_id', $staff->id)
+                            ->whereDate('shift_planner_staffs.start', '=', $dataForm->start)
+                            ->orWhere('shift_group_timesheets.absence_category_id', '2')
+                            ->where('shift_groups.id', $data->shift_group_id)
+                            ->where('staff_id', $staff->id)
+                            ->whereDate('shift_planner_staffs.start', '=', $dataForm->start)
+                            ->orderBy('shift_group_timesheets.absence_category_id', 'ASC')
+                            ->get();
 
-                    if ($absence[0]->time > $absence[1]->time) {
-                        $masuk = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[0]->time));
-                        $pulang = date("Y-m-d H:i:s", strtotime('+ ' . '1' . ' days', strtotime($dataForm->start . $absence[1]->time)));
-                        //  date("Y-m-d H:i:s", strtotime());
-                    } else {
-                        $masuk = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[0]->time));
-                        $pulang = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[1]->time));
-                    }
+                        if ($absence[0]->time > $absence[1]->time) {
+                            $masuk = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[0]->time));
+                            $pulang = date("Y-m-d H:i:s", strtotime('+ ' . '1' . ' days', strtotime($dataForm->start . $absence[1]->time)));
+                            //  date("Y-m-d H:i:s", strtotime());
+                        } else {
+                            $masuk = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[0]->time));
+                            $pulang = date("Y-m-d H:i:s", strtotime($dataForm->start . $absence[1]->time));
+                        }
 
 
-                    // dd($masuk, $start1, $pulang, $absence);
-                    if ($start1 > $masuk && $start1 < $pulang) {
-                        return response()->json(
-                            [
+                        // dd($masuk, $start1, $pulang, $absence);
+                        if ($start1 > $masuk && $start1 < $pulang) {
+                            return response()->json(
+                                [
 
-                                'message' => 'anda tidak bisa melakukan lembur di jam kerja'
-                            ]
-                        );
+                                    'message' => 'anda tidak bisa melakukan lembur di jam kerja !'
+                                ]
+                            );
+                        }
                     }
                 }
             } else {
@@ -452,18 +455,18 @@ class RequestApiController extends Controller
                         }
                     }
                     // dd($absen_now);
-                    if ($schedule) {
-                        $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                        $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                        // dd($schedule);
-                        if ($time_start <  $startS &&  $startS < $time_end) {
-                            // return json_encode('pengajuan berhasil');
-                        } else {
-                            $error = 'anda hanya bisa mengajukan di jam kerja';
-                        }
-                    } else {
-                        $error = 'anda hanya bisa mengajukan di jam kerja';
-                    }
+                    // if ($schedule) {
+                    //     $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                    //     $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                    //     // dd($schedule);
+                    //     if ($time_start <  $startS &&  $startS < $time_end) {
+                    //         // return json_encode('pengajuan berhasil');
+                    //     } else {
+                    //         $error = 'anda hanya bisa mengajukan di jam kerja';
+                    //     }
+                    // } else {
+                    //     $error = 'anda hanya bisa mengajukan di jam kerja';
+                    // }
                 }
             } else {
 
@@ -799,8 +802,8 @@ class RequestApiController extends Controller
                     $query->where('category', 'geolocation_off')
                         ->orWhere('category', 'duty')
                         ->orWhere('category', 'leave')
-                        ->orWhere('category', 'permission')
-                        ->orWhere('category', 'excuse');
+                        ->orWhere('category', 'permission');
+                    // ->orWhere('category', 'excuse');
                     // ->orWhere('category', 'location');
                     // ->orWhere('status', 'close');
                 })
@@ -1674,6 +1677,33 @@ class RequestApiController extends Controller
                     ->update(['status' => 'approve']);
 
                 $d = AbsenceRequest::where('id', $request->id)->first();
+
+                // jika libur start
+                if ($requests->category == "extra") {
+                    $holiday = Holiday::whereDate('start', '=', date("Y-m-d", strtotime($d->start)))->first();
+
+                    if ($holiday) {
+                        $shiftStaff = ShiftPlannerStaffs::where('staff_id', $d->staff_id)->whereDate('start', '=', date('Y-m-d', strtotime($d->start)))->first();
+                        // dd($shiftStaff, date('Y-m-d', strtotime($d->start)));
+                        if ($shiftStaff) {
+                            $absenceLog = AbsenceLog::where('shift_planner_id', $shiftStaff->id)->first();
+                            if ($absenceLog) {
+                                $absence = Absence::where('id', $absenceLog->absence_id)->first();
+                                if ($absence) {
+                                    foreach ($absence->absence_logs as $data) {
+                                        // dd($data->id);
+                                        AbsenceLog::where('id', $data->id)->delete();
+                                    }
+                                    // dd('sss');
+                                    Absence::where('id', $absenceLog->absence_id)->delete();
+                                }
+                            }
+                        }
+                        $shiftStaff = ShiftPlannerStaffs::where('staff_id', $d->staff_id)->whereDate('start', '=', date('Y-m-d', strtotime($d->start)))->delete();
+                    }
+                }
+                // jika libur end
+
                 // dd($d);
                 $message = "Permisi anda tanggal " . $d->start . " disetujui";
                 if ($d->category == "visit") {

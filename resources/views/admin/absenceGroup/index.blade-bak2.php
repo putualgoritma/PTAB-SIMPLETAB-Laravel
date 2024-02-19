@@ -214,7 +214,7 @@
         { data: 'name', name: 'staffs.name' },
         { data: 'created_at', name: 'absences.created_at' },
         { data: 'status_active', name: 'absences.status_active' },
-        { data: 'actions', name: '{{ trans('global.actions') }}', searchable : false }
+        { data: 'actions', name: '{{ trans('global.actions') }}' }
     ],
     pageLength: 100,
   };

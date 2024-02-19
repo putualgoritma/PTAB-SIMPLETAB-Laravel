@@ -120,6 +120,7 @@ class AbsenceApiController extends Controller
         $date_start = $request->from;
         $date_end = $request->to;
         $alpha = 0;
+        $absen_bolong = 0;
 
         $awal_cuti = strtotime($date_start);
         $akhir_cuti = strtotime($date_end);
@@ -134,11 +135,51 @@ class AbsenceApiController extends Controller
             ->selectRaw('count(IF(absence_category_id = 8 AND status = 0 ,1,NULL)) jumlah_cuti')
             ->selectRaw('count(IF(absence_category_id = 9 AND status = 0 ,1,NULL)) jumlah_lembur')
             ->selectRaw('count(IF(absence_category_id = 11 AND status = 0 ,1,NULL)) jumlah_permisi')
-            ->selectRaw('count(IF(absence_category_id = 13 AND status = 0 ,1,NULL)) jumlah_izin')
+            // ->selectRaw('count(IF(absence_category_id = 13 AND status = 0 ,1,NULL)) jumlah_izin')
             ->selectRaw('count(IF(absence_category_id = 14 AND status = 0 ,1,NULL)) jumlah_dispen')
             ->where('staff_id', $request->staff_id)
             ->whereBetween('absences.created_at', [$date_start, $date_end])
             ->first();
+
+        $sakit = AbsenceRequest::selectRaw('count(id) as jumlah_sakit')
+            ->where('category', 'permission')
+            ->where('type', 'sick')
+            ->where('staff_id', $request->staff_id)
+            ->whereNotIn('status', ['reject', 'pending'])
+            ->whereBetween('start', [$date_start, $date_end])
+            ->first();
+        $izin = AbsenceRequest::selectRaw('count(id) as jumlah_izin')
+            ->where('category', 'permission')
+            ->where('type', 'other')
+            ->where('staff_id', $request->staff_id)
+            ->whereNotIn('status', ['reject', 'pending'])
+            ->whereBetween('start', [$date_start, $date_end])
+            ->first();
+
+        $report_masuk =  Absence::join('absence_logs', 'absences.id', '=', 'absence_logs.absence_id')
+            ->selectRaw('absence_logs.*')
+            ->where('absence_category_id', 1)
+            ->where('status', 0)
+            ->where('staff_id', $request->staff_id)
+            ->whereBetween('absences.created_at', [$date_start, $date_end])
+            ->get();
+
+        foreach ($report_masuk as $data) {
+            if ($request->type != "shift") {
+                $cekDateNew = date("Y-m-d H:i:s", strtotime('+ ' . 210 . 'minutes', strtotime(date($data->timein))));
+                // dd($cekDateNew > $clock_in, $cekDateNew . ' lebih besar dari ' . $clock_in);
+                if ($data->register >= $cekDateNew) {
+                    $absen_bolong += 1;
+                }
+            } else {
+                $cekDateNew = date("Y-m-d H:i:s", strtotime('+ ' . 120 . 'minutes', strtotime(date($data->timein))));
+                // dd($cekDateNew > $clock_in, $cekDateNew . ' lebih besar dari ' . $clock_in);
+                if ($data->register >= $cekDateNew) {
+                    $absen_bolong += 1;
+                }
+            }
+        }
+
 
         if ($request->type != "shift") {
 
@@ -178,11 +219,14 @@ class AbsenceApiController extends Controller
             "jumlah_cuti" => $report->jumlah_cuti,
             "jumlah_lembur" => $report->jumlah_lembur,
             "jumlah_permisi" => $report->jumlah_permisi,
-            "jumlah_izin" => $report->jumlah_izin,
+            "jumlah_izin" => $izin->jumlah_izin,
+            "jumlah_sakit" => $sakit->jumlah_sakit,
             "jumlah_dispen" => $report->jumlah_dispen,
             'alpha' => $alpha,
             'jumlah_kerja' => $jumlah_kerja,
-            'jumlah_libur' => $jumlah_libur
+            'jumlah_libur' => $jumlah_libur,
+            'tidakHadir' => 'Tanpa Keterangan',
+            'absen_bolong' => $absen_bolong
         ];
 
         return response()->json($data);

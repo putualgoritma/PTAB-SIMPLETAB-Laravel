@@ -84,6 +84,8 @@ class AbsenceExport implements WithStyles, WithEvents, FromCollection, WithTitle
             'NDays_OT',
             'WeekEnd_OT',
             'Holiday_OT',
+            'Lembur',
+            'Lembur > 4'
         ];
     }
 

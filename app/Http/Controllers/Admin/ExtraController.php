@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Absence;
+use App\AbsenceLog;
 use App\AbsenceRequest;
 use App\AbsenceRequestLogs;
+use App\Holiday;
 use App\Http\Controllers\Controller;
 use App\MessageLog;
 use App\Requests;
+use App\ShiftPlannerStaffs;
 use App\Staff;
 use App\User;
 use OneSignal;
@@ -249,6 +253,31 @@ class ExtraController extends Controller
 
         $d = AbsenceRequest::where('id', $id)->first();
         $message = "Lembur anda tanggal " . $d->start . " diterima";
+
+        // jika libur start
+        $holiday = Holiday::whereDate('start', '=', date("Y-m-d", strtotime($d->start)))->first();
+
+        if ($holiday) {
+            $shiftStaff = ShiftPlannerStaffs::where('staff_id', $d->staff_id)->whereDate('start', '=', date('Y-m-d', strtotime($d->start)))->first();
+            // dd($shiftStaff, date('Y-m-d', strtotime($d->start)));
+            if ($shiftStaff) {
+                $absenceLog = AbsenceLog::where('shift_planner_id', $shiftStaff->id)->first();
+                if ($absenceLog) {
+                    $absence = Absence::where('id', $absenceLog->absence_id)->first();
+                    if ($absence) {
+                        foreach ($absence->absence_logs as $data) {
+                            // dd($data->id);
+                            AbsenceLog::where('id', $data->id)->delete();
+                        }
+                        // dd('sss');
+                        Absence::where('id', $absenceLog->absence_id)->delete();
+                    }
+                }
+            }
+            $shiftStaff = ShiftPlannerStaffs::where('staff_id', $d->staff_id)->whereDate('start', '=', date('Y-m-d', strtotime($d->start)))->delete();
+        }
+        // jika libur end
+
         MessageLog::create([
             'staff_id' => $d->staff_id,
             'memo' => $message,

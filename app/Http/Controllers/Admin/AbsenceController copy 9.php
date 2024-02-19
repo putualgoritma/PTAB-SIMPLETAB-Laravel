@@ -2433,14 +2433,7 @@ class AbsenceController extends Controller
         $staffs = Staff::get();
         $work_units = WorkUnit::get();
         $jobs = Job::get();
-        // if ($department === 5 && $subdepartment === 0) {
-        $dapertements = Dapertement::all();
-        // } else if ($department > 0) {
-        //     $dapertements = Dapertement::where('id', $department)->get();
-        // } else {
-        //     $dapertements = Dapertement::all();
-        // }
-        return view('admin.absence.reportExcel', compact('dapertements', 'staffs', 'work_units', 'jobs'));
+        return view('admin.absence.reportExcel', compact('staffs', 'work_units', 'jobs'));
     }
 
     public function reportAbsenceExcel(Request $request)
@@ -2450,18 +2443,13 @@ class AbsenceController extends Controller
         set_time_limit(0);
         $lemburLebih = "";
         $lemburJumlah = "";
-        // dd($request->all());
         if ($request->absence_log != "yes") {
             $staffs = Staff::FilterWorkUnit($request->work_unit_id)
                 ->FilterId($request->staff_id)
                 ->FilterJob($request->job_id)
-                ->FilterSubdapertement($request->subdapertement_id, $request->job_id)
-                ->FilterDapertement($request->dapertement_id)
                 ->orderBy('NIK', 'ASC')
                 ->where('_status', 'active')
                 ->get();
-
-            // dd($staffs);
             $list_absen_excel = [];
             $date_from = $request->from;
             $date_to = $request->to;
@@ -2504,26 +2492,8 @@ class AbsenceController extends Controller
                             'Off_Duty' => '',
                             'Clock_in' => $data->description,
                             'Clock_out' => $data->description,
-                            'Normal' => '',
-                            'Real time' => '',
-                            'Late' => '',
-                            'Early' => '',
-                            'Absent' => '',
-                            'OT Time' => '',
-                            'Work Time' => '',
-                            'Exception' => '',
-                            'Must C/In' => '',
-                            'Must C/Out' => '',
-                            'Department' => '',
-                            'NDays' => '',
-                            'WeekEnd' => '',
-                            'Holiday' => '',
-                            'ATT_Time' => '',
-                            'NDays_OT' => '',
-                            'WeekEnd_OT' => '',
-                            'Holiday_OT' => '',
-                            'Lembur' => '',
-                            'Lembur > 4' => ''
+                            'keterangan' => '',
+                            'deskripsi' => '',
                         ];
                     }
                 }
@@ -2638,9 +2608,7 @@ class AbsenceController extends Controller
                         $lemburJumlah = round($get_lembur_out->duration);
                         $lemburLebih = "";
                         if ($get_lembur_out->duration > 4) {
-                            $lemburLebih = "Y";
-                        } else if ($get_lembur_out->duration <= 4) {
-                            $lemburLebih = "N";
+                            $lemburLebih = "Lebih dari 4 jam";
                         }
                     } else if ($get_dinasLuar) {
                         $clock_in = "";
@@ -2698,26 +2666,9 @@ class AbsenceController extends Controller
                         'Off_Duty' => $duty_out ? date('H:i', strtotime($duty_out)) : '',
                         'Clock_in' => $clock_in ? date('H:i', strtotime($clock_in)) : $keterangan,
                         'Clock_out' => $clock_out ? date('H:i', strtotime($clock_out)) : $keterangan,
-                        'Normal' => '',
-                        'Real time' => '',
-                        'Late' => $shift,
-                        'Early' => '',
-                        'Absent' => '',
-                        'OT Time' => '',
-                        'Work Time' => '',
-                        'Exception' => '',
-                        'Must C/In' => '',
-                        'Must C/Out' => '',
-                        'Department' => '',
-                        'NDays' => '',
-                        'WeekEnd' => '',
-                        'Holiday' => '',
-                        'ATT_Time' => '',
-                        'NDays_OT' => '',
-                        'WeekEnd_OT' => '',
-                        'Holiday_OT' => '',
-                        'Lembur' => $lemburJumlah,
-                        'Lembur > 4' => $lemburLebih
+                        'keterangan' => $lemburJumlah,
+                        'deskripsi' => $lemburLebih,
+                        'shift' => $shift,
                     ];
                 }
 
@@ -2737,7 +2688,7 @@ class AbsenceController extends Controller
                     // $o = 0;
                     foreach ($shifts as $data) {
                         // $o++;
-                        $ck1 = $list_absen->where('Date', date('d/m/Y', strtotime($data->start)))->sortBy('Clock_in')->first();
+                        $ck1 = $list_absen->where('Date', date('d/m/Y', strtotime($data->start)))->first();
                         if ($ck1) {
                             $list_absen_excel2[] =  $ck1;
                             // dd('ssssss', $ck1);
@@ -2813,7 +2764,7 @@ class AbsenceController extends Controller
                     foreach ($dates as $dt) {
                         $day_id = date('w', strtotime($dt->format('Y-m-d'))) == "0" ? '7' : date('w', strtotime($dt->format('Y-m-d')));
 
-                        $list = $list_absen->where('Date', $dt->format('d/m/Y'))->sortBy('Clock_in')->first();
+                        $list = $list_absen->where('Date', $dt->format('d/m/Y'))->first();
 
                         if ($list != null) {
                             $cek_masuk = $list_absen->where('Date', $dt->format('d/m/Y'))->where('keterangan', 'Masuk')->first();
@@ -2841,26 +2792,8 @@ class AbsenceController extends Controller
                                     // 'Clock_in' => $cek_masuk['Clock_in'] && $cek_masuk['Clock_in'] = "" ? $cek_masuk['Clock_in'] : $deskripsi,
                                     // 'Clock_out' => $cek_masuk['Clock_out'] && $cek_masuk['Clock_out'] = "" ? $cek_masuk['Clock_out'] : $deskripsi,
                                     // 'keterangan' => 'Masuk dan Lembur',
-                                    'Normal' => '',
-                                    'Real time' => '',
-                                    'Late' => '',
-                                    'Early' => '',
-                                    'Absent' => '',
-                                    'OT Time' => '',
-                                    'Work Time' => '',
-                                    'Exception' => '',
-                                    'Must C/In' => '',
-                                    'Must C/Out' => '',
-                                    'Department' => '',
-                                    'NDays' => '',
-                                    'WeekEnd' => '',
-                                    'Holiday' => '',
-                                    'ATT_Time' => '',
-                                    'NDays_OT' => '',
-                                    'WeekEnd_OT' => '',
-                                    'Holiday_OT' => '',
-                                    'Lembur' => $lemburJumlah,
-                                    'Lembur > 4' => $lemburLebih
+                                    'keterangan' => $lemburJumlah,
+                                    'deskripsi' => $lemburLebih,
                                 ];
                             } else if ($cek_lembur) {
                                 // untuk absen lembur
@@ -2885,26 +2818,8 @@ class AbsenceController extends Controller
                                 'Off_Duty' => '',
                                 'Clock_in' => '',
                                 'Clock_out' => '',
-                                'Normal' => '',
-                                'Real time' => '',
-                                'Late' => '',
-                                'Early' => '',
-                                'Absent' => '',
-                                'OT Time' => '',
-                                'Work Time' => '',
-                                'Exception' => '',
-                                'Must C/In' => '',
-                                'Must C/Out' => '',
-                                'Department' => '',
-                                'NDays' => '',
-                                'WeekEnd' => '',
-                                'Holiday' => '',
-                                'ATT_Time' => '',
-                                'NDays_OT' => '',
-                                'WeekEnd_OT' => '',
-                                'Holiday_OT' => '',
-                                'Lembur' => $lemburJumlah,
-                                'Lembur > 4' => $lemburLebih
+                                'keterangan' => $lemburJumlah,
+                                'deskripsi' => $lemburLebih,
                             ];
                         } else {
                             // tanpa keterangan
@@ -2920,26 +2835,8 @@ class AbsenceController extends Controller
                                 'Off_Duty' => '15:30',
                                 'Clock_in' => 'tk',
                                 'Clock_out' => 'tk',
-                                'Normal' => '',
-                                'Real time' => '',
-                                'Late' => '',
-                                'Early' => '',
-                                'Absent' => '',
-                                'OT Time' => '',
-                                'Work Time' => '',
-                                'Exception' => '',
-                                'Must C/In' => '',
-                                'Must C/Out' => '',
-                                'Department' => '',
-                                'NDays' => '',
-                                'WeekEnd' => '',
-                                'Holiday' => '',
-                                'ATT_Time' => '',
-                                'NDays_OT' => '',
-                                'WeekEnd_OT' => '',
-                                'Holiday_OT' => '',
-                                'Lembur' => $lemburJumlah,
-                                'Lembur > 4' => $lemburLebih
+                                'keterangan' => $lemburJumlah,
+                                'deskripsi' => $lemburLebih,
                             ];
                         }
                     }
@@ -2954,72 +2851,68 @@ class AbsenceController extends Controller
             $list_absen = [];
             $date_from = $request->from;
             $date_to = $request->to;
-            // $listAbsen = AbsenceLog::selectRaw(
-            //     'absence_logs.*,
-            //     work_units.name as work_unit_name,
-            //     staffs.name as staff_name,
-            //     absence_logs.status as status,
-            //     absence_logs.register as register,
-            //     absence_logs.timeout as timeout,
-            //     absence_logs.absence_category_id as absence_category_id,
-            //     absences.created_at as created_at,
-            //     (CASE WHEN staffs.type = "employee" THEN  SUBSTRING(staffs.NIK, 5) ELSE staffs.NIK END)  AS NIK',
+            $listAbsen = AbsenceLog::selectRaw(
+                'absence_logs.*,
+                work_units.name as work_unit_name,
+                staffs.name as staff_name,
+                absence_logs.status as status,
+                absence_logs.register as register,
+                absence_logs.timeout as timeout,
+                absence_logs.absence_category_id as absence_category_id,
+                absences.created_at as created_at,
+                (CASE WHEN staffs.type = "employee" THEN  SUBSTRING(staffs.NIK, 5) ELSE staffs.NIK END)  AS NIK',
 
-            // )
-            //     ->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
-            //     ->leftJoin('staffs', 'staffs.id', '=', 'absences.staff_id')
-            //     ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
-            //     ->FilterWorkUnit($request->work_unit_id)
-            //     ->FilterStaff($request->staff_id)
-            //     ->FilterJob($request->job_id)
-            //     ->whereBetween(DB::raw('DATE(absences.created_at)'), [$date_from, $date_to])
-            //     ->where('work_type_id', '1')
-            //     ->get();
+            )
+                ->leftJoin('absences', 'absences.id', '=', 'absence_logs.absence_id')
+                ->leftJoin('staffs', 'staffs.id', '=', 'absences.staff_id')
+                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
+                ->FilterWorkUnit($request->work_unit_id)
+                ->FilterStaff($request->staff_id)
+                ->FilterJob($request->job_id)
+                ->whereBetween(DB::raw('DATE(absences.created_at)'), [$date_from, $date_to])
+                ->where('work_type_id', '1')
+                ->get();
 
-            // // dd($listAbsen[0]);
+            // dd($listAbsen[0]);
 
-            // foreach ($listAbsen as $data) {
+            foreach ($listAbsen as $data) {
 
-            //     $ktrng = "";
+                $ktrng = "";
 
-            //     if ($data->absence_category_id == '7') {
-            //         $ktrng = "d";
-            //     } else if ($data->absence_category_id == '8') {
-            //         $ktrng = "c";
-            //     } else if ($data->absence_category_id == '13') {
-            //         if ($data->absenceRequests->type == "sick") {
-            //             $ktrng = "s";
-            //         } else {
-            //             $ktrng = "i";
-            //         }
-            //     }
+                if ($data->absence_category_id == '7') {
+                    $ktrng = "d";
+                } else if ($data->absence_category_id == '8') {
+                    $ktrng = "c";
+                } else if ($data->absence_category_id == '13') {
+                    if ($data->absenceRequests->type == "sick") {
+                        $ktrng = "s";
+                    } else {
+                        $ktrng = "i";
+                    }
+                }
 
-            //     if ($data->absence_category_id == 1) {
-            //         $sts = "ci";
-            //     } elseif ($data->absence_category_id == 2) {
-            //         $sts = "co";
-            //     } elseif ($data->absence_category_id == 9) {
-            //         $sts = "Lembur Mulai";
-            //     } elseif ($data->absence_category_id == 10) {
-            //         $sts = "Lembur Selesai";
-            //     } else {
-            //         $sts = "";
-            //     }
+                if ($data->absence_category_id == 1) {
+                    $sts = "ci";
+                } elseif ($data->absence_category_id == 2) {
+                    $sts = "co";
+                } else {
+                    $sts = "";
+                }
 
 
-            //     $list_absen[] = [
-            //         'Departemen' => $data->work_unit_name,
-            //         'Name' => $data->staff_name,
-            //         'No.' => $data->NIK,
-            //         'Date/Time' => $data->status == '0' ? date('d/m/Y H:i:s', strtotime($data->register)) : date('d/m/Y', strtotime($data->timeout ? $data->timeout : $data->created_at)),
-            //         'Location' => '',
-            //         'ID Number' => $data->NIK,
-            //         'VerifyCode' => 'Fingerprint',
-            //         'shift' => '',
-            //         'status' => $sts,
-            //         'CardNo' => $ktrng,
-            //     ];
-            // }
+                $list_absen[] = [
+                    'Departemen' => $data->work_unit_name,
+                    'Name' => $data->staff_name,
+                    'No.' => $data->NIK,
+                    'Date/Time' => $data->status == '0' ? date('d/m/Y H:i:s', strtotime($data->register)) : date('d/m/Y', strtotime($data->timeout ? $data->timeout : $data->created_at)),
+                    'Location' => '',
+                    'ID Number' => $data->NIK,
+                    'VerifyCode' => 'Fingerprint',
+                    'shift' => '',
+                    'status' => $sts,
+                    'CardNo' => $ktrng,
+                ];
+            }
 
 
             $listAbsenShift = ShiftPlannerStaffs::selectRaw(
@@ -3044,50 +2937,18 @@ class AbsenceController extends Controller
 
                 ->leftJoin('shift_groups', 'shift_groups.id', '=', 'shift_planner_staffs.shift_group_id')
 
-                ->FilterJob($request->job_id)
-                ->FilterWorkUnit($request->work_unit_id)
+                ->where('staffs.work_unit_id', $request->work_unit_id)
                 ->whereBetween(DB::raw('DATE(shift_planner_staffs.start)'), [$date_from, $date_to])
                 ->where('staffs.work_type_id', '2')
-                ->FilterSubdapertement($request->subdapertement_id, $request->job_id)
-                ->FilterDapertement($request->dapertement_id)
                 // ->where('staffs.id', $request->staff_id)
                 ->orderBy('staffs.id', 'ASC')
                 ->get();
 
-            // dd($listAbsenShift, $request->all());
-            $lemburShift = Absence::selectRaw(
-                'absence_logs.*,
-                work_units.name as work_unit_name,
-                staffs.id as staff_id,
-                staffs.name as staff_name,
-                absence_logs.status as status,
-                absence_logs.register as register,
-                absence_logs.timeout as timeout,
-                absence_logs.absence_category_id as absence_category_id,
-                absences.created_at as created_at,
-                (CASE WHEN staffs.type = "employee" THEN  SUBSTRING(staffs.NIK, 5) ELSE staffs.NIK END)  AS NIK',
-
-            )
-                ->join('absence_logs', 'absence_logs.absence_id', '=', 'absences.id')
-                ->join('staffs', 'staffs.id', '=', 'absences.staff_id')
-                ->leftJoin('work_units', 'staffs.work_unit_id', '=', 'work_units.id')
-                ->FilterJob($request->job_id)
-                ->FilterWorkUnit($request->work_unit_id)
-                ->where('staffs.work_type_id', '2')
-                ->whereBetween(DB::raw('DATE(absences.created_at)'), [$date_from, $date_to])
-                ->whereIn('absence_logs.absence_category_id', ['9', '10'])
-                ->FilterSubdapertement($request->subdapertement_id, $request->job_id)
-                ->FilterDapertement($request->dapertement_id)
-                // ->where('staffs.id', $request->staff_id)
-                ->get();
-
             // foreach ($listAbsenShift as $data) {
-            //     echo "" . $data->staff_name . " " . $data->register . " " . $data->absence_category_id . "<br>";
+            //     echo "" . $data->staff_name . " " . $data->register . "<br>";
             // }
 
-
-
-            // dd($listAbsenShift);
+            // dd();
             foreach ($listAbsenShift as $data) {
 
                 $ktrng = "";
@@ -3142,42 +3003,6 @@ class AbsenceController extends Controller
                     'CardNo' => $ktrng,
                 ];
             }
-
-            foreach ($lemburShift as $data) {
-                if ($data->absence_category_id == 9) {
-                    $sts = "Lembur Mulai";
-                } elseif ($data->absence_category_id == 10) {
-                    $sts = "Lembur Selesai";
-                }
-                $list_absen[] = [
-                    'Departemen' => $data->work_unit_name,
-                    'Name' => $data->staff_name,
-                    'No.' => $data->NIK,
-                    'Date/Time' => $data->status == '0' ? date('d/m/Y H:i:s', strtotime($data->register)) : date('d/m/Y', strtotime($data->start)),
-                    'Location' => '',
-                    'ID Number' => $data->NIK,
-                    'VerifyCode' => 'Fingerprint',
-                    'shift' => '',
-                    'status' => $sts,
-                    'CardNo' => '',
-                ];
-            }
-
-            // $collection($listAbsen)
-            $c = collect($list_absen);
-            $list_absen = [];
-            foreach ($c->sortBy(['ID Number', 'Date/Time']) as $data) {
-                $list_absen[] = $data;
-                // dd($data);
-            }
-            // dd($list_absen);
-            // foreach ($lemburShift as $data) {
-            //     echo "" . $data->staff_name . " " . $data->register . " " . $data->absence_category_id . "<br>";
-            // }
-
-
-
-            // dd('kkkk');
 
 
             return Excel::download(new AbsenceLogExport($list_absen), 'report_log_excel.xlsx');
