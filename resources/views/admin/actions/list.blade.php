@@ -125,7 +125,7 @@
                                 @endcan
 
                                 @if ($action->status == "close")
-                                @can('action_staff_create')
+                                @can('action_staff_edit')
                                 <a class="btn btn-xs btn-warning"  href="{{ route('admin.actions.additionalDone', $action->id) }}">
                                     Tambah Foto Selesai
                                 </a>

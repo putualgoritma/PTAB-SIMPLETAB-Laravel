@@ -23,6 +23,7 @@ use OneSignal;
 use App\Traits\WablasTrait;
 use App\User;
 use App\wa_history;
+use App\WaReceives;
 use App\WorkTypeDays;
 use App\WorkUnit;
 
@@ -257,7 +258,7 @@ class RequestApiController extends Controller
                             // dd($shift_staff);
                             if ($shift_staff) {
                                 $schedule = ShiftGroupTimesheets::where('id', $shift_staff->shift_group_id)
-                                    // ->whereDate('start', '=', $request_date)
+                                    ->where('start', $request_date)
                                     ->where('absence_category_id', 1)->first();
                                 // $schedule_end = ShiftGroupTimesheets::where('id', $id)->where('absence_category_id', 2)->first();
                             } else {
@@ -272,10 +273,10 @@ class RequestApiController extends Controller
                         //     if ($time_start <  $startS &&  $startS < $time_end) {
                         //         // return json_encode('pengajuan berhasil');
                         //     } else {
-                        //         $error = 'anda hanya bisa mengajukan di jam kerja!';
+                        //         $error = 'anda hanya bisa mengajukan di jam kerja';
                         //     }
                         // } else {
-                        //     $error = 'anda hanya bisa mengajukan di jam kerja !';
+                        //     $error = 'anda hanya bisa mengajukan di jam kerja';
                         // }
                     }
                 } else {
@@ -451,18 +452,18 @@ class RequestApiController extends Controller
                         }
                     }
                     // dd($absen_now);
-                    if ($schedule) {
-                        $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                        $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
-                        // dd($schedule);
-                        if ($time_start <  $startS &&  $startS < $time_end) {
-                            // return json_encode('pengajuan berhasil');
-                        } else {
-                            $error = 'anda hanya bisa mengajukan di jam kerja';
-                        }
-                    } else {
-                        $error = 'anda hanya bisa mengajukan di jam kerja';
-                    }
+                    // if ($schedule) {
+                    //     $time_end = date("Y-m-d H:i:s", strtotime('+' . $schedule->duration . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                    //     $time_start = date("Y-m-d H:i:s", strtotime('+' . 0 . ' hours', strtotime(date('Y-m-d ' . $schedule->time))));
+                    //     // dd($schedule);
+                    //     if ($time_start <  $startS &&  $startS < $time_end) {
+                    //         // return json_encode('pengajuan berhasil');
+                    //     } else {
+                    //         $error = 'anda hanya bisa mengajukan di jam kerja';
+                    //     }
+                    // } else {
+                    //     $error = 'anda hanya bisa mengajukan di jam kerja';
+                    // }
                 }
             } else {
 
@@ -798,8 +799,8 @@ class RequestApiController extends Controller
                     $query->where('category', 'geolocation_off')
                         ->orWhere('category', 'duty')
                         ->orWhere('category', 'leave')
-                        ->orWhere('category', 'permission')
-                        ->orWhere('category', 'excuse');
+                        ->orWhere('category', 'permission');
+                    // ->orWhere('category', 'excuse');
                     // ->orWhere('category', 'location');
                     // ->orWhere('status', 'close');
                 })
@@ -1024,6 +1025,41 @@ class RequestApiController extends Controller
                     );
                 }
             }
+
+
+
+            // untuk Notif start manual
+            $waReceives = WaReceives::pluck('no_telp');
+            //wa notif                
+            $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+            $wa_data_group = [];
+            //get phone user
+            for ($i = 0; $i < count($waReceives); $i++) {
+                $wa_data = [
+                    'phone' => $this->gantiFormat($waReceives[$i]),
+                    'customer_id' => null,
+                    'message' => $message,
+                    'template_id' => '',
+                    'status' => 'gagal',
+                    'ref_id' => $wa_code,
+                    'created_at' => date('Y-m-d h:i:sa'),
+                    'updated_at' => date('Y-m-d h:i:sa')
+                ];
+                $wa_data_group[] = $wa_data;
+            }
+            DB::table('wa_histories')->insert($wa_data);
+            $wa_sent = WablasTrait::sendText($wa_data_group);
+            $array_merg = [];
+            if (!empty(json_decode($wa_sent)->data->messages)) {
+                $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+            }
+            foreach ($array_merg as $key => $value) {
+                if (!empty($value->ref_id)) {
+                    wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                }
+            }
+
+            // untuk notif end manual
 
             return response()->json([
                 'message' => 'Pengajuan Terkirim',
@@ -1712,6 +1748,40 @@ class RequestApiController extends Controller
                     );
                 }
                 // untuk notif end
+
+
+                // untuk Notif start manual
+                $waReceives = WaReceives::pluck('no_telp');
+                //wa notif                
+                $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+                $wa_data_group = [];
+                //get phone user
+                for ($i = 0; $i < count($waReceives); $i++) {
+                    $wa_data = [
+                        'phone' => $this->gantiFormat($waReceives[$i]),
+                        'customer_id' => null,
+                        'message' => $message,
+                        'template_id' => '',
+                        'status' => 'gagal',
+                        'ref_id' => $wa_code,
+                        'created_at' => date('Y-m-d h:i:sa'),
+                        'updated_at' => date('Y-m-d h:i:sa')
+                    ];
+                    $wa_data_group[] = $wa_data;
+                }
+                DB::table('wa_histories')->insert($wa_data);
+                $wa_sent = WablasTrait::sendText($wa_data_group);
+                $array_merg = [];
+                if (!empty(json_decode($wa_sent)->data->messages)) {
+                    $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+                }
+                foreach ($array_merg as $key => $value) {
+                    if (!empty($value->ref_id)) {
+                        wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+                    }
+                }
+
+                // untuk notif end manual
             }
         }
 
@@ -1810,6 +1880,39 @@ class RequestApiController extends Controller
             );
         }
         // untuk notif end
+
+        // untuk Notif start manual
+        $waReceives = WaReceives::pluck('no_telp');
+        //wa notif                
+        $wa_code = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $wa_data_group = [];
+        //get phone user
+        for ($i = 0; $i < count($waReceives); $i++) {
+            $wa_data = [
+                'phone' => $this->gantiFormat($waReceives[$i]),
+                'customer_id' => null,
+                'message' => $message,
+                'template_id' => '',
+                'status' => 'gagal',
+                'ref_id' => $wa_code,
+                'created_at' => date('Y-m-d h:i:sa'),
+                'updated_at' => date('Y-m-d h:i:sa')
+            ];
+            $wa_data_group[] = $wa_data;
+        }
+        DB::table('wa_histories')->insert($wa_data);
+        $wa_sent = WablasTrait::sendText($wa_data_group);
+        $array_merg = [];
+        if (!empty(json_decode($wa_sent)->data->messages)) {
+            $array_merg = array_merge(json_decode($wa_sent)->data->messages, $array_merg);
+        }
+        foreach ($array_merg as $key => $value) {
+            if (!empty($value->ref_id)) {
+                wa_history::where('ref_id', $value->ref_id)->update(['id_wa' => $value->id, 'status' => ($value->status === false) ? "gagal" : $value->status]);
+            }
+        }
+
+        // untuk notif end manual
 
         return response()->json([
             'message' => 'Berhasil Ditolak',

@@ -144,12 +144,11 @@ class LockController extends Controller
             //     ->leftJoin('dapertements', 'dapertements.id', '=', 'staffs.dapertement_id')
             //     ->oin('area_staff', 'staffs.id', '=', 'area_staff.staff_id')->where('subdapertement_id', 10)->groupBy('staffs.id');
 
-            $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name, users.id as id ')
+            $qrystf = Staff::selectRaw('staffs.*, subdapertements.name as subdapertements_name, area_staff.area_id, dapertements.name as dapertements_name ')
                 ->join('dapertements', 'staffs.dapertement_id', '=', 'dapertements.id')
                 ->join('subdapertements', 'subdapertements.id', '=', 'staffs.subdapertement_id')
                 ->join('area_staff', 'staffs.id', '=', 'area_staff.staff_id')
-                ->join('users', 'users.staff_id', '=', 'staffs.id')
-                ->where('staffs.subdapertement_id', 10)
+                ->where('subdapertement_id', 10)
                 ->orWhere('dapertements.group_unit', '>', 1)
                 ->groupBy('staffs.id');
         }

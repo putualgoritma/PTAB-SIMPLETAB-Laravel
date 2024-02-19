@@ -2002,7 +2002,6 @@ class AbsenceApiController extends Controller
     public function storeNew(Request $request)
     {
 
-
         $staff = Staff::where('id', $request->staff_id)->first();
         // $last_code = $this->get_last_code('lock_action');
 
@@ -2166,7 +2165,20 @@ class AbsenceApiController extends Controller
             $upload_image->duration = $duration;
 
             // sementara end
-            $upload_image->register = $change_register == "true" ? $upload_image->timein : date('Y-m-d H:i:s');
+            $timeinNew = date('Y-m-d H:i:s');
+
+            if ($request->queue == "1" && $request->type == "presence") {
+                $cekDateNew = date("Y-m-d H:i:s", strtotime('+ ' . 2 . 'hours', strtotime(date('Y-m-d ' . $upload_image->timein))));
+
+                if ($timeinNew >= $cekDateNew) {
+                    $timeinNew = "";
+                } else {
+                    $timeinNew = $timeinNew;
+                }
+            } else if ($change_register == "true") {
+                $timeinNew = $upload_image->timein;
+            }
+            $upload_image->register = $timeinNew;
             $upload_image->updated_at = date('Y-m-d H:i:s');
             $upload_image->lat = $request->lat;
             $upload_image->lng = $request->lng;

@@ -78,4 +78,38 @@ class Absence extends Model
             return $query;
         }
     }
+
+    public function scopeFilterSubdapertement($query, $subdapertement, $job)
+    {
+        if ($job == '' || $job == '0' || $job == null) {
+            if ($subdapertement != '' && $subdapertement != '') {
+                $query->where('staffs.subdapertement_id', $subdapertement);
+            }
+            return $query;
+        }
+    }
+
+    public function scopeFilterDapertement($query, $dapertement)
+    {
+        if ($dapertement != '') {
+            $query->where('staffs.dapertement_id', $dapertement);
+        }
+        return $query;
+    }
+
+    public function scopeFilterJob($query, $job)
+    {
+        if ($job != '' && $job != '0' && $job != null) {
+            $query->where('staffs.job_id', '=', $job);
+        }
+        return $query;
+    }
+
+    public function scopeFilterWorkUnit($query, $WorkUnit)
+    {
+        if ($WorkUnit != '' && $WorkUnit != '0') {
+            $query->where('shift_groups.work_unit_id', '=', $WorkUnit);
+        }
+        return $query;
+    }
 }

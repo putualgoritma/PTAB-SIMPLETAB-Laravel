@@ -48,4 +48,11 @@ class ShiftPlannerStaffs extends Model
             return $query;
         }
     }
+    public function scopeFilterDapertement($query, $dapertement)
+    {
+        if ($dapertement != '') {
+            $query->where('staffs.dapertement_id', $dapertement);
+        }
+        return $query;
+    }
 }
